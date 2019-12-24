@@ -1,0 +1,30 @@
+{
+    "name": "drtheuns/apitizer_php",
+    "description": "A querybuilder library for JSON APIs",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Randall Theuns",
+            "email": "randall@theuns.org"
+        }
+    ],
+    "require": {
+        "illuminate/http": "^6.8",
+        "illuminate/database": "^6.8"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^8.5",
+        "orchestra/testbench": "^4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Apitizer\\": "src/Apitizer"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    }
+}
