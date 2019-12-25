@@ -59,12 +59,8 @@ class RequestParser
                 $context->isQuoted = ! $context->isQuoted;
                 continue 2;
             case ',':
-                if ($context->isQuoted) {
-                    $context->accumulator .= $character;
-                } else {
-                    $context->stack[] = $context->accumulator;
-                    $context->accumulator = '';
-                }
+                $context->stack[] = $context->accumulator;
+                $context->accumulator = '';
                 continue 2;
             case '(':
                 // We've encountered a relationship. Parse everything until ")"
