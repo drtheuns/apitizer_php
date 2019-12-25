@@ -40,6 +40,13 @@ class FetchSpec
         return $this->fields;
     }
 
+    public function setFields(array $fields)
+    {
+        $this->fields = $fields;
+
+        return $this;
+    }
+
     public function getSorts()
     {
         return $this->sorts;

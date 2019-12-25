@@ -91,4 +91,22 @@ class QueryBuilderTest extends TestCase
 
         $this->assertEquals($expected, $result);
     }
+
+    /** @test */
+    public function if_no_fields_are_selected_all_non_association_fields_are_returned()
+    {
+        $user = factory(User::class)->create();
+        $request = $this->buildRequest();
+        $result = (new UserBuilder($request))->build();
+
+        $expected = [
+            [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+            ],
+        ];
+
+        $this->assertEquals($expected, $result);
+    }
 }

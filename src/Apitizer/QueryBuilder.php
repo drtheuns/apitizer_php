@@ -163,8 +163,12 @@ abstract class QueryBuilder
         $fetchSpec = $this->validateRequestInput($unvalidatedInput);
 
         if (empty($fetchSpec->getFields())) {
-            // TODO: Should this throw a 400 bad request instead?
-            return [];
+            // If nothing (valid) is selected, return all non-association fields.
+            $fetchSpec->setFields(
+                array_filter($this->getFields(), function ($field) {
+                    return $field instanceof Field;
+                })
+            );
         }
 
         $data = $this->queryable->fetchData($this, $fetchSpec);
@@ -203,13 +207,13 @@ abstract class QueryBuilder
                 $association->setFields(
                     $this->validateFields($field->fields, $association->getBuilder()->getFields())
                 );
-                $validatedFields[$association->getName()] = $association;
+                $validatedFields[] = $association;
 
                 continue;
             }
 
             if (is_string($field) && isset($availableFields[$field])) {
-                $validatedFields[$field] = $availableFields[$field];
+                $validatedFields[] = $availableFields[$field];
             }
         }
 
@@ -250,8 +254,8 @@ abstract class QueryBuilder
     {
         $acc = [];
 
-        foreach ($selectedFields as $name => $fieldOrAssoc) {
-            $acc[$name] = $fieldOrAssoc->render($row);
+        foreach ($selectedFields as $fieldOrAssoc) {
+            $acc[$fieldOrAssoc->getName()] = $fieldOrAssoc->render($row);
         }
 
         return $acc;
