@@ -40,4 +40,9 @@ class Field
     {
         return $this->type;
     }
+
+    public function getKey()
+    {
+        return $this->type->getKey();
+    }
 }

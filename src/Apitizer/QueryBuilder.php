@@ -7,7 +7,7 @@ use Apitizer\QueryBuilder\Field;
 use Apitizer\QueryBuilder\Association;
 use Illuminate\Http\Request;
 
-abstract class QueryBuilder implements Selectable, Sortable, Filterable
+abstract class QueryBuilder
 {
     use Concerns\HasTypes;
 
@@ -34,17 +34,38 @@ abstract class QueryBuilder implements Selectable, Sortable, Filterable
     protected $availableFilters;
 
     /**
-     * {@inheritdoc}
+     * A function that returns the fields that are available to the client.
+     *
+     * The array that is returned should be map where the key is the name of the
+     * field that will be used by the client, while the value is either a string
+     * or a `FieldType`.
+     *
+     * If the value is a string, it will implicitly cast to the `AnyType`.
+     *
+     * Each type specifies a key that is used to fetch the data from the
+     * eventual source data. In other words, if the query builder is used in
+     * conjunction with a database and Eloquent, then the key would be the key
+     * on the Eloquent model that should be used to fetch the data (usually the
+     * column name in the database).
      */
     abstract public function fields(): array;
 
     /**
-     * {@inheritdoc}
+     * A function that returns the names of the sorting methods that are
+     * available to the client.
+     *
+     * The following sorts:
+     *
+     *   ['name']
+     *
+     * would support the following queries:
+     *
+     *   /users?sort=name.asc
      */
     abstract public function sorts(): array;
 
     /**
-     * {@inheritdoc}
+     * A function that returns the filters that are available to the client.
      */
     abstract public function filters(): array;
 
@@ -126,29 +147,25 @@ abstract class QueryBuilder implements Selectable, Sortable, Filterable
     {
         $unvalidatedInput = $this->parser->parse($this->request);
 
-        $validatedInput = $this->validateRequestInput($unvalidatedInput);
+        $fetchSpec = $this->validateRequestInput($unvalidatedInput);
 
-        if (empty($validatedInput->fields)) {
+        if (empty($fetchSpec->getFields())) {
             // TODO: Should this throw a 400 bad request instead?
             return [];
         }
 
-        $data = $this->queryable
-              ->setQueryBuilder($this)
-              ->applyFilters($validatedInput->filters)
-              ->applySorting($validatedInput->sorts)
-              ->applySelect($validatedInput->fields)
-              ->fetchData();
+        $data = $this->queryable->fetchData($this, $fetchSpec);
 
-        return $this->transformValues($data, $validatedInput->fields);
+        return $this->transformValues($data, $fetchSpec->getFields());
     }
 
-    protected function validateRequestInput(RequestInput $unvalidatedInput): RequestInput
+    protected function validateRequestInput(RequestInput $unvalidatedInput): FetchSpec
     {
-        $validated = new RequestInput();
-        $validated->fields = $this->validateFields($unvalidatedInput->fields, $this->availableFields);
-        $validated->sorts = [];
-        $validated->filters = [];
+        $validated = new FetchSpec(
+            $this->validateFields($unvalidatedInput->fields, $this->availableFields),
+            [],
+            []
+        );
 
         return $validated;
     }

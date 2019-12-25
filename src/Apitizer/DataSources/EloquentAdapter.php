@@ -2,47 +2,36 @@
 
 namespace Apitizer\DataSources;
 
+use Apitizer\FetchSpec;
 use Apitizer\QueryBuilder;
 use Apitizer\QueryBuilder\Field;
+use Apitizer\QueryBuilder\Association;
 use Apitizer\QueryableDataSource;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOneOrMany;
 
 class EloquentAdapter implements QueryableDataSource
 {
-    /** @var Builder */
-    protected $query;
-
-    /** @var QueryBuilder */
-    protected $queryBuilder;
-
-    public function setQueryBuilder(QueryBuilder $queryBuilder): QueryableDataSource
+    /**
+     * {@inheritdoc}
+     */
+    public function fetchData(QueryBuilder $queryBuilder, FetchSpec $fetchSpec): iterable
     {
-        $this->queryBuilder = $queryBuilder;
-        $this->query = $queryBuilder->datasource();
+        $query = $queryBuilder->datasource();
 
-        return $this;
+        if (! $query || (! $query instanceof Builder && ! $query instanceof Model)) {
+            throw new \DomainException("Expected {get_class($queryBuilder}}::datasource to return a query");
+        }
+
+        $this->applySelect($query, $fetchSpec->getFields());
+        $this->applyFilters($query, $fetchSpec->getFilters());
+
+        return $query->get();
     }
 
-    public function applyFilters(array $filters): QueryableDataSource
-    {
-        return $this;
-    }
-
-    public function applySorting(array $sorts): QueryableDataSource
-    {
-        return $this;
-    }
-
-    public function applySelect(array $fields): QueryableDataSource
-    {
-        $this->doApplySelect($this->query, $fields);
-
-        return $this;
-    }
-
-    private function doApplySelect($query, array $fields, array $additionalSelects = [])
+    private function applySelect(Builder $query, array $fields, array $additionalSelects = [])
     {
         // Always load the primary key in case there are relationships that
         // depend on it.
@@ -51,8 +40,8 @@ class EloquentAdapter implements QueryableDataSource
         foreach ($fields as $fieldOrAssoc) {
             if ($fieldOrAssoc instanceof Field) {
                 // Also load any of the selected keys.
-                $selectKeys[] = $fieldOrAssoc->getType()->getKey();
-            } else {
+                $selectKeys[] = $fieldOrAssoc->getKey();
+            } else if ($fieldOrAssoc instanceof Association) {
                 // We also need to ensure that we always load the right foreign
                 // keys, otherwise we won't be able load relationships.
                 $relationship = $query->getModel()->{$fieldOrAssoc->getKey()}();
@@ -75,8 +64,10 @@ class EloquentAdapter implements QueryableDataSource
                                            ? [$relation->getForeignKeyName()]
                                            : [];
 
-                        $this->doApplySelect(
-                            $relation, $fieldOrAssoc->getFields(), $additionalSelects
+                        $this->applySelect(
+                            $relation->getQuery(),
+                            $fieldOrAssoc->getFields(),
+                            $additionalSelects
                         );
                     }]
                 );
@@ -86,8 +77,7 @@ class EloquentAdapter implements QueryableDataSource
         $query->select(array_unique($selectKeys));
     }
 
-    public function fetchData(): iterable
+    private function applyFilters(Builder $query, array $filters)
     {
-        return $this->query->get();
     }
 }

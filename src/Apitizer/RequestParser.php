@@ -4,6 +4,7 @@ namespace Apitizer;
 
 use Apitizer\Parser\Context;
 use Apitizer\Parser\Relation;
+use Apitizer\Parser\Sort;
 use Illuminate\Http\Request;
 
 /**
@@ -28,6 +29,10 @@ class RequestParser
      */
     public function parseFields(Request $request): array
     {
+        // Input examples:
+        //   id,name
+        //   id,"first,name",comments(id,"wo)(,-w")
+
         $rawFields = $request->input('fields', '');
 
         if (empty($rawFields)) {
@@ -93,12 +98,49 @@ class RequestParser
 
     public function parseFilters(Request $request): array
     {
-        return [];
+        return $request->input('filters', []);
     }
 
     public function parseSorts(Request $request): array
     {
-        return [];
+        // Sort input examples:
+        //   "name"
+        //   "name.desc"
+        //   ["first_name.desc", "last_name.asc"]
+        //   first_name.desc,last_name.asc
+
+        $rawSorts = $request->input('sort', []);
+
+        if (is_string($rawSorts)) {
+            $rawSorts = explode(',', $rawSorts);
+        }
+
+        if (! is_array($rawSorts)) {
+            throw new \UnexpectedValueException('expected an array, got: ' . gettype($rawSorts));
+        }
+
+        $sorts = [];
+
+        foreach ($rawSorts as $rawSort) {
+            $rawSort = trim($rawSort);
+            $pos = mb_strpos($rawSort, '.');
+
+            if ($pos === false) {
+                $sorts[] = new Sort($rawSort, Sort::ASC);
+                continue;
+            }
+
+            $field = mb_substr($rawSort, 0, $pos);
+            $order = mb_substr($rawSort, $pos + 1);
+
+            if (empty($order) || ! in_array($order, [Sort::ASC, Sort::DESC])) {
+                $order = Sort::ASC;
+            }
+
+            $sorts[] = new Sort($field, $order);
+        }
+
+        return $sorts;
     }
 
     protected function stringToArray(string $raw)
