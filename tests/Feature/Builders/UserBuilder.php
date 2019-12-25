@@ -3,6 +3,7 @@
 namespace Tests\Feature\Builders;
 
 use Apitizer\QueryBuilder;
+use Apitizer\Sorting\ColumnSort;
 use Tests\Feature\Models\User;
 
 class UserBuilder extends QueryBuilder
@@ -24,7 +25,9 @@ class UserBuilder extends QueryBuilder
 
     public function sorts(): array
     {
-        return [];
+        return [
+            'id' => new ColumnSort(),
+        ];
     }
 
     public function datasource()

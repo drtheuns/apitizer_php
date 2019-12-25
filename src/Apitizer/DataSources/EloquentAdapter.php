@@ -26,6 +26,7 @@ class EloquentAdapter implements QueryableDataSource
         }
 
         $this->applySelect($query, $fetchSpec->getFields());
+        $this->applySorting($query, $fetchSpec->getSorts());
         $this->applyFilters($query, $fetchSpec->getFilters());
 
         return $query->get();
@@ -75,6 +76,15 @@ class EloquentAdapter implements QueryableDataSource
         }
 
         $query->select(array_unique($selectKeys));
+    }
+
+    private function applySorting(Builder $query, array $sorts)
+    {
+        foreach ($sorts as $sort) {
+            if ($handler = $sort->getHandler()) {
+                $handler($query, $sort);
+            }
+        }
     }
 
     private function applyFilters(Builder $query, array $filters)

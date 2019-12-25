@@ -175,8 +175,8 @@ abstract class QueryBuilder
     protected function validateRequestInput(RequestInput $unvalidatedInput): FetchSpec
     {
         $validated = new FetchSpec(
-            $this->validateFields($unvalidatedInput->fields, $this->availableFields),
-            [],
+            $this->validateFields($unvalidatedInput->fields, $this->getFields()),
+            $this->validateSorting($unvalidatedInput->sorts, $this->getSorts()),
             []
         );
 
@@ -214,6 +214,20 @@ abstract class QueryBuilder
         }
 
         return $validatedFields;
+    }
+
+    public function validateSorting(array $selectedSorts, array $availableSorts)
+    {
+        $validatedSorts = [];
+
+        foreach ($selectedSorts as $sort) {
+            if (isset($availableSorts[$sort->getField()])) {
+                $sort->setHandler($availableSorts[$sort->getField()]);
+                $validatedSorts[] = $sort;
+            }
+        }
+
+        return $validatedSorts;
     }
 
     public function transformValues(iterable $data, array $selectedFields)

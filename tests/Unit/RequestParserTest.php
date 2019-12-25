@@ -4,7 +4,7 @@ namespace Tests\Unit;
 
 use Apitizer\RequestParser;
 use Apitizer\Parser\Relation;
-use Apitizer\Parser\Sort;
+use Apitizer\Types\Sort;
 
 class RequestParserTest extends TestCase
 {
@@ -66,8 +66,8 @@ class RequestParserTest extends TestCase
 
         $this->assertEquals(1, count($sorts));
         $this->assertInstanceOf(Sort::class, $sorts[0]);
-        $this->assertEquals('name', $sorts[0]->field);
-        $this->assertEquals(Sort::ASC, $sorts[0]->order);
+        $this->assertEquals('name', $sorts[0]->getField());
+        $this->assertEquals(Sort::ASC, $sorts[0]->getOrder());
     }
 
     /** @test */
@@ -79,8 +79,8 @@ class RequestParserTest extends TestCase
 
         $this->assertEquals(1, count($sorts));
         $this->assertInstanceOf(Sort::class, $sorts[0]);
-        $this->assertEquals('name', $sorts[0]->field);
-        $this->assertEquals(Sort::DESC, $sorts[0]->order);
+        $this->assertEquals('name', $sorts[0]->getField());
+        $this->assertEquals(Sort::DESC, $sorts[0]->getOrder());
     }
 
     /** @test */
@@ -95,11 +95,11 @@ class RequestParserTest extends TestCase
         $this->assertInstanceOf(Sort::class, $sorts[0]);
         $this->assertInstanceOf(Sort::class, $sorts[1]);
 
-        $this->assertEquals('name', $sorts[0]->field);
-        $this->assertEquals(Sort::DESC, $sorts[0]->order);
+        $this->assertEquals('name', $sorts[0]->getField());
+        $this->assertEquals(Sort::DESC, $sorts[0]->getOrder());
 
-        $this->assertEquals('id', $sorts[1]->field);
-        $this->assertEquals(Sort::ASC, $sorts[1]->order);
+        $this->assertEquals('id', $sorts[1]->getField());
+        $this->assertEquals(Sort::ASC, $sorts[1]->getOrder());
     }
 
     /** @test */
@@ -114,10 +114,10 @@ class RequestParserTest extends TestCase
         $this->assertInstanceOf(Sort::class, $sorts[0]);
         $this->assertInstanceOf(Sort::class, $sorts[1]);
 
-        $this->assertEquals('name', $sorts[0]->field);
-        $this->assertEquals(Sort::DESC, $sorts[0]->order);
+        $this->assertEquals('name', $sorts[0]->getField());
+        $this->assertEquals(Sort::DESC, $sorts[0]->getOrder());
 
-        $this->assertEquals('id', $sorts[1]->field);
-        $this->assertEquals(Sort::ASC, $sorts[1]->order);
+        $this->assertEquals('id', $sorts[1]->getField());
+        $this->assertEquals(Sort::ASC, $sorts[1]->getOrder());
     }
 }

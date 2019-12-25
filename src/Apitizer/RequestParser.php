@@ -4,7 +4,7 @@ namespace Apitizer;
 
 use Apitizer\Parser\Context;
 use Apitizer\Parser\Relation;
-use Apitizer\Parser\Sort;
+use Apitizer\Types\Sort;
 use Apitizer\Types\RequestInput;
 use Illuminate\Http\Request;
 

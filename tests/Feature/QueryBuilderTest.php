@@ -66,4 +66,29 @@ class QueryBuilderTest extends TestCase
 
         $this->assertEquals($expected, $result);
     }
+
+    /** @test */
+    public function it_can_order_results()
+    {
+        $users = factory(User::class, 2)->create();
+
+        $request = $this->buildRequest([
+            'sort' => 'id.desc',
+            'fields' => 'id,name'
+        ]);
+        $result = (new UserBuilder($request))->build();
+
+        $expected = [
+            [
+                'id' => $users[1]->id,
+                'name' => $users[1]->name,
+            ],
+            [
+                'id' => $users[0]->id,
+                'name' => $users[0]->name,
+            ]
+        ];
+
+        $this->assertEquals($expected, $result);
+    }
 }
