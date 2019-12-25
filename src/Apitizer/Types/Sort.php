@@ -9,8 +9,19 @@ class Sort
     const ASC = 'asc';
     const DESC = 'desc';
 
+    /**
+     * @var string
+     */
     protected $field;
+
+    /**
+     * @var string 'asc' | 'desc'
+     */
     protected $order;
+
+    /**
+     * @var callable
+     */
     protected $handler;
 
     public function __construct(string $field, string $order)

@@ -2,6 +2,8 @@
 
 namespace Apitizer\Types;
 
+use ArrayAccess;
+
 class Field
 {
     /**
@@ -37,7 +39,7 @@ class Field
         $this->name = $name;
     }
 
-    public function render($row)
+    public function render(ArrayAccess $row)
     {
         $value = $row[$this->getKey()];
 
