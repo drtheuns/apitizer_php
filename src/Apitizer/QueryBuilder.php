@@ -78,6 +78,17 @@ abstract class QueryBuilder
      */
     abstract public function datasource();
 
+    /**
+     * Overridable function to adjust the API documentation for this query
+     * builder.
+     *
+     * @see Apidoc
+     */
+    protected function apidoc(Apidoc $apidoc)
+    {
+        //
+    }
+
     public function __construct(
         Request $request,
         QueryableDataSource $queryable = null,
@@ -230,15 +241,25 @@ abstract class QueryBuilder
         return $acc;
     }
 
-    public function getFields()
-    {
-        return $this->availableFields;
-    }
-
     private function isAssoc(array $array)
     {
         $keys = array_keys($array);
 
         return array_keys($keys) !== $keys;
+    }
+
+    public function getFields()
+    {
+        return $this->availableFields;
+    }
+
+    public function getSorts()
+    {
+        return $this->availableSorts;
+    }
+
+    public function getFilters()
+    {
+        return $this->availableFilters;
     }
 }

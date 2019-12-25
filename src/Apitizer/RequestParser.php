@@ -33,7 +33,8 @@ class RequestParser
         //   id,name
         //   id,"first,name",comments(id,"wo)(,-w")
 
-        $rawFields = $request->input('fields', '');
+        $fieldParameter = config('apitizer.query_parameters.fields', 'fields');
+        $rawFields = $request->input($fieldParameter, '');
 
         if (empty($rawFields)) {
             return [];
@@ -98,7 +99,9 @@ class RequestParser
 
     public function parseFilters(Request $request): array
     {
-        return $request->input('filters', []);
+        $filterParameter = config('apitizer.query_parameters.filters', 'filters');
+
+        return $request->input($filterParameter, []);
     }
 
     public function parseSorts(Request $request): array
@@ -109,7 +112,8 @@ class RequestParser
         //   ["first_name.desc", "last_name.asc"]
         //   first_name.desc,last_name.asc
 
-        $rawSorts = $request->input('sort', []);
+        $sortParameter = config('apitizer.query_parameters.sort', 'sort');
+        $rawSorts = $request->input($sortParameter, []);
 
         if (is_string($rawSorts)) {
             $rawSorts = explode(',', $rawSorts);

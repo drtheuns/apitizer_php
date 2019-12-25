@@ -16,4 +16,9 @@ class TestCase extends \Orchestra\Testbench\TestCase
         $this->withFactories(__DIR__ . '/database/factories');
         $this->loadMigrationsFrom(__DIR__ . '/database/migrations');
     }
+
+    protected function getPackageProviders($app)
+    {
+        return ['Apitizer\ServiceProvider'];
+    }
 }
