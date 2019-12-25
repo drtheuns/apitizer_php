@@ -1,6 +1,6 @@
 <?php
 
-namespace Apitizer\QueryBuilder;
+namespace Apitizer\Types;
 
 use Apitizer\QueryBuilder;
 

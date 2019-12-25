@@ -1,9 +1,9 @@
 <?php
 
-namespace Apitizer;
+namespace Apitizer\Types;
 
-use Apitizer\QueryBuilder\Field;
-use Apitizer\QueryBuilder\Association;
+use Apitizer\Types\Field;
+use Apitizer\Types\Association;
 
 /**
  * The fetch specification holds all the validated information that was

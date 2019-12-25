@@ -2,6 +2,8 @@
 
 namespace Apitizer;
 
+use Apitizer\Types\FetchSpec;
+
 /**
  * A queryable data source is a class that is capable of interpreting a query
  * and applying all the needed actions on that data source to get the desired

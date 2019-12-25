@@ -1,6 +1,6 @@
 <?php
 
-namespace Apitizer;
+namespace Apitizer\Types;
 
 class Apidoc
 {

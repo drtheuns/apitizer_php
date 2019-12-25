@@ -1,0 +1,79 @@
+<?php
+
+namespace Apitizer\Types;
+
+class Field
+{
+    /**
+     * The name of the field that the client uses.
+     *
+     * @var string
+     */
+    protected $name;
+
+    /**
+     * The key that this field occupies on the data source.
+     */
+    protected $key;
+
+    /**
+     * The internal type that is used for this field.
+     *
+     * @var string
+     */
+    protected $type;
+
+    /**
+     * The transformation callables that are called when the field is rendered.
+     *
+     * @var callable[]
+     */
+    protected $transformers = [];
+
+    public function __construct(string $key, string $type, string $name = null)
+    {
+        $this->key = $key;
+        $this->type = $type;
+        $this->name = $name;
+    }
+
+    public function render($row)
+    {
+        $value = $row[$this->getKey()];
+
+        foreach ($this->transformers as $transformer) {
+            $value = $transformer($value, $this);
+        }
+
+        return $value;
+    }
+
+    public function transform(callable $callable): self
+    {
+        $this->transformers[] = $callable;
+
+        return $this;
+    }
+
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    public function setName(string $name): self
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    public function getType()
+    {
+        return $this->type;
+    }
+
+    public function getKey()
+    {
+        return $this->key;
+    }
+}

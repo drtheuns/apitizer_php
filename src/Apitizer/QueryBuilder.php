@@ -3,13 +3,15 @@
 namespace Apitizer;
 
 use Apitizer\DataSources\EloquentAdapter;
-use Apitizer\QueryBuilder\Field;
-use Apitizer\QueryBuilder\Association;
+use Apitizer\Types\Field;
+use Apitizer\Types\Association;
+use Apitizer\Types\FetchSpec;
+use Apitizer\Types\RequestInput;
 use Illuminate\Http\Request;
 
 abstract class QueryBuilder
 {
-    use Concerns\HasTypes;
+    use Concerns\HasFields;
 
     /**
      * @var Request
@@ -35,10 +37,6 @@ abstract class QueryBuilder
 
     /**
      * A function that returns the fields that are available to the client.
-     *
-     * The array that is returned should be map where the key is the name of the
-     * field that will be used by the client, while the value is either a string
-     * or a `FieldType`.
      *
      * If the value is a string, it will implicitly cast to the `AnyType`.
      *
@@ -99,21 +97,18 @@ abstract class QueryBuilder
         $this->parser = $parser ?? new RequestParser();
 
         // Eagerly prepare the builder for later.
-        $this->availableFields = $this->castToField($this->fields());
+        $this->availableFields = $this->castFields($this->fields());
         $this->availableSorts = $this->sorts();
         $this->availableFilters = $this->filters();
     }
 
     /**
-     * Cast each of the programmer-defined fields to Field types.
-     *
-     * Furthermore, ensure that each field that is defined in `fields/0` is
-     * actually a FieldType. Every field that does not have a type is
-     * automatically assigned the AnyType.
+     * Validate that each field has a correct type, possibly assigning the any
+     * type.
      *
      * @return Map<string, Field|Association>
      */
-    protected function castToField(array $fields)
+    protected function castFields(array $fields)
     {
         $castFields = [];
 
@@ -124,11 +119,18 @@ abstract class QueryBuilder
                 continue;
             }
 
-            if (! $field instanceof FieldType) {
+            if (is_string($field)) {
                 $field = $this->any($field);
             }
 
-            $castFields[$name] = new Field($name, $field);
+            if (! $field instanceof Field) {
+                throw new \UnexpectedValueException(
+                    "Unexpected field type for {$name}: {gettype($field)}"
+                );
+            }
+
+            $field->setName($name);
+            $castFields[$name] = $field;
         }
 
         return $castFields;

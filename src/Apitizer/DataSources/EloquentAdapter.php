@@ -2,10 +2,10 @@
 
 namespace Apitizer\DataSources;
 
-use Apitizer\FetchSpec;
+use Apitizer\Types\FetchSpec;
 use Apitizer\QueryBuilder;
-use Apitizer\QueryBuilder\Field;
-use Apitizer\QueryBuilder\Association;
+use Apitizer\Types\Field;
+use Apitizer\Types\Association;
 use Apitizer\QueryableDataSource;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
