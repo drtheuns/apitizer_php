@@ -109,4 +109,24 @@ class QueryBuilderTest extends TestCase
 
         $this->assertEquals($expected, $result);
     }
+
+    /** @test */
+    public function it_can_filter_on_associations()
+    {
+        $users = factory(User::class, 2)->create();
+        $post = factory(Post::class)->make();
+        $users->first()->posts()->save($post);
+
+        $request = $this->buildRequest([
+            'fields' => 'id',
+            'filters' => ['posts' => [$post->id]]
+        ]);
+        $result = (new UserBuilder($request))->build();
+
+        $this->assertEquals([
+            [
+                'id' => $users->first()->id,
+            ]
+        ], $result);
+    }
 }

@@ -7,6 +7,7 @@ use Apitizer\Types\Field;
 use Apitizer\Types\Association;
 use Apitizer\Types\FetchSpec;
 use Apitizer\Types\RequestInput;
+use Apitizer\Types\Filter;
 use Illuminate\Http\Request;
 
 abstract class QueryBuilder
@@ -99,7 +100,7 @@ abstract class QueryBuilder
         // Eagerly prepare the builder for later.
         $this->availableFields = $this->castFields($this->fields());
         $this->availableSorts = $this->sorts();
-        $this->availableFilters = $this->filters();
+        $this->availableFilters = $this->castFilters($this->filters());
     }
 
     /**
@@ -136,6 +137,21 @@ abstract class QueryBuilder
         return $castFields;
     }
 
+    protected function castFilters(array $filters)
+    {
+        foreach ($filters as $name => $filter) {
+            if (! $filter instanceof Filter) {
+                throw new \UnexpectedValueException(
+                    "expected Filter to be returned for {$name}"
+                );
+            }
+
+            $filter->setName($name);
+        }
+
+        return $filters;
+    }
+
     /**
      * Defines a relationship to another querybuilder.
      *
@@ -154,6 +170,11 @@ abstract class QueryBuilder
             $key,
             new $builder($this->request, $this->queryable, $this->parser)
         );
+    }
+
+    protected function filter()
+    {
+        return new Filter($this);
     }
 
     public function build()
@@ -181,7 +202,7 @@ abstract class QueryBuilder
         $validated = new FetchSpec(
             $this->validateFields($unvalidatedInput->fields, $this->getFields()),
             $this->validateSorting($unvalidatedInput->sorts, $this->getSorts()),
-            []
+            $this->validateFilters($unvalidatedInput->filters, $this->getFilters()),
         );
 
         return $validated;
@@ -232,6 +253,25 @@ abstract class QueryBuilder
         }
 
         return $validatedSorts;
+    }
+
+    public function validateFilters(array $selectedFilters, array $availableFilters)
+    {
+        $validatedFilters = [];
+
+        foreach ($selectedFilters as $name => $filterInput) {
+            try {
+                if (is_string($name) && isset($availableFilters[$name])) {
+                    $filter = $availableFilters[$name];
+                    $filter->setValue($filter->validateInput($filterInput));
+                    $validatedFilters[$name] = $filter;
+                }
+            } catch (\UnexpectedValueException $e) {
+                // Ignore this filter.
+            }
+        }
+
+        return $validatedFilters;
     }
 
     public function transformValues(iterable $data, array $selectedFields)

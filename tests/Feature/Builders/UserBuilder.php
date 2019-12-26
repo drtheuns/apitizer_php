@@ -4,6 +4,7 @@ namespace Tests\Feature\Builders;
 
 use Apitizer\QueryBuilder;
 use Apitizer\Sorting\ColumnSort;
+use Apitizer\Filters\AssociationFilter;
 use Tests\Feature\Models\User;
 
 class UserBuilder extends QueryBuilder
@@ -20,7 +21,11 @@ class UserBuilder extends QueryBuilder
 
     public function filters(): array
     {
-        return [];
+        return [
+            'posts' => $this->filter()
+                            ->expectMany('string')
+                            ->handleUsing(new AssociationFilter('posts', 'id')),
+        ];
     }
 
     public function sorts(): array

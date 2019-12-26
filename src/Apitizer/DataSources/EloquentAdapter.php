@@ -89,5 +89,10 @@ class EloquentAdapter implements QueryableDataSource
 
     private function applyFilters(Builder $query, array $filters)
     {
+        foreach ($filters as $filter) {
+            if ($handler = $filter->getHandler()) {
+                call_user_func($handler, $query, $filter->getValue());
+            }
+        }
     }
 }
