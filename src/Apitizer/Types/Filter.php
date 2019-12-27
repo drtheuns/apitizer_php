@@ -4,24 +4,11 @@ namespace Apitizer\Types;
 
 use Apitizer\QueryBuilder;
 use Apitizer\Support\TypeCaster;
+use Apitizer\Filters\LikeFilter;
 use Illuminate\Database\Eloquent\Builder;
 
-class Filter
+class Filter extends Factory
 {
-    /**
-     * The name of this filter that is available to clients.
-     *
-     * @var string
-     */
-    protected $name;
-
-    /**
-     * The query builder that created this filter.
-     *
-     * @var QueryBuilder
-     */
-    protected $queryBuilder;
-
     /**
      * The type of value(s) to expect.
      *
@@ -41,15 +28,14 @@ class Filter
      */
     protected $handler = null;
 
+    /**
+     * @var mixed
+     */
     protected $value = null;
-
-    public function __construct(QueryBuilder $queryBuilder)
-    {
-        $this->queryBuilder = $queryBuilder;
-    }
 
     public function expect(string $type)
     {
+        $this->expectArray = false;
         $this->type = $type;
 
         return $this;
@@ -57,8 +43,8 @@ class Filter
 
     public function expectMany(string $type)
     {
-        $this->type = $type;
         $this->expectArray = true;
+        $this->type = $type;
 
         return $this;
     }
@@ -74,14 +60,37 @@ class Filter
      * Filter by field and operator.
      *
      * When this is method is used, expectMany cannot be used.
+     *
+     * @param string $field
+     * @param string $operator
+     *
+     * @return self
      */
-    public function byField(string $field, string $operator = '=')
+    public function byField(string $field, string $operator = '='): self
     {
-        $this->expectMany = false;
+        $this->expectArray = false;
 
         $this->handleUsing(function (Builder $query, $value) {
             return $query->where($field, $operator, $value);
         });
+
+        return $this;
+    }
+
+    /**
+     * Filter using a LIKE filter on the given field(s).
+     *
+     * When this is method is used, expectMany cannot be used.
+     *
+     * @param array|string $fields
+     *
+     * @return self
+     */
+    public function search($fields): self
+    {
+        $this->expect('string');
+        $this->handleUsing(new LikeFilter($fields));
+        $this->description('Search based on the input string');
 
         return $this;
     }
@@ -112,26 +121,9 @@ class Filter
         return TypeCaster::cast($value, $this->type);
     }
 
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    public function setName(string $name)
-    {
-        $this->name = $name;
-
-        return $this;
-    }
-
     public function getHandler()
     {
-        return $this->handler ?? $this->getDefaultHandler();
-    }
-
-    protected function getDefaultHandler()
-    {
-        // Check if the key is set and filter by key.eq.values
+        return $this->handler;
     }
 
     public function getValue()
@@ -142,5 +134,12 @@ class Filter
     public function setValue($value)
     {
         $this->value = $value;
+    }
+
+    public function getInputType()
+    {
+        return $this->expectArray
+            ? $this->type . '[]'
+            : $this->type;
     }
 }

@@ -2,9 +2,10 @@
 
 namespace Apitizer;
 
+use Apitizer\Apitizer;
 use Apitizer\Parser\Context;
 use Apitizer\Parser\Relation;
-use Apitizer\Types\Sort;
+use Apitizer\Parser\Sort;
 use Apitizer\Types\RequestInput;
 use Illuminate\Http\Request;
 
@@ -34,8 +35,7 @@ class RequestParser
         //   id,name
         //   id,"first,name",comments(id,"wo)(,-w")
 
-        $fieldParameter = config('apitizer.query_parameters.fields', 'fields');
-        $rawFields = $request->input($fieldParameter, '');
+        $rawFields = $request->input(Apitizer::getFieldKey(), '');
 
         if (empty($rawFields)) {
             return [];
@@ -48,6 +48,7 @@ class RequestParser
         $context = new Context();
 
         // TODO: Add line/column numbers for debugging
+        // TODO: Ignore whitespace in non-quoted fields.
         foreach ($this->stringToArray($rawFields) as $character) {
             if ($context->isQuoted && $character !== '"') {
                 $context->accumulator .= $character;
@@ -96,9 +97,7 @@ class RequestParser
 
     public function parseFilters(Request $request): array
     {
-        $filterParameter = config('apitizer.query_parameters.filters', 'filters');
-
-        return $request->input($filterParameter, []);
+        return $request->input(Apitizer::getFilterKey(), []);
     }
 
     public function parseSorts(Request $request): array
@@ -109,8 +108,7 @@ class RequestParser
         //   ["first_name.desc", "last_name.asc"]
         //   first_name.desc,last_name.asc
 
-        $sortParameter = config('apitizer.query_parameters.sort', 'sort');
-        $rawSorts = $request->input($sortParameter, []);
+        $rawSorts = $request->input(Apitizer::getSortKey(), []);
 
         if (is_string($rawSorts)) {
             $rawSorts = explode(',', $rawSorts);

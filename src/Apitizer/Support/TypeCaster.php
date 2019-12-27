@@ -24,6 +24,8 @@ class TypeCaster
             return self::castToDate($value, 'Y-m-d');
         case 'datetime':
             return self::castToDate($value, 'Y-m-d H:i:s');
+        default:
+            return $value;
         }
     }
 

@@ -2,19 +2,11 @@
 
 namespace Apitizer\Types;
 
+use Apitizer\QueryBuilder;
 use ArrayAccess;
 
-class Field
+class Field extends Factory
 {
-    use Concerns\HasDescription;
-
-    /**
-     * The name of the field that the client uses.
-     *
-     * @var string
-     */
-    protected $name;
-
     /**
      * The key that this field occupies on the data source.
      */
@@ -41,11 +33,14 @@ class Field
      */
     protected $transformers = [];
 
-    public function __construct(string $key, string $type, string $name = null)
-    {
+    public function __construct(
+        QueryBuilder $queryBuilder,
+        string $key,
+        string $type
+    ) {
+        parent::__construct($queryBuilder);
         $this->key = $key;
         $this->type = $type;
-        $this->name = $name;
     }
 
     public function render(ArrayAccess $row)
@@ -69,18 +64,6 @@ class Field
     public function nullable(bool $isNullable = true): self
     {
         $this->nullable = $isNullable;
-
-        return $this;
-    }
-
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    public function setName(string $name): self
-    {
-        $this->name = $name;
 
         return $this;
     }

@@ -9,6 +9,7 @@ use Apitizer\Types\FetchSpec;
 use Apitizer\Types\RequestInput;
 use Apitizer\Types\Filter;
 use Apitizer\Types\Apidoc;
+use Apitizer\Types\Sort;
 use Illuminate\Http\Request;
 use ArrayAccess;
 
@@ -82,7 +83,7 @@ abstract class QueryBuilder
      *
      * The following sorts:
      *
-     *   ['name' => ColumnSort()]
+     *   ['name' => $this->sort()->byField('name')]
      *
      * would support the following queries:
      *
@@ -162,7 +163,7 @@ abstract class QueryBuilder
             $builderInstance->setParent($this);
         }
 
-        return new Association($key, $builderInstance);
+        return new Association($builderInstance, $key);
     }
 
     /**
@@ -173,6 +174,16 @@ abstract class QueryBuilder
     protected function filter(): Filter
     {
         return new Filter($this);
+    }
+
+    /**
+     * Start building a new sorting handler.
+     *
+     * @return Sort
+     */
+    protected function sort(): Sort
+    {
+        return new Sort($this);
     }
 
     /**
@@ -288,6 +299,20 @@ abstract class QueryBuilder
         return $filters;
     }
 
+    protected function castSorts(array $sorts): array
+    {
+        foreach ($sorts as $name => $sort) {
+            if (! $sort instanceof Sort) {
+                throw new \UnexpectedValueException(
+                    "Expected Sort to be returned for {$name}"
+                );
+            }
+            $sort->setName($name);
+        }
+
+        return $sorts;
+    }
+
     protected function validateRequestInput(RequestInput $unvalidatedInput): FetchSpec
     {
         $validated = new FetchSpec(
@@ -336,9 +361,10 @@ abstract class QueryBuilder
     {
         $validatedSorts = [];
 
-        foreach ($selectedSorts as $sort) {
-            if (isset($availableSorts[$sort->getField()])) {
-                $sort->setHandler($availableSorts[$sort->getField()]);
+        foreach ($selectedSorts as $parserSort) {
+            if (isset($availableSorts[$parserSort->getField()])) {
+                $sort = $availableSorts[$parserSort->getField()];
+                $sort->setOrder($parserSort->getOrder());
                 $validatedSorts[] = $sort;
             }
         }
@@ -423,7 +449,7 @@ abstract class QueryBuilder
     public function getSorts(): array
     {
         if (is_null($this->availableSorts)) {
-            $this->availableSorts = $this->sorts();
+            $this->availableSorts = $this->castSorts($this->sorts());
         }
 
         return $this->availableSorts;

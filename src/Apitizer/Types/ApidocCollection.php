@@ -6,7 +6,7 @@ use Illuminate\Support\Collection;
 
 class ApidocCollection extends Collection
 {
-    public function findAssociationType(Association $assoc)
+    public function findAssociationType(Association $assoc): ?Apidoc
     {
         $builder = $assoc->getQueryBuilder();
 
@@ -19,7 +19,7 @@ class ApidocCollection extends Collection
         return null;
     }
 
-    public function printAssociationType(Association $assoc)
+    public function printAssociationType(Association $assoc): string
     {
         if ($apidoc = $this->findAssociationType($assoc)) {
             $name = $apidoc->getName();

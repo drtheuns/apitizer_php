@@ -1,4 +1,5 @@
-<h{{ $heading }} class="section-title" id="#{{ $anchor }}">
+<h{{ $heading }} class="section-title">
+  <a id="{{ $anchor }}"></a>
   {{ $title }}
   <a href="#{{ $anchor }}" class="icon-link" aria-label="Link to this section">
     <!-- Credits: zondicons -->

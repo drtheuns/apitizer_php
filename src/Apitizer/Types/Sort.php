@@ -2,32 +2,31 @@
 
 namespace Apitizer\Types;
 
-class Sort
+use Apitizer\QueryBuilder;
+use Apitizer\Sorting\ColumnSort;
+
+class Sort extends Factory
 {
-    // ASC|DESC NULLS LAST|FIRST not supported because laravel does not support
-    // these (they're DB-dependant)
-    const ASC = 'asc';
-    const DESC = 'desc';
-
-    /**
-     * @var string
-     */
-    protected $field;
-
     /**
      * @var string 'asc' | 'desc'
      */
-    protected $order;
+    protected $order = 'asc';
 
     /**
      * @var callable
      */
     protected $handler;
 
-    public function __construct(string $field, string $order)
+    public function __construct(QueryBuilder $queryBuilder)
     {
-        $this->field = $field;
-        $this->order = $order;
+        $this->queryBuilder = $queryBuilder;
+    }
+
+    public function byField(string $field): self
+    {
+        $this->handleUsing(new ColumnSort($field));
+
+        return $this;
     }
 
     public function getField()
@@ -40,12 +39,19 @@ class Sort
         return $this->order;
     }
 
+    public function setOrder(string $order)
+    {
+        $this->order = $order;
+
+        return $this;
+    }
+
     public function getHandler()
     {
         return $this->handler;
     }
 
-    public function setHandler(callable $handler)
+    public function handleUsing(callable $handler)
     {
         $this->handler = $handler;
     }

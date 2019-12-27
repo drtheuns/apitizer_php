@@ -11,7 +11,7 @@ trait HasFields
 {
     protected function field(string $key, string $type): Field
     {
-        return new Field($key, $type);
+        return new Field($this, $key, $type);
     }
 
     protected function any(string $key): Field
@@ -36,11 +36,13 @@ trait HasFields
 
     protected function date(string $key): DateTimeField
     {
-        return (new DateTimeField($key, 'date'))->transform(new CastValue);
+        return (new DateTimeField($key, 'date'))
+            ->transform(new CastValue);
     }
 
     protected function datetime(string $key): DateTimeField
     {
-        return (new DateTimeField($key, 'datetime'))->transform(new CastValue);
+        return (new DateTimeField($this, $key, 'datetime'))
+            ->transform(new CastValue);
     }
 }

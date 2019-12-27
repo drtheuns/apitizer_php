@@ -4,7 +4,7 @@ namespace Tests\Unit;
 
 use Apitizer\RequestParser;
 use Apitizer\Parser\Relation;
-use Apitizer\Types\Sort;
+use Apitizer\Parser\Sort;
 
 class RequestParserTest extends TestCase
 {

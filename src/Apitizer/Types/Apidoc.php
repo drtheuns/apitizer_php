@@ -27,6 +27,13 @@ class Apidoc
      */
     protected $associations;
 
+    /**
+     * A description of this resource.
+     *
+     * @var string
+     */
+    protected $description;
+
     public function __construct(QueryBuilder $queryBuilder)
     {
         $this->queryBuilder = $queryBuilder;
@@ -43,6 +50,18 @@ class Apidoc
         }
 
         $queryBuilder->apidoc($this);
+    }
+
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    public function setDescription(string $description): self
+    {
+        $this->description = $description;
+
+        return $this;
     }
 
     public function getName()
@@ -98,6 +117,16 @@ class Apidoc
             return Str::title($re[1]);
         }
 
-        return get_class($this->queryBuilder);
+        return \get_class($this->queryBuilder);
+    }
+
+    public function hasFilters(): bool
+    {
+        return ! empty($this->getFilters());
+    }
+
+    public function hasSorts(): bool
+    {
+        return ! empty($this->getSorts());
     }
 }

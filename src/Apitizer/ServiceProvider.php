@@ -22,14 +22,15 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
      */
     public function boot()
     {
-        $configPath = __DIR__ . '/../../config/apitizer.php';
+        $root = __DIR__ . '/../../';
+        $configPath = $root . 'config/apitizer.php';
         $this->publishes([$configPath => $this->getConfigPath()], 'config');
 
         if ($this->app['config']->get('apitizer.generate_documentation', false)) {
             $this->registerRoutes();
         }
 
-        $this->loadViewsFrom(__DIR__.'/../../views', 'apitizer');
+        $this->loadViewsFrom($root . '/resources/views', 'apitizer');
     }
 
     protected function registerRoutes()
@@ -43,6 +44,11 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
             $router->get('/', [
                 'uses' => 'DocumentationController@list',
                 'as' => 'apitizer.apidoc',
+            ]);
+
+            $router->get('/css', [
+                'uses' => 'DocumentationController@css',
+                'as' => 'apitizer.css'
             ]);
         });
     }

@@ -33,7 +33,7 @@ class UserBuilder extends QueryBuilder
     public function sorts(): array
     {
         return [
-            'id' => new ColumnSort(),
+            'id' => $this->sort()->byField('id'),
         ];
     }
 
