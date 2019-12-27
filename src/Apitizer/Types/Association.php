@@ -4,6 +4,7 @@ namespace Apitizer\Types;
 
 use Apitizer\QueryBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use ArrayAccess;
 
 class Association
@@ -89,6 +90,6 @@ class Association
         $model = $this->builder->getParent()->model();
         $relation = $model->{$this->key}();
 
-        return ! $relation instanceof BelongsTo;
+        return ! $relation instanceof BelongsTo && ! $relation instanceof HasOne;
     }
 }
