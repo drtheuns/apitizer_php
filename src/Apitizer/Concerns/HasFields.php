@@ -3,6 +3,8 @@
 namespace Apitizer\Concerns;
 
 use Apitizer\Types\Field;
+use Apitizer\Types\DateTimeField;
+use Apitizer\Types\FormattableField;
 use Apitizer\Transformers\CastValue;
 
 trait HasFields
@@ -32,13 +34,13 @@ trait HasFields
         return $this->field($key, 'float')->transform(new CastValue);
     }
 
-    protected function date(string $key): Field
+    protected function date(string $key): DateTimeField
     {
-        return $this->field($key, 'date')->transform(new CastValue);
+        return (new DateTimeField($key, 'date'))->transform(new CastValue);
     }
 
-    protected function datetime(string $key): Field
+    protected function datetime(string $key): DateTimeField
     {
-        return $this->field($key, 'datetime')->transform(new CastValue);
+        return (new DateTimeField($key, 'datetime'))->transform(new CastValue);
     }
 }

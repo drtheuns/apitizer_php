@@ -25,8 +25,8 @@ class CommentBuilder extends QueryBuilder
         return [];
     }
 
-    public function datasource()
+    public function model()
     {
-        return Post::query();
+        return new Comment();
     }
 }

@@ -2,6 +2,8 @@
 
 namespace Apitizer\Support;
 
+use DateTimeInterface;
+
 class TypeCaster
 {
     public static function cast($value, string $type)
@@ -19,9 +21,9 @@ class TypeCaster
         case 'boolean':
             return (bool) $value;
         case 'date':
-            return $this->castToDate($value, 'Y-m-d');
+            return self::castToDate($value, 'Y-m-d');
         case 'datetime':
-            return $this->castToDate($value, 'Y-m-d H:i:s');
+            return self::castToDate($value, 'Y-m-d H:i:s');
         }
     }
 

@@ -3,9 +3,13 @@
 namespace Apitizer\Types;
 
 use Apitizer\QueryBuilder;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use ArrayAccess;
 
 class Association
 {
+    use Concerns\HasDescription;
+
     /**
      * The key of this association on the data source.
      *
@@ -38,7 +42,7 @@ class Association
         $this->builder = $builder;
     }
 
-    public function render($row)
+    public function render(ArrayAccess $row)
     {
         return $this->builder->transformValues($row[$this->key], $this->fields);
     }
@@ -55,7 +59,7 @@ class Association
         return $this;
     }
 
-    public function getBuilder()
+    public function getQueryBuilder()
     {
         return $this->builder;
     }
@@ -75,5 +79,16 @@ class Association
     public function getKey()
     {
         return $this->key;
+    }
+
+    /**
+     * Check if this association returns a collection of related rows.
+     */
+    public function returnsCollection()
+    {
+        $model = $this->builder->getParent()->model();
+        $relation = $model->{$this->key}();
+
+        return ! $relation instanceof BelongsTo;
     }
 }

@@ -8,7 +8,9 @@ use Apitizer\Types\Association;
 use Apitizer\Types\FetchSpec;
 use Apitizer\Types\RequestInput;
 use Apitizer\Types\Filter;
+use Apitizer\Types\Apidoc;
 use Illuminate\Http\Request;
+use ArrayAccess;
 
 abstract class QueryBuilder
 {
@@ -29,12 +31,37 @@ abstract class QueryBuilder
      */
     protected $queryable;
 
-    // These variables contain the results of the fields(), sorts(), and
-    // filters() method.
-    /** @var Map<string, Field|Association> */
+    /**
+     * The result of the fields() callback.
+     *
+     * @var Field[]|Association[]
+     */
     protected $availableFields;
+
+    /**
+     * The results of the sorts() function.
+     *
+     * @var Sort[]
+     */
     protected $availableSorts;
+
+    /**
+     * The results of the filters() function.
+     *
+     * @var Filter[]
+     */
     protected $availableFilters;
+
+    /**
+     * The parent query builder instance.
+     *
+     * This is used to prevent infinite loops when dealing with associations and
+     * reducing the number of operations a query builder performs, such as
+     * parsing the request.
+     *
+     * @var QueryBuilder
+     */
+    protected $parent;
 
     /**
      * A function that returns the fields that are available to the client.
@@ -55,7 +82,7 @@ abstract class QueryBuilder
      *
      * The following sorts:
      *
-     *   ['name']
+     *   ['name' => ColumnSort()]
      *
      * would support the following queries:
      *
@@ -75,7 +102,7 @@ abstract class QueryBuilder
      * object, whereas for a different adapter you will want to return a
      * different source.
      */
-    abstract public function datasource();
+    abstract public function model();
 
     /**
      * Overridable function to adjust the API documentation for this query
@@ -83,7 +110,7 @@ abstract class QueryBuilder
      *
      * @see Apidoc
      */
-    protected function apidoc(Apidoc $apidoc)
+    public function apidoc(Apidoc $apidoc)
     {
         //
     }
@@ -96,11 +123,120 @@ abstract class QueryBuilder
         $this->request = $request;
         $this->queryable = $queryable ?? new EloquentAdapter();
         $this->parser = $parser ?? new RequestParser();
+    }
 
-        // Eagerly prepare the builder for later.
-        $this->availableFields = $this->castFields($this->fields());
-        $this->availableSorts = $this->sorts();
-        $this->availableFilters = $this->castFilters($this->filters());
+    /**
+     * Static factory method; essentially alias for the constructor.
+     */
+    public static function make(
+        Request $request,
+        QueryableDataSource $queryable = null,
+        RequestParser $parser = null
+    ) {
+        return (new static($request, $queryable, $parser));
+    }
+
+    /**
+     * Defines a relationship to another querybuilder.
+     *
+     * This can be used in the `fields` callback to handle nested selects such
+     * as:
+     *
+     *   /users?select=id,comments(id,body)
+     *
+     * where `comments` is defined like:
+     *
+     *   $this->association('comments', CommentBuilder::class)
+     *
+     * @param string $key
+     * @param string|QueryBuilder $builder
+     *
+     * @return Association
+     */
+    protected function association(string $key, string $builder)
+    {
+        $builderInstance = $this->getParentByClassName($builder);
+
+        if (! $builderInstance) {
+            $builderInstance = new $builder($this->request, $this->queryable, $this->parser);
+            $builderInstance->setParent($this);
+        }
+
+        return new Association($key, $builderInstance);
+    }
+
+    /**
+     * Start building a new filter.
+     *
+     * @return Filter
+     */
+    protected function filter(): Filter
+    {
+        return new Filter($this);
+    }
+
+    /**
+     * Render the given data based on the current query builder and request.
+     *
+     * @return array
+     */
+    public function render($data): array
+    {
+        $fetchSpec = $this->makeFetchSpecification();
+
+        return $this->transformValues($data, $fetchSpec->getFields());
+    }
+
+    /**
+     * Fetch and render all the data.
+     *
+     * @return array
+     */
+    public function all(): array
+    {
+        $fetchSpec = $this->makeFetchSpecification();
+
+        return $this->transformValues(
+            $this->queryable->fetchData($this, $fetchSpec),
+            $fetchSpec->getFields()
+        );
+    }
+
+    /**
+     * Fetch and return paginated data.
+     */
+    public function paginate()
+    {
+        $fetchSpec = $this->makeFetchSpecification();
+
+        return $this->transformValues(
+            // TODO: Implement pagination
+            $this->queryable->fetchData($this, $fetchSpec),
+            $fetchSpec->getFields()
+        );
+    }
+
+    /**
+     * Build the fetch specification based on the query builder and the request.
+     *
+     * @return FetchSpec
+     */
+    protected function makeFetchSpecification(): FetchSpec
+    {
+        $fetchSpec = $this->validateRequestInput(
+            $this->parser->parse($this->request)
+        );
+
+        if (empty($fetchSpec->getFields())) {
+            // If nothing (valid) is selected, return all non-association fields.
+            $fetchSpec->setFields(
+                array_filter($this->getFields(), function ($field) {
+                    return $field instanceof Field;
+                })
+            );
+        }
+
+        return $fetchSpec;
     }
 
     /**
@@ -109,7 +245,7 @@ abstract class QueryBuilder
      *
      * @return Map<string, Field|Association>
      */
-    protected function castFields(array $fields)
+    protected function castFields(array $fields): array
     {
         $castFields = [];
 
@@ -137,7 +273,7 @@ abstract class QueryBuilder
         return $castFields;
     }
 
-    protected function castFilters(array $filters)
+    protected function castFilters(array $filters): array
     {
         foreach ($filters as $name => $filter) {
             if (! $filter instanceof Filter) {
@@ -150,51 +286,6 @@ abstract class QueryBuilder
         }
 
         return $filters;
-    }
-
-    /**
-     * Defines a relationship to another querybuilder.
-     *
-     * This can be used in the `fields` callback to handle nested selects such
-     * as:
-     *
-     *   /users?select=id,comments(id,body)
-     *
-     * where `comments` is defined like:
-     *
-     *   $this->association('comments', CommentBuilder::class)
-     */
-    protected function association(string $key, string $builder)
-    {
-        return new Association(
-            $key,
-            new $builder($this->request, $this->queryable, $this->parser)
-        );
-    }
-
-    protected function filter()
-    {
-        return new Filter($this);
-    }
-
-    public function build()
-    {
-        $unvalidatedInput = $this->parser->parse($this->request);
-
-        $fetchSpec = $this->validateRequestInput($unvalidatedInput);
-
-        if (empty($fetchSpec->getFields())) {
-            // If nothing (valid) is selected, return all non-association fields.
-            $fetchSpec->setFields(
-                array_filter($this->getFields(), function ($field) {
-                    return $field instanceof Field;
-                })
-            );
-        }
-
-        $data = $this->queryable->fetchData($this, $fetchSpec);
-
-        return $this->transformValues($data, $fetchSpec->getFields());
     }
 
     protected function validateRequestInput(RequestInput $unvalidatedInput): FetchSpec
@@ -213,7 +304,7 @@ abstract class QueryBuilder
      *
      * @return Map<string, Field|Association>
      */
-    public function validateFields($unvalidatedFields, $availableFields)
+    protected function validateFields($unvalidatedFields, $availableFields): array
     {
         $validatedFields = [];
 
@@ -226,7 +317,7 @@ abstract class QueryBuilder
 
                 // Validate the fields recursively
                 $association->setFields(
-                    $this->validateFields($field->fields, $association->getBuilder()->getFields())
+                    $this->validateFields($field->fields, $association->getQueryBuilder()->getFields())
                 );
                 $validatedFields[] = $association;
 
@@ -241,7 +332,7 @@ abstract class QueryBuilder
         return $validatedFields;
     }
 
-    public function validateSorting(array $selectedSorts, array $availableSorts)
+    protected function validateSorting(array $selectedSorts, array $availableSorts): array
     {
         $validatedSorts = [];
 
@@ -255,7 +346,7 @@ abstract class QueryBuilder
         return $validatedSorts;
     }
 
-    public function validateFilters(array $selectedFilters, array $availableFilters)
+    protected function validateFilters(array $selectedFilters, array $availableFilters): array
     {
         $validatedFilters = [];
 
@@ -274,10 +365,10 @@ abstract class QueryBuilder
         return $validatedFilters;
     }
 
-    public function transformValues(iterable $data, array $selectedFields)
+    public function transformValues($data, array $selectedFields): array
     {
         // Check if we're dealing with a single row of data.
-        if (is_array($data) && $this->isAssoc($data)) {
+        if ($this->isSingleDataModel($data) || $this->isNonCollectionObject($data)) {
             return $this->transformOne($data, $selectedFields);
         }
 
@@ -290,7 +381,7 @@ abstract class QueryBuilder
         return $result;
     }
 
-    protected function transformOne($row, $selectedFields)
+    protected function transformOne(ArrayAccess $row, array $selectedFields): array
     {
         $acc = [];
 
@@ -301,25 +392,82 @@ abstract class QueryBuilder
         return $acc;
     }
 
-    private function isAssoc(array $array)
+    protected function isSingleDataModel($data): bool
+    {
+        // Distinguish between arrays as list and arrays as maps.
+        return is_array($data) && $this->isAssoc($data);
+    }
+
+    protected function isNonCollectionObject($data): bool
+    {
+        // Distinguish between e.g. Eloquent objects and Collection objects.
+        return is_object($data) && ! is_iterable($data);
+    }
+
+    private function isAssoc(array $array): bool
     {
         $keys = array_keys($array);
 
         return array_keys($keys) !== $keys;
     }
 
-    public function getFields()
+    public function getFields(): array
     {
+        if (is_null($this->availableFields)) {
+            $this->availableFields = $this->castFields($this->fields());
+        }
+
         return $this->availableFields;
     }
 
-    public function getSorts()
+    public function getSorts(): array
     {
+        if (is_null($this->availableSorts)) {
+            $this->availableSorts = $this->sorts();
+        }
+
         return $this->availableSorts;
     }
 
-    public function getFilters()
+    public function getFilters(): array
     {
+        if (is_null($this->availableFilters)) {
+            $this->availableFilters = $this->castFilters($this->filters());
+        }
+
         return $this->availableFilters;
+    }
+
+    public function setParent(QueryBuilder $parent): self
+    {
+        $this->parent = $parent;
+
+        return $this;
+    }
+
+    public function getParent(): ?QueryBuilder
+    {
+        return $this->parent;
+    }
+
+    /**
+     * Traverse the parents to find out if any of them are of the same instance
+     * as the given class name.
+     *
+     * @return null|QueryBuilder
+     */
+    public function getParentByClassName(string $className): ?QueryBuilder
+    {
+        $parent = $this;
+
+        while (! is_null($parent)) {
+            $parent = $parent->getParent();
+
+            if ($parent && \get_class($parent) === $className) {
+                return $parent;
+            }
+        }
+
+        return null;
     }
 }

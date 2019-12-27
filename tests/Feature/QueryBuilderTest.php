@@ -15,7 +15,7 @@ class QueryBuilderTest extends TestCase
         $user = factory(User::class)->create();
 
         $request = $this->buildRequest(['fields' => 'id,name']);
-        $results = (new UserBuilder($request))->build();
+        $results = UserBuilder::make($request)->all();
 
         $this->assertEquals([
             [
@@ -43,7 +43,7 @@ class QueryBuilderTest extends TestCase
                });
 
         $request = $this->buildRequest(['fields' => 'id,name,posts(id,title,comments(id,body))']);
-        $result = (new UserBuilder($request))->build();
+        $result = UserBuilder::make($request)->all();
 
         $expected = $users->map(function (User $user) {
             return [
@@ -76,7 +76,7 @@ class QueryBuilderTest extends TestCase
             'sort' => 'id.desc',
             'fields' => 'id,name'
         ]);
-        $result = (new UserBuilder($request))->build();
+        $result = UserBuilder::make($request)->all();
 
         $expected = [
             [
@@ -97,7 +97,7 @@ class QueryBuilderTest extends TestCase
     {
         $user = factory(User::class)->create();
         $request = $this->buildRequest();
-        $result = (new UserBuilder($request))->build();
+        $result = UserBuilder::make($request)->all();
 
         $expected = [
             [
@@ -121,7 +121,7 @@ class QueryBuilderTest extends TestCase
             'fields' => 'id',
             'filters' => ['posts' => [$post->id]]
         ]);
-        $result = (new UserBuilder($request))->build();
+        $result = UserBuilder::make($request)->all();
 
         $this->assertEquals([
             [

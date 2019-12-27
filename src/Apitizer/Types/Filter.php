@@ -4,6 +4,7 @@ namespace Apitizer\Types;
 
 use Apitizer\QueryBuilder;
 use Apitizer\Support\TypeCaster;
+use Illuminate\Database\Eloquent\Builder;
 
 class Filter
 {
@@ -26,7 +27,7 @@ class Filter
      *
      * @var string
      */
-    protected $type;
+    protected $type = 'string';
 
     /**
      * If we expect an array of values or just one.
@@ -70,6 +71,22 @@ class Filter
     }
 
     /**
+     * Filter by field and operator.
+     *
+     * When this is method is used, expectMany cannot be used.
+     */
+    public function byField(string $field, string $operator = '=')
+    {
+        $this->expectMany = false;
+
+        $this->handleUsing(function (Builder $query, $value) {
+            return $query->where($field, $operator, $value);
+        });
+
+        return $this;
+    }
+
+    /**
      * Get the validated, type casted input.
      *
      * @throws \UnexpectedValueException
@@ -78,15 +95,21 @@ class Filter
      */
     public function validateInput($input)
     {
-        if ($this->expectArray && ! is_array($input)) {
+        if ($this->expectArray) {
+            if (! \is_array($input)) {
+                throw new \UnexpectedValueException();
+            }
+
+            return array_map(function ($value) {
+                return TypeCaster::cast($value, $this->type);
+            }, $input);
+        }
+
+        if (\is_array($input)) {
             throw new \UnexpectedValueException();
         }
 
-        return $this->expectArray
-            ? array_map(function ($value) {
-                return TypeCaster::cast($value, $this->type);
-            }, $input)
-            : TypeCaster::cast($input);
+        return TypeCaster::cast($value, $this->type);
     }
 
     public function getName()

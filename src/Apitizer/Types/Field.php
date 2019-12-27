@@ -6,6 +6,8 @@ use ArrayAccess;
 
 class Field
 {
+    use Concerns\HasDescription;
+
     /**
      * The name of the field that the client uses.
      *
@@ -24,6 +26,13 @@ class Field
      * @var string
      */
     protected $type;
+
+    /**
+     * Whether or not this field can be null.
+     *
+     * @var bool
+     */
+    protected $nullable = false;
 
     /**
      * The transformation callables that are called when the field is rendered.
@@ -57,6 +66,13 @@ class Field
         return $this;
     }
 
+    public function nullable(bool $isNullable = true): self
+    {
+        $this->nullable = $isNullable;
+
+        return $this;
+    }
+
     public function getName()
     {
         return $this->name;
@@ -77,5 +93,10 @@ class Field
     public function getKey()
     {
         return $this->key;
+    }
+
+    public function isNullable()
+    {
+        return $this->nullable;
     }
 }

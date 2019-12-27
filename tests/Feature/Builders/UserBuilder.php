@@ -22,9 +22,11 @@ class UserBuilder extends QueryBuilder
     public function filters(): array
     {
         return [
-            'posts' => $this->filter()
-                            ->expectMany('string')
-                            ->handleUsing(new AssociationFilter('posts', 'id')),
+            'name'       => $this->filter()->byField('name'),
+            'created_at' => $this->filter()->byField('created_at', '>'),
+            'posts'      => $this->filter()
+                                 ->expectMany('string')
+                                 ->handleUsing(new AssociationFilter('posts', 'id')),
         ];
     }
 
@@ -35,8 +37,8 @@ class UserBuilder extends QueryBuilder
         ];
     }
 
-    public function datasource()
+    public function model()
     {
-        return User::query();
+        return new User();
     }
 }

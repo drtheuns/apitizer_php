@@ -19,7 +19,7 @@ class EloquentAdapter implements QueryableDataSource
      */
     public function fetchData(QueryBuilder $queryBuilder, FetchSpec $fetchSpec): iterable
     {
-        $query = $queryBuilder->datasource();
+        $query = $queryBuilder->model()->query();
 
         if (! $query || (! $query instanceof Builder && ! $query instanceof Model)) {
             throw new \DomainException("Expected {get_class($queryBuilder}}::datasource to return a query");

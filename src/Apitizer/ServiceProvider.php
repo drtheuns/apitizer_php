@@ -28,6 +28,8 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
         if ($this->app['config']->get('apitizer.generate_documentation', false)) {
             $this->registerRoutes();
         }
+
+        $this->loadViewsFrom(__DIR__.'/../../views', 'apitizer');
     }
 
     protected function registerRoutes()

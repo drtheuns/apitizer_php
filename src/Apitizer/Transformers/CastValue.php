@@ -4,7 +4,6 @@ namespace Apitizer\Transformers;
 
 use Apitizer\Types\Field;
 use Apitizer\Support\TypeCaster;
-use DateTimeInterface;
 
 class CastValue
 {

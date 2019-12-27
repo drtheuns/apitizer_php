@@ -27,8 +27,8 @@ class PostBuilder extends QueryBuilder
         return [];
     }
 
-    public function datasource()
+    public function model()
     {
-        return Post::query();
+        return new Post();
     }
 }

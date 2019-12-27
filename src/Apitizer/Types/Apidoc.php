@@ -2,25 +2,59 @@
 
 namespace Apitizer\Types;
 
+use Apitizer\QueryBuilder;
+use Illuminate\Support\Str;
+
 class Apidoc
 {
+    /**
+     * @var QueryBuilder
+     */
     protected $queryBuilder;
 
-    protected $fields = [];
+    /**
+     * @var string
+     */
+    protected $name;
 
-    protected $sorts = [];
+    /**
+     * @var Field[]
+     */
+    protected $fields;
 
-    protected $filters = [];
+    /**
+     * @var Assocation[]
+     */
+    protected $associations;
 
     public function __construct(QueryBuilder $queryBuilder)
     {
         $this->queryBuilder = $queryBuilder;
+        $this->setName($this->guessQueryBuilderResourceName());
 
-        $this->setFields($queryBuilder->getFields());
-        $this->setSorts($queryBuilder->getSorts());
-        $this->setFilters($queryBuilder->getFilters());
+        foreach ($queryBuilder->getFields() as $field) {
+            if ($field instanceof Field) {
+                $this->fields[] = $field;
+            }
+
+            if ($field instanceof Association) {
+                $this->associations[] = $field;
+            }
+        }
 
         $queryBuilder->apidoc($this);
+    }
+
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    public function setName(string $name): self
+    {
+        $this->name = $name;
+
+        return $this;
     }
 
     public function getFields()
@@ -28,28 +62,42 @@ class Apidoc
         return $this->fields;
     }
 
-    public function setFields(array $fields)
+    public function getAssociations()
     {
-        $this->fields = $fields;
+        return $this->associations;
     }
 
     public function getSorts()
     {
-        return $this->sorts;
-    }
-
-    public function setSorts(array $sorts)
-    {
-        $this->sorts = $sorts;
+        return $this->queryBuilder->getSorts();
     }
 
     public function getFilters()
     {
-        return $this->filters;
+        return $this->queryBuilder->getFilters();
     }
 
-    public function setFilters(array $filters)
+    public function getQueryBuilder()
     {
-        $this->filters = $filters;
+        return $this->queryBuilder;
+    }
+
+    public function getAnchorName(string $suffix)
+    {
+        return $this->getName() . '-' . $suffix;
+    }
+
+    protected function guessQueryBuilderResourceName()
+    {
+        // App\QueryBuilders\UserBuilder -> User
+        \preg_match('/[\w\\\]+\\\(\w+)Builder/',
+                    \get_class($this->queryBuilder),
+                    $re);
+
+        if (isset($re[1])) {
+            return Str::title($re[1]);
+        }
+
+        return get_class($this->queryBuilder);
     }
 }

@@ -20,5 +20,12 @@ return [
     /*
      * The route prefix that should be used for the documentation routes.
      */
-    'route_prefix' => '_apidoc',
+    'route_prefix' => 'apidoc',
+
+    /*
+     * The registered query builders.
+     *
+     * This should be set by the applications that use this library.
+     */
+    'query_builders' => [],
 ];
