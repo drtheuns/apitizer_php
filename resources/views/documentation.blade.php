@@ -26,6 +26,11 @@
        --code-background-color: #e2e8f0;
        --code-border-color: #cbd5e0;
      }
+     @media (min-width: 640px) {
+      :root {
+        --text-size: 1.1rem;
+      }
+     }
 
      * {
        font-size: var(--text-size);
@@ -198,25 +203,22 @@
        display: initial;
      }
      @media (min-width: 640px) {
-     :root {
-       --text-size: 1.1rem;
-     }
-     .content-wrapper {
-       margin-left: 16rem;
-     }
-     .content {
-       padding: 2rem 2rem;
-       width: 48rem;
-     }
-     .menu {
-       display: none;
-     }
-     .sidebar {
-       display: initial;
-       width: 16rem;
-       padding: 2rem 0.5rem 2rem 0.5rem;
-       margin-top: 0;
-     }
+      .content-wrapper {
+        margin-left: 16rem;
+      }
+      .content {
+        padding: 2rem 2rem;
+        width: 48rem;
+      }
+      .menu {
+        display: none;
+      }
+      .sidebar {
+        display: initial;
+        width: 16rem;
+        padding: 2rem 0.5rem 2rem 0.5rem;
+        margin-top: 0;
+      }
      }
     </style>
   </head>
