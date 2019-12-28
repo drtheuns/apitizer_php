@@ -4,6 +4,7 @@ namespace Apitizer\Types;
 
 use Apitizer\QueryBuilder;
 use Illuminate\Support\Str;
+use ReflectionClass;
 
 class Apidoc
 {
@@ -108,16 +109,17 @@ class Apidoc
 
     protected function guessQueryBuilderResourceName()
     {
-        // App\QueryBuilders\UserBuilder -> User
-        \preg_match('/[\w\\\]+\\\(\w+)Builder/',
-                    \get_class($this->queryBuilder),
-                    $re);
+        $className = (new ReflectionClass($this->queryBuilder))->getShortName();
+
+        // UserBuilder -> User
+        // UserQueryBuilder -> User
+        \preg_match('/(.+?)(?:Query)?Builder/', $className, $re);
 
         if (isset($re[1])) {
             return Str::title($re[1]);
         }
 
-        return \get_class($this->queryBuilder);
+        return $className;
     }
 
     public function hasFilters(): bool
