@@ -347,33 +347,35 @@
                   </table>
                 </div>
               </section>
-              <section>
-                @include('apitizer::section_link', ['heading' => 4, 'title' => 'Associations', 'anchor' => $doc->getAnchorName('associations')])
-                <div class="overflow">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Name</th>
-                        <th>Type</th>
-                        <th>Description</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      @foreach ($doc->getAssociations() as $assoc)
-                        <tr class="font-monospaced">
-                          <td>{{ $assoc->getName() }}</td>
-                          <td>
-                            <a href="#{{ $docs->findAssociationType($assoc)->getName() }}">
-                              {{ $docs->printAssociationType($assoc) }}
-                            </a>
-                          </td>
-                          <td class="font-sans">{{ $assoc->getDescription() }}</td>
+              @if($doc->hasAssociations())
+                <section>
+                  @include('apitizer::section_link', ['heading' => 4, 'title' => 'Associations', 'anchor' => $doc->getAnchorName('associations')])
+                  <div class="overflow">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Name</th>
+                          <th>Type</th>
+                          <th>Description</th>
                         </tr>
-                      @endforeach
-                    </tbody>
-                  </table>
-                </div>
-              </section>
+                      </thead>
+                      <tbody>
+                        @foreach ($doc->getAssociations() as $assoc)
+                          <tr class="font-monospaced">
+                            <td>{{ $assoc->getName() }}</td>
+                            <td>
+                              <a href="#{{ $docs->findAssociationType($assoc)->getName() }}">
+                                {{ $docs->printAssociationType($assoc) }}
+                              </a>
+                            </td>
+                            <td class="font-sans">{{ $assoc->getDescription() }}</td>
+                          </tr>
+                        @endforeach
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+              @endif
               @if($doc->hasFilters())
                 <section>
                   @include('apitizer::section_link', ['heading' => 4, 'title' => 'Filters', 'anchor' => $doc->getAnchorName('filters')])

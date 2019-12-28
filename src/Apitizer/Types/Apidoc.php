@@ -20,12 +20,12 @@ class Apidoc
     /**
      * @var Field[]
      */
-    protected $fields;
+    protected $fields = [];
 
     /**
      * @var Assocation[]
      */
-    protected $associations;
+    protected $associations = [];
 
     /**
      * A description of this resource.
@@ -128,5 +128,10 @@ class Apidoc
     public function hasSorts(): bool
     {
         return ! empty($this->getSorts());
+    }
+
+    public function hasAssociations(): bool
+    {
+        return ! empty($this->getAssociations());
     }
 }
