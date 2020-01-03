@@ -70,7 +70,7 @@ class Filter extends Factory
     {
         $this->expectArray = false;
 
-        $this->handleUsing(function (Builder $query, $value) {
+        $this->handleUsing(function (Builder $query, $value) use ($field, $operator) {
             return $query->where($field, $operator, $value);
         });
 
