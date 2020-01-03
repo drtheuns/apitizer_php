@@ -19,30 +19,29 @@ class RequestParser
     public function parse(Request $request): RequestInput
     {
         $requestData = new RequestInput();
-        $requestData->fields = $this->parseFields($request);
-        $requestData->filters = $this->parseFilters($request);
-        $requestData->sorts = $this->parseSorts($request);
+
+        $requestData->fields = $this->parseFields($request->input(Apitizer::getFieldKey(), ''));
+        $requestData->filters = $this->parseFilters($request->input(Apitizer::getFilterKey(), []));
+        $requestData->sorts = $this->parseSorts($request->input(Apitizer::getSortKey(), []));
 
         return $requestData;
     }
 
     /**
+     * @param string|array $fields
      * @return (string|Relation)[]
      */
-    public function parseFields(Request $request): array
+    public function parseFields($rawFields): array
     {
         // Input examples:
         //   id,name
         //   id,"first,name",comments(id,"wo)(,-w")
-
-        $rawFields = $request->input(Apitizer::getFieldKey(), '');
-
         if (empty($rawFields)) {
             return [];
         }
 
-        if (is_array($rawFields)) {
-            throw new \Exception('cannot handle that yet');
+        if (\is_array($rawFields)) {
+            return $rawFields;
         }
 
         $context = new Context();
@@ -52,6 +51,11 @@ class RequestParser
         foreach ($this->stringToArray($rawFields) as $character) {
             if ($context->isQuoted && $character !== '"') {
                 $context->accumulator .= $character;
+                continue;
+            }
+
+            // Ignore whitespace in non-quoted expressions.
+            if ($this->isBlacklistedCharacter(mb_ord($character))) {
                 continue;
             }
 
@@ -95,21 +99,24 @@ class RequestParser
         return $context->stack;
     }
 
-    public function parseFilters(Request $request): array
+    /**
+     * @param array|null $rawFilters
+     */
+    public function parseFilters($rawFilters): array
     {
-        return $request->input(Apitizer::getFilterKey(), []);
+        return $rawFilters;
     }
 
-    public function parseSorts(Request $request): array
+    /**
+     * @param array|string $rawSorts
+     */
+    public function parseSorts($rawSorts): array
     {
         // Sort input examples:
         //   "name"
         //   "name.desc"
         //   ["first_name.desc", "last_name.asc"]
         //   first_name.desc,last_name.asc
-
-        $rawSorts = $request->input(Apitizer::getSortKey(), []);
-
         if (is_string($rawSorts)) {
             $rawSorts = explode(',', $rawSorts);
         }
@@ -145,5 +152,25 @@ class RequestParser
     protected function stringToArray(string $raw)
     {
         return preg_split('//u', $raw, null, PREG_SPLIT_NO_EMPTY);
+    }
+
+    protected function isBlacklistedCharacter(int $character)
+    {
+        // This is just a best-attempt, probably not good enough.
+        return
+            // Control characters
+            $character < 33
+
+            // Spacing: https://unicode-table.com/en/blocks/general-punctuation/
+            || ($character > 8191 && $character < 8208)
+
+            // Line separator, formatting, etc. Same category as above: "General punctuation"
+            || ($character > 8231 && $character < 8240)
+
+            // NO-BREAK SPACE
+            || $character === 160
+
+            // MEDIUM MATHEMATICAL SPACE
+            || $character === 8287;
     }
 }

@@ -4,7 +4,6 @@ namespace Apitizer\Concerns;
 
 use Apitizer\Types\Field;
 use Apitizer\Types\DateTimeField;
-use Apitizer\Types\FormattableField;
 use Apitizer\Transformers\CastValue;
 
 trait HasFields
@@ -36,7 +35,7 @@ trait HasFields
 
     protected function date(string $key): DateTimeField
     {
-        return (new DateTimeField($key, 'date'))
+        return (new DateTimeField($this, $key, 'date'))
             ->transform(new CastValue);
     }
 

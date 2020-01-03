@@ -5,9 +5,7 @@ namespace Apitizer\Controllers;
 use Apitizer\Apitizer;
 use Apitizer\Types\Apidoc;
 use Apitizer\Types\ApidocCollection;
-use Apitizer\QueryBuilder;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Config;
 
 class DocumentationController

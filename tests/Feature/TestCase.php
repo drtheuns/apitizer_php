@@ -2,12 +2,11 @@
 
 namespace Tests\Feature;
 
-use Tests\Support\BuildsRequests;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 
-class TestCase extends \Orchestra\Testbench\TestCase
+class TestCase extends \Tests\TestCase
 {
-    use BuildsRequests, DatabaseTransactions;
+    use DatabaseTransactions;
 
     protected function setUp(): void
     {

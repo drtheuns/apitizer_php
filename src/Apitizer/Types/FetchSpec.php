@@ -14,7 +14,7 @@ class FetchSpec
     /**
      * The fields that should be fetched from the datasource.
      *
-     * @var Array<Field|Association>
+     * @var Field[]|Association[]
      */
     protected $fields = [];
 

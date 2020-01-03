@@ -2,6 +2,8 @@
 
 namespace Apitizer\Filters;
 
+use Illuminate\Database\Eloquent\Builder;
+
 class LikeFilter
 {
     protected $fields;

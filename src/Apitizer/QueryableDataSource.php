@@ -15,7 +15,7 @@ use Apitizer\Types\FetchSpec;
 interface QueryableDataSource
 {
     /**
-     * TODO docs
+     * The function responsible for turning a fetch specification into response data.
      */
     public function fetchData(QueryBuilder $queryBuilder, FetchSpec $fetchSpec): iterable;
 }

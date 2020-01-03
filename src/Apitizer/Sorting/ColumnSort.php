@@ -7,9 +7,12 @@ use Apitizer\Types\Sort;
 
 class ColumnSort
 {
+    /**
+     * @var string
+     */
     protected $column;
 
-    public function __construct(string $column = null)
+    public function __construct(string $column)
     {
         $this->column = $column;
     }
