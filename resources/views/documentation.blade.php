@@ -378,7 +378,11 @@
   ]
 }</pre>
           When the <code>fields</code> parameter is left out, all the
-          fields and none of the associations will be returned.
+          fields and none of the associations will be returned. Similarly, if no
+          fields on an association are selected, all fields will be returned:
+          <pre>
+/users?fields=posts
+/users?fields=posts(comments)</pre>
         </div>
       </section>
       <section class="topic">
