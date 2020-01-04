@@ -2,6 +2,7 @@
 
 namespace Apitizer\Types;
 
+use Apitizer\Filters\AssociationFilter;
 use Apitizer\Support\TypeCaster;
 use Apitizer\Filters\LikeFilter;
 use Illuminate\Database\Eloquent\Builder;
@@ -58,6 +59,9 @@ class Filter extends Factory
     /**
      * Filter by field and operator.
      *
+     * If `expectMany` is used, the operator will be ignored in favour of a
+     * `whereIn` query.
+     *
      * @param string $field
      * @param string $operator
      *
@@ -70,6 +74,28 @@ class Filter extends Factory
                 ? $query->whereIn($field, $value)
                 : $query->where($field, $operator, $value);
         });
+
+        return $this;
+    }
+
+    /**
+     * Filter by association.
+     *
+     * Uses the AssociationFilter class.
+     *
+     * @param string $relation the name of the relation on the parent model (the
+     * model of the current query builder)
+     * @param null|string $key the key on the child model that should be
+     * filtered on. Defaults to the primary key of that model.
+     *
+     * @return self
+     */
+    public function byAssociation(string $relation, string $key = null): self
+    {
+        // Default to the model's primary key.
+        $key = $key ?? $this->queryBuilder->model()->getKeyName();
+
+        $this->handleUsing(new AssociationFilter($relation, $key));
 
         return $this;
     }
@@ -130,7 +156,7 @@ class Filter extends Factory
 
     public function setValue($value)
     {
-        $this->value = $value;
+        $this->value = $this->validateInput($value);
     }
 
     public function getInputType()

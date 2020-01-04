@@ -5,6 +5,8 @@ namespace Apitizer\Filters;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOneOrMany;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Arr;
 
 class AssociationFilter
 {
@@ -28,24 +30,49 @@ class AssociationFilter
         $this->column = $column;
     }
 
-    public function __invoke(Builder $query, array $values)
+    public function __invoke(Builder $query, $values)
     {
+        $values = Arr::wrap($values);
         $relation = $query->getModel()->{$this->relation}();
 
-        if (! $relation instanceof BelongsTo && ! $relation instanceof HasOneOrMany) {
-            return $this->inefficientFilter($query, $values);
+        if ($relation instanceof BelongsTo || $relation instanceof HasOneOrMany) {
+            $this->applyFilter($query, $values, $relation);
+        } else {
+            $this->inefficientFilter($query, $values);
         }
+    }
 
+    protected function applyFilter(Builder $query, array $values, Relation $relation)
+    {
         $table = $relation->getQuery()->getModel()->getTable();
-        $relatedKey = $relation instanceof HasOneOrMany
-                    ? $relation->getForeignKeyName()
-                    : $relation->getForeignKey();
+        $localJoinKey = $this->getLocalJoinKey($relation);
+        $foreignJoinKey = $this->getForeignJoinKey($relation);
 
-        $query->whereIn('id', function ($query) use ($values, $table, $relatedKey) {
+        $query->whereIn($localJoinKey, function ($query) use ($values, $table, $foreignJoinKey) {
             $query->from($table)
-                  ->select($relatedKey)
-                  ->whereIn($this->column, $values);
+                ->select($foreignJoinKey)
+                ->whereIn($this->column, $values);
         });
+    }
+
+    /**
+     * @param BelongsTo|HasOneOrMany $relation
+     */
+    protected function getLocalJoinKey(Relation $relation): string
+    {
+        return $relation instanceof BelongsTo
+            ? $relation->getForeignKeyName()
+            : $relation->getLocalKeyName();
+    }
+
+    /**
+     * @param BelongsTo|HasOneOrMany $relation
+     */
+    protected function getForeignJoinKey(Relation $relation): string
+    {
+        return $relation instanceof BelongsTo
+            ? $relation->getOwnerKeyName()
+            : $relation->getForeignKeyName();
     }
 
     protected function inefficientFilter(Builder $query, array $values)

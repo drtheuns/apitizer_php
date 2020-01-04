@@ -385,7 +385,7 @@ abstract class QueryBuilder
             try {
                 if (is_string($name) && isset($availableFilters[$name])) {
                     $filter = $availableFilters[$name];
-                    $filter->setValue($filter->validateInput($filterInput));
+                    $filter->setValue($filterInput);
                     $validatedFilters[$name] = $filter;
                 }
             } catch (\UnexpectedValueException $e) {
