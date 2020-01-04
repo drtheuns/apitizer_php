@@ -105,13 +105,13 @@
        width: 100%;
        height: 100%;
        position: fixed;
-       top: 0;
+       top: var(--menu-height);
        left: 0;
        bottom: 0;
        background: var(--sidebar-background-color);
        color: var(--sidebar-text-color);
        display: none;
-       z-index: 99;
+       z-index: 100;
      }
      .sidebar-header {
        position: absolute;
@@ -136,7 +136,7 @@
        overflow-y: auto;
        height: 100%;
        position: absolute;
-       top: var(--sidebar-header-height);
+       top: 0;
        left: 0;
        bottom: 0;
        width: 100%;
@@ -230,6 +230,7 @@
        z-index: 100;
        background-color: var(--menu-background-color);
        color: var(--menu-text-color);
+       box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
      }
      .menu-inner {
        display: flex;
@@ -295,6 +296,7 @@
        }
        .sidebar {
          width: var(--sidebar-width);
+         top: 0;
          display: initial;
        }
        .sidebar-header {
@@ -302,6 +304,9 @@
        }
        .menu {
          display: none;
+       }
+       .sidebar-content {
+         top: var(--sidebar-header-height);
        }
      }
     </style>
