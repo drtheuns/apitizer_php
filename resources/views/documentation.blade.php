@@ -28,8 +28,15 @@
        --text-color: #232323;
        --primary-color: #2d3748;
        --darken: rgba(0,0,0,0.1);
+       --darken-lg: rgba(0,0,0,0.3);
        --lighten: rgba(255,255,255,0.1);
        --lighten-lg: rgba(255,255,255,0.3);
+       --code-background-color: #eaeef4;
+       --code-text-color: var(--text-color);
+       --code-border-color: #cbd5e0;
+       --separator-color: #dedede;
+       --link-color: #1f5688;
+       --link-hover-background-color: var(--darken);
 
        --sidebar-width: 300px;
        --sidebar-background-color: var(--primary-color);
@@ -47,7 +54,15 @@
        --menu-text-color: var(--sidebar-text-color);
      }
      .dark-mode {
-       --content-background-color: black;
+       --text-color: white;
+       --code-text-color: #F8F8F2;
+       --code-background-color: var(--darken-lg);
+       --code-border-color: var(--darken-lg);
+       --separator-color: var(--lighten-lg);
+       --link-color: #2da4c6;
+       --link-hover-background-color: var(--lighten-lg);
+
+       --content-background-color: #2c2c2c;
      }
 
      * {
@@ -58,6 +73,9 @@
      *, .font-sans {
        font-family: sans serif;
      }
+     body {
+       background: var(--content-background-color);
+     }
      code, pre, .font-monospaced {
        font-family: monospace;
      }
@@ -67,10 +85,21 @@
      pre {
        overflow: auto;
        padding: 5px;
-       border: 1px solid #cbd5e0;
+       border: 1px solid var(--code-border-color);
      }
      code, pre {
-       background: #eaeef4;
+       background: var(--code-background-color);
+       color: var(--code-text-color);
+     }
+     .content a.link {
+       text-decoration: none;
+       color: var(--link-color);
+       padding: 5px 2px;
+       font-weight: 600;
+       border-bottom: 1px solid var(--link-color);
+     }
+     a:hover {
+       background-color: var(--link-hover-background-color);
      }
      .sidebar {
        width: 100%;
@@ -80,7 +109,6 @@
        left: 0;
        bottom: 0;
        background: var(--sidebar-background-color);
-       border-right: 1px solid #DBDBDB;
        color: var(--sidebar-text-color);
        display: none;
        z-index: 99;
@@ -95,13 +123,14 @@
        display: none;
      }
      .sidebar-title {
-       padding: 20px;
+       padding: 0 20px;
        display: flex;
        flex-direction: row;
        align-items: center;
        justify-content: space-between;
        font-weight: 700;
        font-size: 16px;
+       height: 100%;
      }
      .sidebar-content {
        overflow-y: auto;
@@ -139,11 +168,10 @@
        right: 0;
        left: 0;
        bottom: 0;
-       overflow: hide;
-       background: var(--content-background-color);
        box-sizing: border-box;
        outline: none;
        max-width: 100vw;
+       color: var(--text-color);
      }
      .topic {
        width: 100%;
@@ -160,7 +188,7 @@
        font-size: 24px;
      }
      .content > * ~ * {
-       border-top: 2px solid #dedede;
+       border-top: 2px solid var(--separator-color);
      }
      .attributes-title, assoc-title {
        font-size: 18px;
@@ -172,7 +200,7 @@
        font-family: monospace;
      }
      .attribute {
-       border-top: 1px solid #dedede;
+       border-top: 1px solid var(--separator-color);
        padding: 10px 0;
        font-size: 14px;
      }
@@ -215,6 +243,12 @@
        font-size: 16px;
        padding-left: 20px;
      }
+     .menu-right {
+       display: flex;
+       flex-direction: row;
+       align-items: center;
+       height: 100%;
+     }
      .menu-open svg {
        width: 20px;
        fill: currentColor;
@@ -223,6 +257,7 @@
      .menu-open {
        padding: 0 24px;
        height: 100%;
+       margin-left: 20px;
      }
      .menu-open:hover {
        background-color: var(--lighten);
@@ -240,6 +275,17 @@
        height: 100px;
        visibility: hidden;
        pointer-events: none;
+     }
+     .dark-mode-toggle {
+       color: var(--sidebar-text-color);
+       font-size: 12px;
+       background-color: var(--lighten);
+       padding: 10px 10px;
+       border-radius: 5px;
+     }
+     .dark-mode-toggle:hover {
+       cursor: pointer;
+       background-color: var(--lighten-lg);
      }
 
      @media (min-width: 768px) {
@@ -264,16 +310,19 @@
     <header class="menu">
       <div class="menu-inner">
         <span class="menu-title">{{ $appName }}</span>
-        <button class="menu-open" aria-label="show navigation menu" id="menu-toggle">
-          <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 20 20"><path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z"/></svg>
-        </button>
+        <div class="menu-right">
+          <button class="dark-mode-toggle">dark mode</button>
+          <button class="menu-open" aria-label="show navigation menu" id="menu-toggle">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 20 20"><path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z"/></svg>
+          </button>
+        </div>
       </div>
     </header>
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <div class="sidebar-title">
           <span>{{ $appName }}</span>
-          <button class="dark-mode-toggle">X</button>
+          <button class="dark-mode-toggle">dark mode</button>
         </div>
       </div>
       <nav class="sidebar-content" role="navigation">
@@ -369,6 +418,20 @@
          document.getElementById("sidebar").classList.remove('open');
        }
      });
+
+     document.querySelectorAll(".dark-mode-toggle").forEach((e) => {
+       e.addEventListener("click", function (e) {
+         document.body.classList.toggle("dark-mode");
+
+         if (window.localStorage) {
+           window.localStorage.setItem("dark-mode", document.body.classList.contains("dark-mode"));
+         }
+       });
+     })
+
+     if (window.localStorage && window.localStorage.getItem("dark-mode") === "true") {
+       document.body.classList.add("dark-mode");
+     }
     </script>
   </body>
 </html>

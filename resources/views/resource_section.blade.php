@@ -40,7 +40,7 @@
           @foreach ($doc->getAssociations() as $assoc)
             <li class="attribute">
               <span class="attribute-name">{{ $assoc->getName() }}:</span>
-              <a class="attribute-type" href="#{{ $docs->findAssociationType($assoc)->getName() }}">
+              <a class="attribute-type link" href="#{{ $docs->findAssociationType($assoc)->getName() }}">
                 {{ $docs->printAssociationType($assoc) }}
               </a>
               @if ($assoc->getDescription())
