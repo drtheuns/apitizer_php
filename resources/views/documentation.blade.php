@@ -272,8 +272,8 @@
      h2::before {
        display: block;
        content: " ";
-       margin-top: -100px;
-       height: 100px;
+       margin-top: -50px;
+       height: 50px;
        visibility: hidden;
        pointer-events: none;
      }
@@ -307,6 +307,10 @@
        }
        .sidebar-content {
          top: var(--sidebar-header-height);
+       }
+       h2::before {
+         margin-top: -100px;
+         height: 100px;
        }
      }
     </style>

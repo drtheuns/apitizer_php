@@ -1,6 +1,6 @@
 <section class="topic">
   <div class="topic-content">
-    <h2 class="topic-title anchorable" id="{{ $doc->getName() }}">
+    <h2 class="topic-title" id="{{ $doc->getName() }}">
       {{ $doc->getName() }}
     </h2>
     @if ($doc->getDescription())
