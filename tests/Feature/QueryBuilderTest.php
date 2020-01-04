@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use Tests\Feature\Builders\PostBuilder;
 use Tests\Feature\Builders\UserBuilder;
 use Tests\Feature\Models\User;
 use Tests\Feature\Models\Post;
@@ -126,6 +127,30 @@ class QueryBuilderTest extends TestCase
         $this->assertEquals([
             [
                 'id' => $users->first()->id,
+            ]
+        ], $result);
+    }
+
+    /** @test */
+    public function selecting_an_association_without_specifying_fields_fetches_all_fields()
+    {
+        $user = factory(User::class)->create();
+        $post = factory(Post::class)->create(['author_id' => $user->id]);
+        $comment = factory(Comment::class)->make(['author_id' => $user->id]);
+        $post->comments()->save($comment);
+
+        $request = $this->buildRequest(['fields' => 'id,comments']);
+        $result = PostBuilder::make($request)->all();
+
+        $this->assertEquals([
+            [
+                'id' => $post->id,
+                'comments' => [
+                    [
+                        'id' => $comment->id,
+                        'body' => $comment->body,
+                    ]
+                ]
             ]
         ], $result);
     }

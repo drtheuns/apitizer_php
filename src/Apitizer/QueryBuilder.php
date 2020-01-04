@@ -240,11 +240,7 @@ abstract class QueryBuilder
 
         if (empty($fetchSpec->getFields())) {
             // If nothing (valid) is selected, return all non-association fields.
-            $fetchSpec->setFields(
-                array_filter($this->getFields(), function ($field) {
-                    return $field instanceof Field;
-                })
-            );
+            $fetchSpec->setFields($this->getOnlyFields());
         }
 
         return $fetchSpec;
@@ -316,9 +312,9 @@ abstract class QueryBuilder
     protected function validateRequestInput(RequestInput $unvalidatedInput): FetchSpec
     {
         $validated = new FetchSpec(
-            $this->validateFields($unvalidatedInput->fields, $this->getFields()),
-            $this->validateSorting($unvalidatedInput->sorts, $this->getSorts()),
-            $this->validateFilters($unvalidatedInput->filters, $this->getFilters()),
+            $this->getValidatedFields($unvalidatedInput->fields, $this->getFields()),
+            $this->getValidatedSorting($unvalidatedInput->sorts, $this->getSorts()),
+            $this->getValidatedFilters($unvalidatedInput->filters, $this->getFilters()),
         );
 
         return $validated;
@@ -327,9 +323,9 @@ abstract class QueryBuilder
     /**
      * Validate the fields that were requested by the client.
      *
-     * @return Map<string, Field|Association>
+     * @return [string => Field|Association]
      */
-    protected function validateFields($unvalidatedFields, $availableFields): array
+    protected function getValidatedFields(array $unvalidatedFields, array $availableFields): array
     {
         $validatedFields = [];
 
@@ -342,7 +338,7 @@ abstract class QueryBuilder
 
                 // Validate the fields recursively
                 $association->setFields(
-                    $this->validateFields($field->fields, $association->getQueryBuilder()->getFields())
+                    $this->getValidatedFields($field->fields, $association->getQueryBuilder()->getFields())
                 );
                 $validatedFields[] = $association;
 
@@ -350,6 +346,15 @@ abstract class QueryBuilder
             }
 
             if (is_string($field) && isset($availableFields[$field])) {
+                $fieldInstance = $availableFields[$field];
+
+                // An association was selected without specifying any fields, e.g.:
+                // /posts?fields=comments
+                // .. so we select everything from that query builder.
+                if ($fieldInstance instanceof Association) {
+                    $fieldInstance->setFields($fieldInstance->getQueryBuilder()->getOnlyFields());
+                }
+
                 $validatedFields[] = $availableFields[$field];
             }
         }
@@ -357,7 +362,7 @@ abstract class QueryBuilder
         return $validatedFields;
     }
 
-    protected function validateSorting(array $selectedSorts, array $availableSorts): array
+    protected function getValidatedSorting(array $selectedSorts, array $availableSorts): array
     {
         $validatedSorts = [];
 
@@ -372,7 +377,7 @@ abstract class QueryBuilder
         return $validatedSorts;
     }
 
-    protected function validateFilters(array $selectedFilters, array $availableFilters): array
+    protected function getValidatedFilters(array $selectedFilters, array $availableFilters): array
     {
         $validatedFilters = [];
 
@@ -495,5 +500,15 @@ abstract class QueryBuilder
         }
 
         return null;
+    }
+
+    /**
+     * @return Field[]
+     */
+    public function getOnlyFields(): array
+    {
+        return array_filter($this->getFields(), function ($field) {
+            return $field instanceof Field;
+        });
     }
 }
