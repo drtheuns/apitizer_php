@@ -382,7 +382,24 @@
           fields on an association are selected, all fields will be returned:
           <pre>
 /users?fields=posts
-/users?fields=posts(comments)</pre>
+{
+  "posts": [
+    { ... },
+  ]
+}
+
+/users?fields=id,posts(comments)
+{
+  "id": 1,
+  "posts": [
+    {
+      "comments": [
+        { ... },
+      ]
+    }
+  ]
+}
+          </pre>
         </div>
       </section>
       <section class="topic">
