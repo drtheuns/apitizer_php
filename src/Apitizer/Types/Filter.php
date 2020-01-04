@@ -58,8 +58,6 @@ class Filter extends Factory
     /**
      * Filter by field and operator.
      *
-     * When this is method is used, expectMany cannot be used.
-     *
      * @param string $field
      * @param string $operator
      *
@@ -67,10 +65,10 @@ class Filter extends Factory
      */
     public function byField(string $field, string $operator = '='): self
     {
-        $this->expectArray = false;
-
         $this->handleUsing(function (Builder $query, $value) use ($field, $operator) {
-            return $query->where($field, $operator, $value);
+            return $this->expectArray
+                ? $query->whereIn($field, $value)
+                : $query->where($field, $operator, $value);
         });
 
         return $this;

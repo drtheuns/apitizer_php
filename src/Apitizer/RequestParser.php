@@ -47,7 +47,6 @@ class RequestParser
         $context = new Context();
 
         // TODO: Add line/column numbers for debugging
-        // TODO: Ignore whitespace in non-quoted fields.
         foreach ($this->stringToArray($rawFields) as $character) {
             if ($context->isQuoted && $character !== '"') {
                 $context->accumulator .= $character;
