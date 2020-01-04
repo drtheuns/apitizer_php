@@ -3,6 +3,7 @@
 namespace Apitizer\Concerns;
 
 use Apitizer\Types\Field;
+use Apitizer\Types\EnumField;
 use Apitizer\Types\DateTimeField;
 use Apitizer\Transformers\CastValue;
 
@@ -42,6 +43,12 @@ trait HasFields
     protected function datetime(string $key): DateTimeField
     {
         return (new DateTimeField($this, $key, 'datetime'))
+            ->transform(new CastValue);
+    }
+
+    protected function enum(string $key, array $enum, string $type = 'string'): EnumField
+    {
+        return (new EnumField($this, $key, $enum, $type))
             ->transform(new CastValue);
     }
 }

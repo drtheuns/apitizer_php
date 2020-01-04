@@ -25,7 +25,7 @@ class ApidocCollection extends Collection
             $name = $apidoc->getName();
 
             return $assoc->returnsCollection()
-                ? $name . '[]'
+                ? "array of $name"
                 : $name;
         }
 

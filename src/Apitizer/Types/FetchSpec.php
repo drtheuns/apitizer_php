@@ -2,9 +2,6 @@
 
 namespace Apitizer\Types;
 
-use Apitizer\Types\Field;
-use Apitizer\Types\Association;
-
 /**
  * The fetch specification holds all the validated information that was
  * requested by the client.
@@ -20,11 +17,15 @@ class FetchSpec
 
     /**
      * The sorting methods that should be applied.
+     *
+     * @var Sort[]
      */
     protected $sorts = [];
 
     /**
      * The filters that should be applied to the datasource.
+     *
+     * @var Filter[]
      */
     protected $filters = [];
 

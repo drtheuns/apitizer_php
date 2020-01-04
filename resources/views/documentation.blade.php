@@ -14,262 +14,294 @@
        background: none;
        border: none;
      }
+     ul {
+       list-style: none;
+       margin: 0;
+       padding: 0;
+     }
+     p {
+       margin: 0;
+     }
 
      :root {
-       --text-size: 1.0rem;
-       --text-color: white;
+       --text-size: 14px;
+       --text-color: #232323;
        --primary-color: #2d3748;
-       --link-hover-color: #4a5568;
-       --permalink-color: #666;
-       --table-row-alternating-color: #EEEEEE;
-       --table-row-hover-color: #CCCCCC;
-       --code-background-color: #e2e8f0;
-       --code-border-color: #cbd5e0;
+       --darken: rgba(0,0,0,0.1);
+       --lighten: rgba(255,255,255,0.1);
+       --lighten-lg: rgba(255,255,255,0.3);
+
+       --sidebar-width: 300px;
+       --sidebar-background-color: var(--primary-color);
+       --sidebar-text-color: white;
+       --sidebar-item-hover-color: var(--lighten);
+       --sidebar-header-height: 64px;
+       --sidebar-header-color: var(--darken);
+
+       --content-background-color: #fefefe;
+       --topic-max-width: calc(768px + var(--topic-padding) + var(--topic-padding));
+       --topic-padding: 5vw;
+
+       --menu-height: 50px;
+       --menu-background-color: var(--sidebar-background-color);
+       --menu-text-color: var(--sidebar-text-color);
      }
-     @media (min-width: 640px) {
-      :root {
-        --text-size: 1.1rem;
-      }
+     .dark-mode {
+       --content-background-color: black;
      }
 
      * {
        font-size: var(--text-size);
        line-height: 1.5;
+       box-sizing: border-box;
      }
-
-     .font-monospaced, code, pre {
-       font-family: Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-     }
-
      *, .font-sans {
-       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+       font-family: sans serif;
      }
-     body {
-       margin: 0;
-       height: 100vh;
-     }
-     ol, ul {
-       list-style: none;
-       margin: 0;
-       padding: 0;
-     }
-     .wrapper {
-       min-height: 100%;
-       display: flex;
-       flex-direction: column;
-     }
-     .sidebar {
-       background: var(--primary-color);
-       padding: 0 2rem;
-       min-height: 100%;
-       display: flex;
-       flex-direction: column;
-       color: var(--text-color);
-       overflow: auto;
-       position: fixed;
-       left: 0;
-       right: 0;
-       display: none;
-       margin-top: 56px;
-     }
-     .content-wrapper {
-       margin-left: 0;
-     }
-     .content{
-       display: flex;
-       flex-direction: column;
-       padding: 1rem 1rem;
-       width: auto;
-       margin: 0 auto;
-     }
-     .sidebar .title {
-       display: block;
-       justify-content: center;
-       font-weight: 700;
-       padding: 1rem 0;
-       font-size: 1.1rem;
-       text-align: center;
-       text-decoration: none;
-       color: var(--text-color);
-     }
-     .link {
-       margin-bottom: 0.5rem;
-       padding: 0.5rem 0.75rem;
-       display: block;
-       border-radius: .25rem;
-       color: var(--text-color);
-       text-decoration: none;
-     }
-     .link:hover {
-       background-color: var(--link-hover-color);
-     }
-     h1 {
-       font-size: 2rem;
-       text-align: center;
-     }
-     h2 {
-       border-bottom: 3px solid var(--primary-color);
-       margin-bottom: 2rem;
-       padding-bottom: 1rem;
-       font-size: 1.7rem;
-     }
-     h3.section-title {
-       font-size: 1.5rem;
-       margin-top: 0;
-     }
-     .icon-link {
-       opacity: 0;
-       transition: opacity .2s ease-in-out;
-       display: inline-block;
-       text-decoration: none;
-     }
-     .icon-link svg {
-       color: var(--permalink-color);
-       fill: currentColor;
-       width: 1rem;
-     }
-     .icon-link:hover {
-       opacity: 1;
-     }
-     h3 .icon-link svg {
-       width: 1.2rem;
-     }
-     table {
-       table-layout: auto;
-       border-collapse: collapse;
-       width: 100%;
-     }
-     table thead tr th, table tbody tr td {
-       padding: .5rem 1rem;
-       text-align: left;
-       font-family: inherit;
-     }
-     table thead tr th {
-       font-weight: 600;
-       text-transform: uppercase;
-       font-size: 0.7rem;
-       border-bottom: 2px solid var(--primary-color);
-     }
-     table tbody tr:nth-child(even) {
-       background: var(--table-row-alternating-color);
-     }
-     table tbody tr:hover {
-       background: var(--table-row-hover-color);
+     code, pre, .font-monospaced {
+       font-family: monospace;
      }
      code {
-       padding: 0.25rem 0.4rem;
+       padding: 2px 5px;
      }
      pre {
        overflow: auto;
-       padding: .5rem;
+       padding: 5px;
+       border: 1px solid #cbd5e0;
      }
      code, pre {
-       background: #e2e8f0;
-       border: 2px solid #cbd5e0;
+       background: #eaeef4;
      }
-     .resource {
-       margin-bottom: 3rem;
+     .sidebar {
+       width: 100%;
+       height: 100%;
+       position: fixed;
+       top: 0;
+       left: 0;
+       bottom: 0;
+       background: var(--sidebar-background-color);
+       border-right: 1px solid #DBDBDB;
+       color: var(--sidebar-text-color);
+       display: none;
+       z-index: 99;
+     }
+     .sidebar-header {
+       position: absolute;
+       top: 0;
+       left: 0;
+       height: var(--sidebar-header-height);
+       width: 100%;
+       background: var(--sidebar-header-color);
+       display: none;
+     }
+     .sidebar-title {
+       padding: 20px;
+       display: flex;
+       flex-direction: row;
+       align-items: center;
+       justify-content: space-between;
+       font-weight: 700;
+       font-size: 16px;
+     }
+     .sidebar-content {
+       overflow-y: auto;
+       height: 100%;
+       position: absolute;
+       top: var(--sidebar-header-height);
+       left: 0;
+       bottom: 0;
+       width: 100%;
+       padding-top: 20px;
+     }
+     .sidebar-items {
+       padding-bottom: 12px;
+     }
+     .sidebar-nav-item {
+       margin-top: 2px;
+       padding: 4px 20px;
+       text-decoration: none;
+       display: block;
+       cursor: pointer;
+       color: inherit;
+     }
+     .sidebar-nav-item:hover {
+       background-color: var(--sidebar-item-hover-color);
+     }
+     .sidebar-nav-heading {
+       font-weight: 700;
+       margin-top: 20px;
+       padding: 4px 20px;
+       display: block;
+     }
+     .content {
+       position: absolute;
+       top: var(--menu-height);
+       right: 0;
+       left: 0;
+       bottom: 0;
+       overflow: hide;
+       background: var(--content-background-color);
+       box-sizing: border-box;
+       outline: none;
+       max-width: 100vw;
+     }
+     .topic {
+       width: 100%;
+       display: flex;
+       flex-direction: column;
+       align-items: center;
+     }
+     .topic-content {
+       width: 100%;
+       max-width: var(--topic-max-width);
+       padding: var(--topic-padding);
+     }
+     .topic-title {
+       font-size: 24px;
+     }
+     .content > * ~ * {
+       border-top: 2px solid #dedede;
+     }
+     .attributes-title, assoc-title {
+       font-size: 18px;
+     }
+     .attribute-name, .assoc-name {
+       font-weight: 700;
+     }
+     .attribute-type, .attribute-name {
+       font-family: monospace;
+     }
+     .attribute {
+       border-top: 1px solid #dedede;
+       padding: 10px 0;
+       font-size: 14px;
+     }
+     .attribute-short {
+       display: flex;
+       flex-direction: row;
+       flex-wrap: wrap;
+       justify-content: space-between;
+       flex: 1 0 auto;
+       margin-top: -15px;
+     }
+     .attribute-short > div {
+       margin-top: 15px;
+     }
+     .attribute-description {
+       margin-top: 10px;
+     }
+     .topic-content > .topic-section ~ .topic-section {
+       margin-top: 40px;
      }
      .menu {
-       background: var(--primary-color);
-       color: var(--text-color);
-       position: sticky;
+       position: fixed;
        top: 0;
        left: 0;
        right: 0;
+       height: var(--menu-height);
+       z-index: 100;
+       background-color: var(--menu-background-color);
+       color: var(--menu-text-color);
      }
-     .menu .inner {
+     .menu-inner {
        display: flex;
        flex-direction: row;
        justify-content: space-between;
-       padding: 0 0 0 2rem;
+       height: 100%;
+       align-items: center;
      }
-     .menu-open {
-       padding: 0 1.5rem;
+     .menu-title {
+       font-weight: 700;
+       font-size: 16px;
+       padding-left: 20px;
      }
      .menu-open svg {
-       width: 1.2rem;
+       width: 20px;
        fill: currentColor;
-       color: var(--text-color);
+       color: var(--menu-text-color);
+     }
+     .menu-open {
+       padding: 0 24px;
+       height: 100%;
      }
      .menu-open:hover {
-       background-color: var(--link-hover-color);
-       cursor: pointer;
+       background-color: var(--lighten);
      }
-     .overflow {
-       overflow: auto;
+     .menu-open:focus {
+       outline: 0;
      }
      .open {
        display: initial;
      }
-     @media (min-width: 640px) {
-      .content-wrapper {
-        margin-left: 16rem;
-      }
-      .content {
-        padding: 2rem 2rem;
-        width: 48rem;
-      }
-      .menu {
-        display: none;
-      }
-      .sidebar {
-        display: initial;
-        width: 16rem;
-        padding: 2rem 0.5rem 2rem 0.5rem;
-        margin-top: 0;
-      }
+     h2::before {
+       display: block;
+       content: " ";
+       margin-top: -100px;
+       height: 100px;
+       visibility: hidden;
+       pointer-events: none;
+     }
+
+     @media (min-width: 768px) {
+       .content {
+         top: 0;
+         left: var(--sidebar-width);
+       }
+       .sidebar {
+         width: var(--sidebar-width);
+         display: initial;
+       }
+       .sidebar-header {
+         display: initial;
+       }
+       .menu {
+         display: none;
+       }
      }
     </style>
   </head>
-  <body>
-    <div class="wrapper">
-      <header class="menu">
-        <div class="inner">
-          <p>
-            {{ $appName }}
-          </p>
-          <button class="menu-open" aria-label="Show navigation menu" id="menu-toggle">
-            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z"/></svg>
-          </button>
+  <body class="">
+    <header class="menu">
+      <div class="menu-inner">
+        <span class="menu-title">{{ $appName }}</span>
+        <button class="menu-open" aria-label="show navigation menu" id="menu-toggle">
+          <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 20 20"><path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z"/></svg>
+        </button>
+      </div>
+    </header>
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-title">
+          <span>{{ $appName }}</span>
+          <button class="dark-mode-toggle">X</button>
         </div>
-      </header>
-      <nav class="sidebar" id="sidebar">
-        <ul class="resources">
-          <a href="#usage" class="title">Usage</a>
-          <li><a class="link" href="#fields">Fields</a></li>
-          <li><a class="link" href="#filtering">Filtering</a></li>
-          <li><a class="link" href="#sorting">Sorting</a></li>
-          <a href="#resources" class="title">Resources</a>
+      </div>
+      <nav class="sidebar-content" role="navigation">
+        <ul class="sidebar-items">
+          <li><a href="#fields" class="sidebar-nav-item">Fields</a></li>
+          <li><a href="#filtering" class="sidebar-nav-item">Filtering</a></li>
+          <li><a href="#sorting" class="sidebar-nav-item">Sorting</a></li>
+          <span class="sidebar-nav-heading">Resources</span>
           @foreach ($docs as $doc)
             <li>
-              <a class="link" href="#{{ $doc->getName() }}">{{ $doc->getName() }}</a>
+              <a class="sidebar-nav-item" href="#{{ $doc->getName() }}">{{ $doc->getName() }}</a>
             </li>
           @endforeach
         </ul>
       </nav>
-      <main class="content-wrapper">
-        <div class="content">
-          <h1>{{ $appName }} - API documentation</h1>
-          <section>
-            <h2><a id="usage"></a>Usage</h2>
-            <p>
-              This section describes how to consume this API. There are a couple
-              concepts that give the client more control over the response they
-              receive from the server, such as selecting specific fields —
-              including related models, applying filters, and sorting. These
-              functions are outlined in the sections below.
-            </p>
-            <section class="resource">
-              @include('apitizer::section_link', ['heading' => 3, 'title' => 'Fields', 'anchor' => 'fields'])
-              <p>
-                Specific fields can be requested by using the <code>{{ $fieldKey
-                                                                    }}</code> query parameter.
-                The fields and associations that can be requested are
-                documentated for each resource. The syntax (and response) look
-                like this:
-              </p>
-              <pre>
+    </aside>
+    <main class="content" tabindex="0">
+      <section class="topic">
+        <div class="topic-content">
+          <h2 id="fields" class="topic-title">Fields</h2>
+          <p>
+            Specific fields can be requested by using the <code>{{ $fieldKey
+                                                                }}</code> query parameter.
+            The fields and associations that can be requested are
+            documentated for each resource. The syntax (and response) look
+            like this:
+          </p>
+          <pre>
 /users?{{ $fieldKey }}=id,name,posts(id,title,comments(id,body))
 {
   "id": 1,
@@ -287,153 +319,55 @@
     }
   ]
 }</pre>
-              When the <code>fields</code> parameter is left out, all the
-              fields and no associations will be returned.
-            </section>
-            <section class="resource">
-              @include('apitizer::section_link', ['heading' => 3, 'title' => 'Filtering', 'anchor' => 'filtering'])
-              <p>
-                Filtering can be applied to index calls. The available filters
-                and how they work differ per filter and should be documented for
-                each filter. Applying a filter can be done as follows:
-                <pre>
+          When the <code>fields</code> parameter is left out, all the
+          fields and none of the associations will be returned.
+        </div>
+      </section>
+      <section class="topic">
+        <div class="topic-content">
+          <h2 id="filtering" class="topic-title">Filtering</h2>
+          <p>
+            Filtering can be applied to index calls. The available filters
+            and how they work differ per filter and should be documented for
+            each filter. Applying a filter can be done as follows:
+            <pre>
 /posts?{{ $filterKey }}[search]=api&{{ $filterKey }}[published_after]=2019-06-01</pre>
-              </p>
-            </section>
-            <section class="resource">
-              @include('apitizer::section_link', ['heading' => 3, 'title' => 'Sorting', 'anchor' => 'sorting'])
-              <p>
-                Sorting allows the response to be sorted either ascending or
-                descending. Similar to filtering, sorting differs from resource
-                to resource and the documentation should therefore be consulted
-                to find the available sorting keys. Syntax is as follows:
-                <pre>
+          </p>
+        </div>
+      </section>
+      <section class="topic">
+        <div class="topic-content">
+          <h2 id="sorting" class="topic-title">Sorting</h2>
+          <p>
+            Sorting allows the response to be sorted either ascending or
+            descending. Similar to filtering, sorting differs from resource
+            to resource and the documentation should therefore be consulted
+            to find the available sorting keys. Syntax is as follows:
+            <pre>
 /posts?sort=name
 /posts?sort=name.asc
-/posts?sort=published_at.desc</pre>
-                The first two examples are the same, as ascending order is the
-                default ordering method.
-              </p>
-            </section>
-          </section>
-
-          <h2><a id="resources"></a>Resources</h2>
-          @foreach ($docs as $doc)
-            <section class="resource">
-              @include('apitizer::section_link', ['heading' => 3, 'title' => $doc->getName(), 'anchor' => $doc->getName()])
-              @if($doc->getDescription())
-                <p>{{ $doc->getDescription() }}</p>
-              @endif
-              <section>
-                @include('apitizer::section_link', ['heading' => 4, 'title' => 'Fields', 'anchor' => $doc->getAnchorName('fields')])
-                <div class="overflow">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Name</th>
-                        <th>Type</th>
-                        <th>Nullable?</th>
-                        <th>Description</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      @foreach ($doc->getFields() as $field)
-                        <tr class="font-monospaced">
-                          <td>{{ $field->getName() }}</td>
-                          <td>{{ $field->getType() }}</td>
-                          <td>{{ $field->isNullable() ? 'Yes' : 'No' }}</td>
-                          <td class="font-sans">{{ $field->getDescription() }}</td>
-                        </tr>
-                      @endforeach
-                    </tbody>
-                  </table>
-                </div>
-              </section>
-              @if($doc->hasAssociations())
-                <section>
-                  @include('apitizer::section_link', ['heading' => 4, 'title' => 'Associations', 'anchor' => $doc->getAnchorName('associations')])
-                  <div class="overflow">
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Name</th>
-                          <th>Type</th>
-                          <th>Description</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        @foreach ($doc->getAssociations() as $assoc)
-                          <tr class="font-monospaced">
-                            <td>{{ $assoc->getName() }}</td>
-                            <td>
-                              <a href="#{{ $docs->findAssociationType($assoc)->getName() }}">
-                                {{ $docs->printAssociationType($assoc) }}
-                              </a>
-                            </td>
-                            <td class="font-sans">{{ $assoc->getDescription() }}</td>
-                          </tr>
-                        @endforeach
-                      </tbody>
-                    </table>
-                  </div>
-                </section>
-              @endif
-              @if($doc->hasFilters())
-                <section>
-                  @include('apitizer::section_link', ['heading' => 4, 'title' => 'Filters', 'anchor' => $doc->getAnchorName('filters')])
-                  <div class="overflow">
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Name</th>
-                          <th>Input type</th>
-                          <th>Description</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        @foreach ($doc->getFilters() as $filter)
-                          <tr class="font-monospaced">
-                            <td>{{ $filter->getName() }}</td>
-                            <td>{{ $filter->getInputType() }}</td>
-                            <td class="font-sans">{{ $filter->getDescription() }}</td>
-                          </tr>
-                        @endforeach
-                      </tbody>
-                    </table>
-                  </div>
-                </section>
-              @endif
-              @if($doc->hasSorts())
-                <section>
-                  @include('apitizer::section_link', ['heading' => 4, 'title' => 'Sorting', 'anchor' => $doc->getAnchorName('sorting')])
-                  <div class="overflow">
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Name</th>
-                          <th>Description</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        @foreach($doc->getSorts() as $sort)
-                          <tr class="font-monospaced">
-                            <td>{{ $sort->getName() }}</td>
-                            <td class="font-sans">{{ $sort->getDescription() }}</td>
-                          </tr>
-                        @endforeach
-                      </tbody>
-                    </table>
-                  </div>
-                </section>
-              @endif
-            </section>
-          @endforeach
+/users?sort=first_name.desc,last_name.asc
+/users?sort[]=first_name.desc&sort[]=last_name.asc</pre>
+            The first two examples are the same, as ascending order is the
+            default ordering method. The last two examples are also the same,
+            but uses an array of sorting, rather than a single string.
+          </p>
         </div>
-      </main>
-    </div>
+      </section>
+      </section>
+      @foreach ($docs as $doc)
+        @include('apitizer::resource_section', ['doc' => $doc])
+      @endforeach
+    </main>
     <script>
      document.getElementById("menu-toggle").addEventListener("click", function (e) {
        document.getElementById("sidebar").classList.toggle('open');
+     });
+
+     document.getElementById("sidebar").addEventListener("click", function (e) {
+       if (e.target.tagName.toLowerCase() === "a") {
+         document.getElementById("sidebar").classList.remove('open');
+       }
      });
     </script>
   </body>

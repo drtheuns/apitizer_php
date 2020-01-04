@@ -2,7 +2,6 @@
 
 namespace Apitizer\Types;
 
-use Apitizer\QueryBuilder;
 use Apitizer\Support\TypeCaster;
 use Apitizer\Filters\LikeFilter;
 use Illuminate\Database\Eloquent\Builder;
@@ -118,7 +117,7 @@ class Filter extends Factory
             throw new \UnexpectedValueException();
         }
 
-        return TypeCaster::cast($value, $this->type);
+        return TypeCaster::cast($input, $this->type);
     }
 
     public function getHandler()
@@ -139,7 +138,7 @@ class Filter extends Factory
     public function getInputType()
     {
         return $this->expectArray
-            ? $this->type . '[]'
+            ? "array of {$this->type}"
             : $this->type;
     }
 }
