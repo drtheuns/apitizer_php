@@ -12,6 +12,8 @@ use Apitizer\Types\Apidoc;
 use Apitizer\Types\Sort;
 use Illuminate\Http\Request;
 use ArrayAccess;
+use Illuminate\Contracts\Pagination\Paginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 abstract class QueryBuilder
 {
@@ -28,9 +30,9 @@ abstract class QueryBuilder
     protected $parser;
 
     /**
-     * @var QueryableDataSource
+     * @var QueryInterpreter
      */
-    protected $queryable;
+    protected $queryInterpreter;
 
     /**
      * The result of the fields() callback.
@@ -97,7 +99,7 @@ abstract class QueryBuilder
     abstract public function filters(): array;
 
     /**
-     * Get the source that can be used by the queryable.
+     * Get the source that can be used by the query interpreter.
      *
      * In the case of Eloquent, this function should return a query or model
      * object, whereas for a different adapter you will want to return a
@@ -118,11 +120,11 @@ abstract class QueryBuilder
 
     public function __construct(
         Request $request,
-        QueryableDataSource $queryable = null,
+        QueryInterpreter $queryInterpreter = null,
         RequestParser $parser = null
     ) {
         $this->request = $request;
-        $this->queryable = $queryable ?? new EloquentAdapter();
+        $this->queryInterpreter = $queryInterpreter ?? new QueryInterpreter();
         $this->parser = $parser ?? new RequestParser();
     }
 
@@ -131,10 +133,10 @@ abstract class QueryBuilder
      */
     public static function make(
         Request $request,
-        QueryableDataSource $queryable = null,
+        QueryInterpreter $queryInterpreter = null,
         RequestParser $parser = null
     ) {
-        return (new static($request, $queryable, $parser));
+        return (new static($request, $queryInterpreter, $parser));
     }
 
     /**
@@ -159,7 +161,7 @@ abstract class QueryBuilder
         $builderInstance = $this->getParentByClassName($builder);
 
         if (! $builderInstance) {
-            $builderInstance = new $builder($this->request, $this->queryable, $this->parser);
+            $builderInstance = new $builder($this->request, $this->queryInterpreter, $this->parser);
             $builderInstance->setParent($this);
         }
 
@@ -208,7 +210,7 @@ abstract class QueryBuilder
         $fetchSpec = $this->makeFetchSpecification();
 
         return $this->transformValues(
-            $this->queryable->fetchData($this, $fetchSpec),
+            $this->queryInterpreter->fetchAll($this, $fetchSpec),
             $fetchSpec->getFields()
         );
     }
@@ -220,9 +222,8 @@ abstract class QueryBuilder
     {
         $fetchSpec = $this->makeFetchSpecification();
 
-        return $this->transformValues(
-            // TODO: Implement pagination
-            $this->queryable->fetchData($this, $fetchSpec),
+        return $this->transformPaginator(
+            $this->queryInterpreter->paginate($this, $fetchSpec),
             $fetchSpec->getFields()
         );
     }
@@ -421,6 +422,13 @@ abstract class QueryBuilder
         }
 
         return $acc;
+    }
+
+    protected function transformPaginator(LengthAwarePaginator $paginator, array $selectedFields)
+    {
+        return $paginator->setCollection(
+            collect($this->transformValues($paginator->getCollection(), $selectedFields))
+        );
     }
 
     protected function isSingleDataModel($data): bool
