@@ -109,6 +109,7 @@ class Apidoc
 
     protected function guessQueryBuilderResourceName()
     {
+        // It might be better to guess based on the model's name.
         $className = (new ReflectionClass($this->queryBuilder))->getShortName();
 
         // UserBuilder -> User

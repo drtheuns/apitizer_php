@@ -14,7 +14,7 @@ use Tests\Unit\TestCase;
 class RequestParserTest extends TestCase
 {
     /** @test */
-    public function it_should_parse_requests()
+    public function it_parses_requests()
     {
         $request = $this->buildRequest([
             'fields'  => 'id, name, posts(id, title, body, comments(id, body))',

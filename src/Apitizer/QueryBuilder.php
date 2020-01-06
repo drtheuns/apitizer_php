@@ -11,6 +11,7 @@ use Apitizer\Types\Apidoc;
 use Apitizer\Types\Sort;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use ArrayAccess;
 
 abstract class QueryBuilder
@@ -18,7 +19,7 @@ abstract class QueryBuilder
     use Concerns\HasFields;
 
     /**
-     * @var Request
+     * @var null|Request
      */
     protected $request;
 
@@ -117,7 +118,7 @@ abstract class QueryBuilder
     }
 
     public function __construct(
-        Request $request,
+        Request $request = null,
         QueryInterpreter $queryInterpreter = null,
         RequestParser $parser = null
     ) {
@@ -135,6 +136,16 @@ abstract class QueryBuilder
         RequestParser $parser = null
     ) {
         return (new static($request, $queryInterpreter, $parser));
+    }
+
+    /**
+     * Build a query object using this builder without actually fetching the data.
+     *
+     * @return Builder
+     */
+    public static function build(): Builder
+    {
+        return (new static())->buildQuery();
     }
 
     /**
@@ -215,14 +226,28 @@ abstract class QueryBuilder
 
     /**
      * Fetch and return paginated data.
+     *
+     * @return LengthAwarePaginator
      */
-    public function paginate()
+    public function paginate(): LengthAwarePaginator
     {
         $fetchSpec = $this->makeFetchSpecification();
 
         return $this->transformPaginator(
             $this->queryInterpreter->paginate($this, $fetchSpec),
             $fetchSpec->getFields()
+        );
+    }
+
+    /**
+     * Build the query without actually fetching the data.
+     *
+     * @return Builder
+     */
+    public function buildQuery(): Builder
+    {
+        return $this->queryInterpreter->build(
+            $this, $this->makeFetchSpecification()
         );
     }
 

@@ -4,13 +4,12 @@ namespace Tests\Unit\Parser;
 
 use Apitizer\RequestParser;
 use Apitizer\Parser\Relation;
-use Illuminate\Http\Request;
 use Tests\Unit\TestCase;
 
 class FieldParsingTest extends TestCase
 {
     /** @test */
-    public function it_should_parse_non_nested_fields()
+    public function it_parses_non_nested_fields()
     {
         $fields = $this->parse('id,name');
 

@@ -37,12 +37,8 @@ class FieldTest extends TestCase
         $this->assertEquals(null, $rendered);
     }
 
-    private function field(QueryBuilder $queryBuilder = null, string $key = 'key', string $type = 'string')
+    private function field(string $key = 'key', string $type = 'string')
     {
-        return new Field(
-            $queryBuilder ?? new UserBuilder($this->buildRequest()),
-            $key,
-            $type
-        );
+        return new Field(new UserBuilder($this->buildRequest()), $key, $type);
     }
 }

@@ -34,16 +34,16 @@ trait HasFields
         return $this->field($key, 'float')->transform(new CastValue);
     }
 
-    protected function date(string $key): DateTimeField
+    protected function date(string $key, $castFormat = null): DateTimeField
     {
         return (new DateTimeField($this, $key, 'date'))
-            ->transform(new CastValue);
+            ->transform(new CastValue($castFormat));
     }
 
-    protected function datetime(string $key): DateTimeField
+    protected function datetime(string $key, string $castFormat = null): DateTimeField
     {
         return (new DateTimeField($this, $key, 'datetime'))
-            ->transform(new CastValue);
+            ->transform(new CastValue($castFormat));
     }
 
     protected function enum(string $key, array $enum, string $type = 'string'): EnumField

@@ -33,7 +33,10 @@ class EnumField extends Field
         $value = parent::validateValue($value);
 
         if (! in_array($value, $this->enum)) {
-            throw new UnexpectedValueException("Expected value [{$value}] to be one of [{implode(',', $this->enum)}]");
+            $options = implode(', ', $this->enum);
+            throw new UnexpectedValueException(
+                "Expected value [{$value}] to be one of [{$options}]"
+            );
         }
 
         return $value;
