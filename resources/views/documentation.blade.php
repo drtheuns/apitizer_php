@@ -71,7 +71,7 @@
        box-sizing: border-box;
      }
      *, .font-sans {
-       font-family: sans serif;
+       font-family: sans-serif;
      }
      body {
        background: var(--content-background-color);
