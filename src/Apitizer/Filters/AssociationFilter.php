@@ -48,6 +48,15 @@ class AssociationFilter
         $localJoinKey = $this->getLocalJoinKey($relation);
         $foreignJoinKey = $this->getForeignJoinKey($relation);
 
+        // Example: Tables "users" and "posts" with posts.author_id -> users.id.
+        // If we filter from the "posts" on the author through the users.id,
+        // then we don't need to use a subquery/join and we can instead just
+        // use the posts.author_id directly.
+        if ($relation instanceof BelongsTo && $foreignJoinKey === $this->column) {
+            $query->whereIn($localJoinKey, $values);
+            return;
+        }
+
         $query->whereIn($localJoinKey, function ($query) use ($values, $table, $foreignJoinKey) {
             $query->from($table)
                 ->select($foreignJoinKey)
