@@ -2,7 +2,6 @@
 
 namespace Apitizer;
 
-use Apitizer\DataSources\EloquentAdapter;
 use Apitizer\Types\Field;
 use Apitizer\Types\Association;
 use Apitizer\Types\FetchSpec;
@@ -11,9 +10,8 @@ use Apitizer\Types\Filter;
 use Apitizer\Types\Apidoc;
 use Apitizer\Types\Sort;
 use Illuminate\Http\Request;
-use ArrayAccess;
-use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Pagination\LengthAwarePaginator;
+use ArrayAccess;
 
 abstract class QueryBuilder
 {
