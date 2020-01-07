@@ -69,13 +69,11 @@ abstract class QueryBuilder
     /**
      * A function that returns the fields that are available to the client.
      *
-     * If the value is a string, it will implicitly cast to the `AnyType`.
+     * If the value is a string, it will be implicitly cast to `$this->any`
      *
-     * Each type specifies a key that is used to fetch the data from the
-     * eventual source data. In other words, if the query builder is used in
-     * conjunction with a database and Eloquent, then the key would be the key
-     * on the Eloquent model that should be used to fetch the data (usually the
-     * column name in the database).
+     * Each type (e.g. `$this->string`) expects at least a key string. This key
+     * is used to fetch the data from the Eloquent model, so it usually
+     * corresponds to the column name in the database.
      */
     abstract public function fields(): array;
 
@@ -90,20 +88,25 @@ abstract class QueryBuilder
      * would support the following queries:
      *
      *   /users?sort=name.asc
+     *
+     * @see $this->sort()
+     * @see \Apitizer\Types\Sort
      */
     abstract public function sorts(): array;
 
     /**
      * A function that returns the filters that are available to the client.
+     *
+     * The key of the array is the name of the filter that is displayed to the
+     * client, while the value must be a Filter object.
+     *
+     * @see $this->filter()
+     * @see \Apitizer\Types\Filter
      */
     abstract public function filters(): array;
 
     /**
-     * Get the source that can be used by the query interpreter.
-     *
-     * In the case of Eloquent, this function should return a query or model
-     * object, whereas for a different adapter you will want to return a
-     * different source.
+     * Get the source that will be used by the query interpreter.
      */
     abstract public function model(): Model;
 
@@ -134,7 +137,8 @@ abstract class QueryBuilder
      * If you need to pass other variables, such as a custom QueryInterpreter,
      * use the constructor instead.
      */
-    public static function make(Request $request) {
+    public static function make(Request $request)
+    {
         return (new static($request));
     }
 
@@ -161,7 +165,7 @@ abstract class QueryBuilder
      *   $this->association('comments', CommentBuilder::class)
      *
      * @param string $key
-     * @param string|QueryBuilder $builder
+     * @param string $builder
      *
      * @return Association
      */
@@ -170,7 +174,7 @@ abstract class QueryBuilder
         $builderInstance = $this->getParentByClassName($builder);
 
         if (! $builderInstance) {
-            $builderInstance = new $builder($this->request, $this->queryInterpreter, $this->parser);
+            $builderInstance = new $builder($this->getRequest(), $this->queryInterpreter, $this->parser);
             $builderInstance->setParent($this);
         }
 
@@ -259,7 +263,7 @@ abstract class QueryBuilder
     protected function makeFetchSpecification(): FetchSpec
     {
         $fetchSpec = $this->validateRequestInput(
-            $this->parser->parse($this->request)
+            $this->parser->parse($this->getRequest())
         );
 
         if (empty($fetchSpec->getFields())) {
@@ -436,7 +440,12 @@ abstract class QueryBuilder
         return $result;
     }
 
-    protected function transformOne(ArrayAccess $row, array $selectedFields): array
+    /**
+     * @param array|ArrayAccess|object|null $row
+     * @param array $selectedFields
+     * @return array
+     */
+    protected function transformOne($row, array $selectedFields): array
     {
         $acc = [];
 
@@ -541,5 +550,10 @@ abstract class QueryBuilder
         return array_filter($this->getFields(), function ($field) {
             return $field instanceof Field;
         });
+    }
+
+    public function getRequest(): Request
+    {
+        return $this->request ?? request();
     }
 }

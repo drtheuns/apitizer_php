@@ -4,7 +4,7 @@ namespace Apitizer\Types;
 
 use Apitizer\Transformers\DateTimeFormat;
 
-class DateTimeField extends Field implements FormattableField
+class DateTimeField extends Field
 {
     public function format(string $format = null): Field
     {

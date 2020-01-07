@@ -3,7 +3,6 @@
 namespace Tests\Feature\Builders;
 
 use Apitizer\QueryBuilder;
-use Apitizer\Filters\AssociationFilter;
 use Illuminate\Database\Eloquent\Model;
 use Tests\Feature\Models\User;
 
@@ -15,6 +14,8 @@ class UserBuilder extends QueryBuilder
             'id'    => $this->int('id'),
             'name'  => $this->string('name'),
             'email' => $this->string('email'),
+            'created_at' => $this->datetime('created_at')->format(),
+            'updated_at' => $this->date('updated_at')->format(),
             'posts' => $this->association('posts', PostBuilder::class),
         ];
     }
@@ -24,9 +25,7 @@ class UserBuilder extends QueryBuilder
         return [
             'name'       => $this->filter()->byField('name'),
             'created_at' => $this->filter()->byField('created_at', '>'),
-            'posts'      => $this->filter()
-                                 ->expectMany('string')
-                                 ->handleUsing(new AssociationFilter('posts', 'id')),
+            'posts'      => $this->filter()->byAssociation('posts', 'id')->expectMany('string'),
         ];
     }
 

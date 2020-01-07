@@ -105,6 +105,8 @@ class QueryBuilderTest extends TestCase
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'created_at' => $user->created_at->format('Y-m-d H:i:s'),
+                'updated_at' => $user->updated_at->format('Y-m-d'),
             ],
         ];
 
@@ -151,6 +153,40 @@ class QueryBuilderTest extends TestCase
                         'body' => $comment->body,
                     ]
                 ]
+            ]
+        ], $result);
+    }
+
+    /** @test */
+    public function it_can_select_from_belongs_to_relations()
+    {
+        $user = factory(User::class)->create();
+        $post = factory(Post::class)->create(['author_id' => $user->id]);
+
+        $request = $this->buildRequest(['fields' => 'id, author(id)']);
+        $result = PostBuilder::make($request)->all();
+
+        $this->assertEquals([
+            [
+                'id' => $post->id,
+                'author' => [
+                    'id' => $user->id,
+                ]
+            ]
+        ], $result);
+    }
+
+    /** @test */
+    public function it_can_handle_unexpected_array_fields()
+    {
+        $user = factory(User::class)->create();
+
+        $request = $this->buildRequest(['fields' => ['id', 'posts(id)', 'posts' => ['id']]]);
+        $result = UserBuilder::make($request)->all();
+
+        $this->assertEquals([
+            [
+                'id' => $user->id,
             ]
         ], $result);
     }

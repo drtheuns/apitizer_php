@@ -71,7 +71,24 @@ class FieldParsingTest extends TestCase
         $this->assertEquals('id, and	name', $fields[0]);
     }
 
-    private function parse(string $fields)
+    /** @test */
+    public function the_fields_may_be_an_array_of_strings()
+    {
+        $fields = $this->parse(['id', 'name']);
+        $this->assertEquals(2, count($fields));
+        $this->assertEquals(['id', 'name'], $fields);
+    }
+
+    /** @test */
+    public function no_parsing_is_performed_when_an_array_is_passed()
+    {
+        $input = ['id', 'name', 'comments(id,name)', 'comments' => ['id', 'name']];
+        $fields = $this->parse($input);
+
+        $this->assertSame($input, $fields);
+    }
+
+    private function parse($fields)
     {
         return (new RequestParser())->parseFields($fields);
     }

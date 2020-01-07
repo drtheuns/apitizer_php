@@ -6,6 +6,7 @@ use Apitizer\Support\TypeCaster;
 use DateTime;
 use DateTimeInterface;
 use Tests\Unit\TestCase;
+use UnexpectedValueException;
 
 class TypeCasterTest extends TestCase
 {
@@ -34,6 +35,53 @@ class TypeCasterTest extends TestCase
 
         $this->assertInstanceOf(DateTimeInterface::class, $datetime);
         $this->assertEquals(DateTime::createFromFormat('Y-m-d H:i:s', '2020-01-01 19:00:00'), $datetime);
+    }
+
+    /** @test */
+    public function it_returns_the_value_if_it_is_already_a_datetime_object()
+    {
+        $original = new DateTime();
+        $datetime = TypeCaster::cast($original, 'datetime');
+
+        $this->assertSame($original, $datetime);
+    }
+
+    /** @test */
+    public function it_throws_an_exception_if_datetime_casting_receives_unexpected_type()
+    {
+        $this->expectException(UnexpectedValueException::class);
+        TypeCaster::cast(1, 'datetime');
+    }
+
+    /** @test */
+    public function unknown_types_are_ignored_and_return_the_value_unmodified()
+    {
+        $this->assertEquals(1, TypeCaster::cast(1, 'tree'));
+        $this->assertEquals(2, TypeCaster::cast(2, 'uint_8'));
+        $this->assertEquals(3, TypeCaster::cast(3, 'Maybe'));
+    }
+
+    /** @test */
+    public function it_can_cast_various_boolean_types()
+    {
+        $true = ['on', 'yes', 'true', 1, '1'];
+        $false = ['off', 'no', 'false', 0, '0', 'unexpected', null];
+
+        foreach ($true as $value) {
+            $this->assertTrue(TypeCaster::cast($value, 'bool'));
+        }
+
+        foreach ($false as $value) {
+            $this->assertFalse(TypeCaster::cast($value, 'bool'));
+        }
+    }
+
+    /** @test */
+    public function it_can_cast_to_floating_point_numbers()
+    {
+        $this->assertEquals(1.0, TypeCaster::cast(1, 'float'));
+        $this->assertEquals(1.0, TypeCaster::cast('1', 'float'));
+        $this->assertEquals(1.0, TypeCaster::cast(1.0, 'float'));
     }
 
     /** @test */

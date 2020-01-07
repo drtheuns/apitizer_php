@@ -11,10 +11,12 @@ class PostBuilder extends QueryBuilder
     public function fields(): array
     {
         return [
-            'id'    => $this->int('id'),
-            'title' => $this->string('title'),
-            'body'  => $this->string('body'),
-            'comments' => $this->association('comments', CommentBuilder::class),
+            'id'         => $this->int('id'),
+            'title'      => $this->string('title'),
+            'body'       => $this->any('body'),
+            'status'     => $this->enum('status', ['published', 'draft', 'scrapped', 'another-status']),
+            'author'     => $this->association('author', UserBuilder::class),
+            'comments'   => $this->association('comments', CommentBuilder::class),
         ];
     }
 

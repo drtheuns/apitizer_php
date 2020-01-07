@@ -5,6 +5,7 @@ namespace Tests\Unit\Parser;
 use Apitizer\RequestParser;
 use Apitizer\Parser\Sort;
 use Tests\Unit\TestCase;
+use UnexpectedValueException;
 
 class SortParsingTest extends TestCase
 {
@@ -62,6 +63,22 @@ class SortParsingTest extends TestCase
 
         $this->assertEquals('id', $sorts[1]->getField());
         $this->assertEquals(Sort::ASC, $sorts[1]->getOrder());
+    }
+
+    /** @test */
+    public function incorrect_sort_orders_are_replaced_with_ascending_order()
+    {
+        $sorts = $this->parse('name.upside-down');
+
+        $this->assertEquals(Sort::ASC, $sorts[0]->getOrder());
+    }
+
+    /** @test */
+    public function an_exception_is_raised_if_a_non_array_or_string_is_passed()
+    {
+        $this->expectException(UnexpectedValueException::class);
+
+        $this->parse((object) ['name.asc']);
     }
 
     private function parse($sort)
