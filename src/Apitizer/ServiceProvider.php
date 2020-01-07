@@ -45,22 +45,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
                 'uses' => 'DocumentationController@list',
                 'as' => 'apitizer.apidoc',
             ]);
-
-            $router->get('/css', [
-                'uses' => 'DocumentationController@css',
-                'as' => 'apitizer.css'
-            ]);
         });
-    }
-
-    /**
-     * Publish the config file
-     *
-     * @param  string $configPath
-     */
-    protected function publishConfig($configPath)
-    {
-        $this->publishes([$configPath => config_path('apitizer.php')], 'config');
     }
 
     /**
@@ -70,6 +55,6 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
      */
     protected function getConfigPath()
     {
-        return config_path('debugbar.php');
+        return config_path('apitizer.php');
     }
 }
