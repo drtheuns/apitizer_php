@@ -29,16 +29,6 @@ class QueryInterpreter
         return $query;
     }
 
-    public function fetchAll(QueryBuilder $queryBuilder, FetchSpec $fetchSpec): iterable
-    {
-        return $this->build($queryBuilder, $fetchSpec)->get();
-    }
-
-    public function paginate(QueryBuilder $queryBuilder, FetchSpec $fetchSpec): LengthAwarePaginator
-    {
-        return $this->build($queryBuilder, $fetchSpec)->paginate();
-    }
-
     private function applySelect(Builder $query, array $fields, array $additionalSelects = [])
     {
         // Always load the primary key in case there are relationships that

@@ -128,14 +128,13 @@ abstract class QueryBuilder
     }
 
     /**
-     * Static factory method; essentially alias for the constructor.
+     * Create a new instance with a request object.
+     *
+     * If you need to pass other variables, such as a custom QueryInterpreter,
+     * use the constructor instead.
      */
-    public static function make(
-        Request $request,
-        QueryInterpreter $queryInterpreter = null,
-        RequestParser $parser = null
-    ) {
-        return (new static($request, $queryInterpreter, $parser));
+    public static function make(Request $request) {
+        return (new static($request));
     }
 
     /**
@@ -219,7 +218,7 @@ abstract class QueryBuilder
         $fetchSpec = $this->makeFetchSpecification();
 
         return $this->transformValues(
-            $this->queryInterpreter->fetchAll($this, $fetchSpec),
+            $this->queryInterpreter->build($this, $fetchSpec)->paginate(),
             $fetchSpec->getFields()
         );
     }
@@ -234,7 +233,7 @@ abstract class QueryBuilder
         $fetchSpec = $this->makeFetchSpecification();
 
         return $this->transformPaginator(
-            $this->queryInterpreter->paginate($this, $fetchSpec),
+            $this->queryInterpreter->build($this, $fetchSpec)->paginate(),
             $fetchSpec->getFields()
         );
     }
