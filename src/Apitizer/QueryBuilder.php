@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use ArrayAccess;
+use Illuminate\Database\Eloquent\Model;
 
 abstract class QueryBuilder
 {
@@ -104,7 +105,7 @@ abstract class QueryBuilder
      * object, whereas for a different adapter you will want to return a
      * different source.
      */
-    abstract public function model();
+    abstract public function model(): Model;
 
     /**
      * Overridable function to adjust the API documentation for this query

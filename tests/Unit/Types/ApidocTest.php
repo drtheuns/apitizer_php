@@ -4,6 +4,7 @@ namespace Tests\Unit\Types;
 
 use Apitizer\QueryBuilder;
 use Apitizer\Types\Apidoc;
+use Illuminate\Database\Eloquent\Model;
 use Tests\Feature\Builders\UserBuilder;
 use Tests\Feature\Models\User;
 use Tests\Unit\TestCase;
@@ -29,7 +30,7 @@ class UserQueryBuilder extends QueryBuilder
     public function fields(): array { return []; }
     public function filters(): array { return []; }
     public function sorts(): array { return []; }
-    public function model() {
+    public function model(): Model {
         return new User();
     }
 }

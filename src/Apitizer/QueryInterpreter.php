@@ -6,9 +6,7 @@ use Apitizer\Types\FetchSpec;
 use Apitizer\QueryBuilder;
 use Apitizer\Types\Field;
 use Apitizer\Types\Association;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOneOrMany;
 
@@ -17,10 +15,6 @@ class QueryInterpreter
     public function build(QueryBuilder $queryBuilder, FetchSpec $fetchSpec): Builder
     {
         $query = $queryBuilder->model()->query();
-
-        if (!$query || (!$query instanceof Builder && !$query instanceof Model)) {
-            throw new \DomainException("Expected {get_class($queryBuilder}}::datasource to return a query");
-        }
 
         $this->applySelect($query, $fetchSpec->getFields());
         $this->applySorting($query, $fetchSpec->getSorts());

@@ -3,8 +3,8 @@
 namespace Tests\Feature\Builders;
 
 use Apitizer\QueryBuilder;
-use Apitizer\Sorting\ColumnSort;
 use Apitizer\Filters\AssociationFilter;
+use Illuminate\Database\Eloquent\Model;
 use Tests\Feature\Models\User;
 
 class UserBuilder extends QueryBuilder
@@ -37,7 +37,7 @@ class UserBuilder extends QueryBuilder
         ];
     }
 
-    public function model()
+    public function model(): Model
     {
         return new User();
     }

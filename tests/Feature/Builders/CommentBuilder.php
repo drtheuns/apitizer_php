@@ -3,6 +3,7 @@
 namespace Tests\Feature\Builders;
 
 use Apitizer\QueryBuilder;
+use Illuminate\Database\Eloquent\Model;
 use Tests\Feature\Models\Comment;
 
 class CommentBuilder extends QueryBuilder
@@ -25,7 +26,7 @@ class CommentBuilder extends QueryBuilder
         return [];
     }
 
-    public function model()
+    public function model(): Model
     {
         return new Comment();
     }
