@@ -2,11 +2,19 @@
 
 namespace Apitizer;
 
+use Apitizer\Types\Apidoc;
+use Apitizer\Types\ApidocCollection;
+
 class Apitizer
 {
-    public static function getQueryBuilders()
+    public static function getQueryBuilderDocumentation(): ApidocCollection
     {
-        return config('apitizer.query_builders', []);
+        $builders = collect(config('apitizer.query_builders', []))
+                  ->map(function (string $builderClass) {
+                      return new Apidoc(new $builderClass);
+                  });
+
+        return new ApidocCollection($builders);
     }
 
     public static function getFieldKey()

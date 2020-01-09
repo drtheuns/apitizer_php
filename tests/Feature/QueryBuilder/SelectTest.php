@@ -1,29 +1,25 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\QueryBuilder;
 
+use Tests\Feature\TestCase;
 use Tests\Feature\Builders\PostBuilder;
 use Tests\Feature\Builders\UserBuilder;
 use Tests\Feature\Models\User;
 use Tests\Feature\Models\Post;
 use Tests\Feature\Models\Comment;
 
-class QueryBuilderTest extends TestCase
+class SelectTest extends TestCase
 {
-    /** @test */
+        /** @test */
     public function it_can_select_the_specified_fields()
     {
         $user = factory(User::class)->create();
 
-        $request = $this->buildRequest(['fields' => 'id,name']);
+        $request = $this->request()->fields('id,name')->make();
         $results = UserBuilder::make($request)->all();
 
-        $this->assertEquals([
-            [
-                'id' => $user->id,
-                'name' => $user->name,
-            ]
-        ], $results);
+        $this->assertEquals([$user->only('id', 'name')], $results);
     }
 
     /** @test */
@@ -32,8 +28,10 @@ class QueryBuilderTest extends TestCase
         $users = factory(User::class, 2)
                ->create()
                ->each(function (User $user) {
-                   $posts = $user->posts()
-                        ->saveMany(factory(Post::class, 2)->make()->all());
+                   $posts = factory(Post::class, 2)
+                          ->make(['author_id' => $user->id])
+                          ->all();
+                   $posts = $user->posts()->saveMany($posts);
 
                    collect($posts)->each(function (Post $post) {
                        $comments = factory(Comment::class, 2)
@@ -43,7 +41,7 @@ class QueryBuilderTest extends TestCase
                    });
                });
 
-        $request = $this->buildRequest(['fields' => 'id,name,posts(id,title,comments(id,body))']);
+        $request = $this->request()->fields('id,name,posts(id,title,comments(id,body))')->make();
         $result = UserBuilder::make($request)->all();
 
         $expected = $users->map(function (User $user) {
@@ -54,12 +52,7 @@ class QueryBuilderTest extends TestCase
                     return [
                         'id' => $post->id,
                         'title' => $post->title,
-                        'comments' => $post->comments->map(function (Comment $comment) {
-                            return [
-                                'id' => $comment->id,
-                                'body' => $comment->body,
-                            ];
-                        })->all(),
+                        'comments' => $post->comments->map->only('id', 'body')->all(),
                     ];
                 })->all(),
             ];
@@ -69,37 +62,14 @@ class QueryBuilderTest extends TestCase
     }
 
     /** @test */
-    public function it_can_order_results()
-    {
-        $users = factory(User::class, 2)->create();
-
-        $request = $this->buildRequest([
-            'sort' => 'id.desc',
-            'fields' => 'id,name'
-        ]);
-        $result = UserBuilder::make($request)->all();
-
-        $expected = [
-            [
-                'id' => $users[1]->id,
-                'name' => $users[1]->name,
-            ],
-            [
-                'id' => $users[0]->id,
-                'name' => $users[0]->name,
-            ]
-        ];
-
-        $this->assertEquals($expected, $result);
-    }
-
-    /** @test */
     public function if_no_fields_are_selected_all_non_association_fields_are_returned()
     {
         $user = factory(User::class)->create();
-        $request = $this->buildRequest();
+        $request = $this->request()->make();
         $result = UserBuilder::make($request)->all();
 
+        // TODO: Get these fields dynamically from the query builder to make
+        // this test more robust against changes to the Builder.
         $expected = [
             [
                 'id' => $user->id,
@@ -114,26 +84,6 @@ class QueryBuilderTest extends TestCase
     }
 
     /** @test */
-    public function it_can_filter_on_associations()
-    {
-        $users = factory(User::class, 2)->create();
-        $post = factory(Post::class)->make();
-        $users->first()->posts()->save($post);
-
-        $request = $this->buildRequest([
-            'fields' => 'id',
-            'filters' => ['posts' => [$post->id]]
-        ]);
-        $result = UserBuilder::make($request)->all();
-
-        $this->assertEquals([
-            [
-                'id' => $users->first()->id,
-            ]
-        ], $result);
-    }
-
-    /** @test */
     public function selecting_an_association_without_specifying_fields_fetches_all_fields()
     {
         $user = factory(User::class)->create();
@@ -141,18 +91,13 @@ class QueryBuilderTest extends TestCase
         $comment = factory(Comment::class)->make(['author_id' => $user->id]);
         $post->comments()->save($comment);
 
-        $request = $this->buildRequest(['fields' => 'id,comments']);
+        $request = $this->request()->fields('id,comments')->make();
         $result = PostBuilder::make($request)->all();
 
         $this->assertEquals([
             [
                 'id' => $post->id,
-                'comments' => [
-                    [
-                        'id' => $comment->id,
-                        'body' => $comment->body,
-                    ]
-                ]
+                'comments' => [$comment->only('id', 'body')],
             ]
         ], $result);
     }
@@ -163,15 +108,13 @@ class QueryBuilderTest extends TestCase
         $user = factory(User::class)->create();
         $post = factory(Post::class)->create(['author_id' => $user->id]);
 
-        $request = $this->buildRequest(['fields' => 'id, author(id)']);
+        $request = $this->request()->fields('id, author(id)')->make();
         $result = PostBuilder::make($request)->all();
 
         $this->assertEquals([
             [
                 'id' => $post->id,
-                'author' => [
-                    'id' => $user->id,
-                ]
+                'author' => $user->only('id'),
             ]
         ], $result);
     }
@@ -181,13 +124,28 @@ class QueryBuilderTest extends TestCase
     {
         $user = factory(User::class)->create();
 
-        $request = $this->buildRequest(['fields' => ['id', 'posts(id)', 'posts' => ['id']]]);
+        $request = $this->request()->fields(['id', 'posts(id)', 'posts' => ['id']])->make();
         $result = UserBuilder::make($request)->all();
 
         $this->assertEquals([
             [
                 'id' => $user->id,
             ]
+        ], $result);
+    }
+
+    /** @test */
+    public function it_selects_from_morph_relationships()
+    {
+        $post = factory(Post::class)->state('withTags')->create();
+        $request = $this->request()->fields('id, tags(id)')->make();
+        $result = PostBuilder::make($request)->all();
+
+        $this->assertEquals([
+            [
+                'id' => $post->id,
+                'tags' => $post->tags->map->only('id')->all(),
+            ],
         ], $result);
     }
 }

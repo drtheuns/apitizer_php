@@ -83,6 +83,9 @@ class Field extends Factory
         return $value;
     }
 
+    /**
+     * @return $this
+     */
     public function transform(callable $callable): self
     {
         $this->transformers[] = $callable;
@@ -90,6 +93,9 @@ class Field extends Factory
         return $this;
     }
 
+    /**
+     * @return $this
+     */
     public function nullable(bool $isNullable = true): self
     {
         $this->nullable = $isNullable;

@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Parser;
 
-use Apitizer\RequestParser;
+use Apitizer\Parser\InputParser;
 use Apitizer\Parser\Relation;
 use Tests\Unit\TestCase;
 
@@ -90,6 +90,6 @@ class FieldParsingTest extends TestCase
 
     private function parse($fields)
     {
-        return (new RequestParser())->parseFields($fields);
+        return (new InputParser())->parseFields($fields);
     }
 }

@@ -1,8 +1,8 @@
 <?php
 
-namespace Apitizer\Types;
+namespace Apitizer\Parser;
 
-class RequestInput
+class ParsedInput
 {
     public $fields = [];
     public $sorts = [];

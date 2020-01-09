@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Parser;
 
-use Apitizer\RequestParser;
+use Apitizer\Parser\InputParser;
 use Apitizer\Parser\Sort;
 use Tests\Unit\TestCase;
 use UnexpectedValueException;
@@ -83,6 +83,6 @@ class SortParsingTest extends TestCase
 
     private function parse($sort)
     {
-        return (new RequestParser())->parseSorts($sort);
+        return (new InputParser())->parseSorts($sort);
     }
 }

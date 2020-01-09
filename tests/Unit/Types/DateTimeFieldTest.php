@@ -53,13 +53,13 @@ class DateTimeFieldTest extends TestCase
         $this->assertEquals('13:00:00, 2020-01-01', $formatted);
     }
 
-    private function datetimeField(QueryBuilder $queryBuilder = null, string $key = 'key')
+    private function datetimeField(string $key = 'key'): DateTimeField
     {
-        return new DateTimeField(new UserBuilder($this->buildRequest()), $key, 'datetime');
+        return new DateTimeField(new UserBuilder(), $key, 'datetime');
     }
 
-    private function dateField(string $key = 'key')
+    private function dateField(string $key = 'key'): DateTimeField
     {
-        return new DateTimeField(new UserBuilder($this->buildRequest()), $key, 'date');
+        return new DateTimeField(new UserBuilder(), $key, 'date');
     }
 }

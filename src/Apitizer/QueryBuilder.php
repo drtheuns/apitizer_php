@@ -2,18 +2,26 @@
 
 namespace Apitizer;
 
-use Apitizer\Types\Field;
+use Apitizer\Interpreter\QueryInterpreter;
+use Apitizer\Parser\InputParser;
+use Apitizer\Parser\ParsedInput;
+use Apitizer\Parser\Parser;
+use Apitizer\Parser\RawInput;
+use Apitizer\Parser\Relation;
+use Apitizer\Rendering\BasicRenderer;
+use Apitizer\Rendering\Renderer;
+use Apitizer\Types\Apidoc;
 use Apitizer\Types\Association;
 use Apitizer\Types\FetchSpec;
-use Apitizer\Types\RequestInput;
+use Apitizer\Types\Field;
 use Apitizer\Types\Filter;
-use Apitizer\Types\Apidoc;
 use Apitizer\Types\Sort;
-use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
-use ArrayAccess;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
+use Illuminate\Pagination\AbstractPaginator;
+use Illuminate\Pagination\LengthAwarePaginator;
+use UnexpectedValueException;
 
 abstract class QueryBuilder
 {
@@ -25,9 +33,14 @@ abstract class QueryBuilder
     protected $request;
 
     /**
-     * @var RequestParser
+     * @var InputParser
      */
     protected $parser;
+
+    /**
+     * @var Renderer
+     */
+    protected $renderer;
 
     /**
      * @var QueryInterpreter
@@ -121,14 +134,8 @@ abstract class QueryBuilder
         //
     }
 
-    public function __construct(
-        Request $request = null,
-        QueryInterpreter $queryInterpreter = null,
-        RequestParser $parser = null
-    ) {
-        $this->request = $request;
-        $this->queryInterpreter = $queryInterpreter ?? new QueryInterpreter();
-        $this->parser = $parser ?? new RequestParser();
+    public function __construct(Request $request = null) {
+        $this->setRequest($request);
     }
 
     /**
@@ -169,16 +176,31 @@ abstract class QueryBuilder
      *
      * @return Association
      */
-    protected function association(string $key, string $builder)
+    protected function association(string $key, string $builderClass)
     {
-        $builderInstance = $this->getParentByClassName($builder);
+        $builderInstance = $this->getParentByClassName($builderClass);
 
         if (! $builderInstance) {
-            $builderInstance = new $builder($this->getRequest(), $this->queryInterpreter, $this->parser);
-            $builderInstance->setParent($this);
+            $builderInstance = $this->createChildBuilder($builderClass);
         }
 
         return new Association($builderInstance, $key);
+    }
+
+    protected function createChildBuilder(string $builderClass)
+    {
+        $builder = new $builderClass();
+
+        if (! $builder instanceof QueryBuilder) {
+            throw new UnexpectedValueException(
+                "Expected [$builderClass] to be a query builder class"
+            );
+        }
+
+        // setParent will take care of all the other setters.
+        $builder->setParent($this);
+
+        return $builder;
     }
 
     /**
@@ -202,15 +224,20 @@ abstract class QueryBuilder
     }
 
     /**
-     * Render the given data based on the current query builder and request.
+     * Render the given data based on either the current query builder and
+     * request, or the fields that were passed in.
+     *
+     * @param mixed $data
+     * @param (Field|Association)[] $fields
      *
      * @return array
      */
-    public function render($data): array
+    public function render($data, array $fields = null): array
     {
-        $fetchSpec = $this->makeFetchSpecification();
+        $fieldsToRender = $fields ?? $this->makeFetchSpecification()->getFields();
+        // TODO: Validate & convert the fields that were passed in.
 
-        return $this->transformValues($data, $fetchSpec->getFields());
+        return $this->getRenderer()->render($data, $fieldsToRender);
     }
 
     /**
@@ -222,8 +249,8 @@ abstract class QueryBuilder
     {
         $fetchSpec = $this->makeFetchSpecification();
 
-        return $this->transformValues(
-            $this->queryInterpreter->build($this, $fetchSpec)->paginate(),
+        return $this->getRenderer()->render(
+            $this->getQueryInterpreter()->build($this, $fetchSpec)->get(),
             $fetchSpec->getFields()
         );
     }
@@ -236,11 +263,15 @@ abstract class QueryBuilder
     public function paginate(): LengthAwarePaginator
     {
         $fetchSpec = $this->makeFetchSpecification();
+        $paginator = $this->getQueryInterpreter()->build($this, $fetchSpec)->paginate();
 
-        return $this->transformPaginator(
-            $this->queryInterpreter->build($this, $fetchSpec)->paginate(),
-            $fetchSpec->getFields()
-        );
+        return tap($paginator, function (AbstractPaginator $paginator) use ($fetchSpec) {
+            $renderedData = $this->getRenderer()->render(
+                $paginator->getCollection(), $fetchSpec->getFields()
+            );
+
+            $paginator->setCollection(collect($renderedData));
+        });
     }
 
     /**
@@ -250,7 +281,7 @@ abstract class QueryBuilder
      */
     public function buildQuery(): Builder
     {
-        return $this->queryInterpreter->build(
+        return $this->getQueryInterpreter()->build(
             $this, $this->makeFetchSpecification()
         );
     }
@@ -263,7 +294,7 @@ abstract class QueryBuilder
     protected function makeFetchSpecification(): FetchSpec
     {
         $fetchSpec = $this->validateRequestInput(
-            $this->parser->parse($this->getRequest())
+            $this->getParser()->parse(RawInput::fromRequest($this->getRequest()))
         );
 
         if (empty($fetchSpec->getFields())) {
@@ -337,7 +368,7 @@ abstract class QueryBuilder
         return $sorts;
     }
 
-    protected function validateRequestInput(RequestInput $unvalidatedInput): FetchSpec
+    protected function validateRequestInput(ParsedInput $unvalidatedInput): FetchSpec
     {
         $validated = new FetchSpec(
             $this->getValidatedFields($unvalidatedInput->fields, $this->getFields()),
@@ -360,7 +391,7 @@ abstract class QueryBuilder
         // Essentially get a subset of $availableFields with some type juggling
         // along the way.
         foreach ($unvalidatedFields as $field) {
-            if ($field instanceof Parser\Relation && isset($availableFields[$field->name])) {
+            if ($field instanceof Relation && isset($availableFields[$field->name])) {
                 // Convert the Parser\Relation to an Association object.
                 $association = $availableFields[$field->name];
 
@@ -424,64 +455,6 @@ abstract class QueryBuilder
         return $validatedFilters;
     }
 
-    public function transformValues($data, array $selectedFields): array
-    {
-        // Check if we're dealing with a single row of data.
-        if ($this->isSingleDataModel($data) || $this->isNonCollectionObject($data)) {
-            return $this->transformOne($data, $selectedFields);
-        }
-
-        $result = [];
-
-        foreach ($data as $row) {
-            $result[] = $this->transformOne($row, $selectedFields);
-        }
-
-        return $result;
-    }
-
-    /**
-     * @param array|ArrayAccess|object|null $row
-     * @param array $selectedFields
-     * @return array
-     */
-    protected function transformOne($row, array $selectedFields): array
-    {
-        $acc = [];
-
-        foreach ($selectedFields as $fieldOrAssoc) {
-            $acc[$fieldOrAssoc->getName()] = $fieldOrAssoc->render($row);
-        }
-
-        return $acc;
-    }
-
-    protected function transformPaginator(LengthAwarePaginator $paginator, array $selectedFields)
-    {
-        return $paginator->setCollection(
-            collect($this->transformValues($paginator->getCollection(), $selectedFields))
-        );
-    }
-
-    protected function isSingleDataModel($data): bool
-    {
-        // Distinguish between arrays as list and arrays as maps.
-        return is_array($data) && $this->isAssoc($data);
-    }
-
-    protected function isNonCollectionObject($data): bool
-    {
-        // Distinguish between e.g. Eloquent objects and Collection objects.
-        return is_object($data) && ! is_iterable($data);
-    }
-
-    private function isAssoc(array $array): bool
-    {
-        $keys = array_keys($array);
-
-        return array_keys($keys) !== $keys;
-    }
-
     public function getFields(): array
     {
         if (is_null($this->availableFields)) {
@@ -509,16 +482,14 @@ abstract class QueryBuilder
         return $this->availableFilters;
     }
 
-    public function setParent(QueryBuilder $parent): self
+    /**
+     * @return Field[]
+     */
+    public function getOnlyFields(): array
     {
-        $this->parent = $parent;
-
-        return $this;
-    }
-
-    public function getParent(): ?QueryBuilder
-    {
-        return $this->parent;
+        return array_filter($this->getFields(), function ($field) {
+            return $field instanceof Field;
+        });
     }
 
     /**
@@ -542,18 +513,79 @@ abstract class QueryBuilder
         return null;
     }
 
-    /**
-     * @return Field[]
-     */
-    public function getOnlyFields(): array
-    {
-        return array_filter($this->getFields(), function ($field) {
-            return $field instanceof Field;
-        });
-    }
-
     public function getRequest(): Request
     {
         return $this->request ?? request();
+    }
+
+    public function setRequest(?Request $request): self
+    {
+        $this->request = $request;
+
+        return $this;
+    }
+
+    public function getRenderer(): Renderer
+    {
+        if (! $this->renderer) {
+           $this->renderer = new BasicRenderer($this);
+        }
+
+        return $this->renderer;
+    }
+
+    public function setRenderer(Renderer $renderer): self
+    {
+        $this->renderer = $renderer;
+
+        return $this;
+    }
+
+    public function getQueryInterpreter(): QueryInterpreter
+    {
+        if (! $this->queryInterpreter) {
+            $this->queryInterpreter = new QueryInterpreter();
+        }
+
+        return $this->queryInterpreter;
+    }
+
+    public function setQueryInterpreter(QueryInterpreter $queryInterpreter): self
+    {
+        $this->queryInterpreter = $queryInterpreter;
+
+        return $this;
+    }
+
+    public function getParser(): Parser
+    {
+        if (! $this->parser) {
+            $this->parser = new InputParser();
+        }
+
+        return $this->parser;
+    }
+
+    public function setParser(Parser $requestParser): self
+    {
+        $this->parser = $requestParser;
+
+        return $this;
+    }
+
+    public function getParent(): ?QueryBuilder
+    {
+        return $this->parent;
+    }
+
+    public function setParent(QueryBuilder $parent): self
+    {
+        $this->parent = $parent;
+        $this->setRequest($parent->getRequest())
+             ->setQueryInterpreter($parent->getQueryInterpreter())
+             ->setParser($parent->getParser())
+             ->setRenderer($parent->getRenderer());
+
+        return $this;
     }
 }

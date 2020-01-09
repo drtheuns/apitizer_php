@@ -10,7 +10,7 @@ class LikeFilter
 
     public function __construct($fields)
     {
-        $this->fields = is_array($fields) ? $fields : [$fields];
+        $this->fields = is_array($fields) ? $fields : func_get_args();
     }
 
     public function __invoke(Builder $query, string $value)

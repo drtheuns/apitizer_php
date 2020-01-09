@@ -29,8 +29,7 @@ class Association extends Factory
 
     public function render(ArrayAccess $row)
     {
-        return $this->getQueryBuilder()
-                    ->transformValues($row[$this->key], $this->fields);
+        return $this->getQueryBuilder()->render($row[$this->key], $this->fields);
     }
 
     public function getFields()

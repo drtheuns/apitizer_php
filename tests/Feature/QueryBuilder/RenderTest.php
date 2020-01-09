@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Tests\Feature\Models\User;
 use Tests\Feature\Builders\UserBuilder;
@@ -10,26 +11,23 @@ use Tests\Feature\Builders\UserBuilder;
  * The query builder can be used JUST to render data, rather than also fetching
  * it. That's what this class tests.
  */
-class QueryBuilderRenderTest extends TestCase
+class RenderTest extends TestCase
 {
     /** @test */
     public function it_renders_existing_eloquent_models()
     {
         $user = factory(User::class)->create();
-        $request = $this->buildRequest(['fields' => 'id,name']);
+        $request = $this->request()->fields('id,name')->make();
         $result = UserBuilder::make($request)->render($user);
 
-        $this->assertEquals([
-            'id'   => $user->id,
-            'name' => $user->name,
-        ], $result);
+        $this->assertEquals($user->only('id', 'name'), $result);
     }
 
     /** @test */
     public function it_renders_an_array_of_data()
     {
         $data = ['id' => 1, 'name' => 'Name', 'email' => 'Email'];
-        $request = $this->buildRequest(['fields' => 'id,name']);
+        $request = $this->request()->fields('id,name')->make();
         $result = UserBuilder::make($request)->render($data);
 
         $this->assertEquals([
@@ -44,15 +42,12 @@ class QueryBuilderRenderTest extends TestCase
         $users = factory(User::class, 2)->make()->map(function ($user) {
             return $user->toArray();
         });
-        $request = $this->buildRequest(['fields' => 'name,email']);
+        $request = $this->request()->fields('name,email')->make();
         $result = UserBuilder::make($request)->render($users);
 
         $this->assertInstanceOf(Collection::class, $users);
-        $this->assertEquals(
-            $users->map(function ($user) {
-                return ['name' => $user['name'], 'email' => $user['email']];
-            })->all(),
-            $result
-        );
+        $this->assertEquals($users->map(function (array $user) {
+            return Arr::only($user, ['name', 'email']);
+        })->all(), $result);
     }
 }

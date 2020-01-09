@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class User extends Model
 {
+    use HasUuid;
+
     public function posts()
     {
         return $this->hasMany(Post::class, 'author_id');

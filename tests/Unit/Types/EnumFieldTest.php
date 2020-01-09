@@ -21,6 +21,6 @@ class EnumFieldTest extends TestCase
 
     private function enumField(array $enum, string $key = 'key', string $type = 'string')
     {
-        return new EnumField(new UserBuilder($this->buildRequest()), $key, $enum, $type);
+        return new EnumField(new UserBuilder(), $key, $enum, $type);
     }
 }

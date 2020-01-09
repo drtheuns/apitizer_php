@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Comment extends Model
 {
+    use HasUuid;
+
     public function post()
     {
         return $this->belongsTo(Comment::class);

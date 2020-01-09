@@ -39,6 +39,6 @@ class FieldTest extends TestCase
 
     private function field(string $key = 'key', string $type = 'string')
     {
-        return new Field(new UserBuilder($this->buildRequest()), $key, $type);
+        return new Field(new UserBuilder(), $key, $type);
     }
 }

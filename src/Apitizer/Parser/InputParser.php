@@ -1,30 +1,25 @@
 <?php
 
-namespace Apitizer;
+namespace Apitizer\Parser;
 
-use Apitizer\Apitizer;
 use Apitizer\Parser\Context;
 use Apitizer\Parser\Relation;
 use Apitizer\Parser\Sort;
-use Apitizer\Types\RequestInput;
-use Illuminate\Http\Request;
 
 /**
  * The request parser is responsible for turning the request data that we
  * received from the client, into something that can be interpreted by the
  * rest of the query builder.
  */
-class RequestParser
+class InputParser implements Parser
 {
-    public function parse(Request $request): RequestInput
+    public function parse(RawInput $rawInput): ParsedInput
     {
-        $requestData = new RequestInput();
-
-        $requestData->fields = $this->parseFields($request->input(Apitizer::getFieldKey(), ''));
-        $requestData->filters = $this->parseFilters($request->input(Apitizer::getFilterKey(), []));
-        $requestData->sorts = $this->parseSorts($request->input(Apitizer::getSortKey(), []));
-
-        return $requestData;
+        $parsedInput = new ParsedInput();
+        $parsedInput->fields = $this->parseFields($rawInput->getFields());
+        $parsedInput->filters = $this->parseFilters($rawInput->getFilters());
+        $parsedInput->sorts = $this->parseSorts($rawInput->getSorts());
+        return $parsedInput;
     }
 
     /**

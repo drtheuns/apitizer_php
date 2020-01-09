@@ -15,11 +15,11 @@ class ApidocTest extends TestCase
     public function it_should_guess_resource_names_from_the_query_builder()
     {
         // UserBuilder -> User
-        $onlyBuilder = new Apidoc(new UserBuilder($this->buildRequest()));
+        $onlyBuilder = new Apidoc(new UserBuilder());
         $this->assertEquals('User', $onlyBuilder->getName());
 
         // UserQueryBuilder -> User
-        $queryBuilder = new Apidoc(new UserQueryBuilder($this->buildRequest()));
+        $queryBuilder = new Apidoc(new UserQueryBuilder());
         $this->assertEquals('User', $queryBuilder->getName());
     }
 }

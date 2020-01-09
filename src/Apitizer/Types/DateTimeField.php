@@ -6,7 +6,10 @@ use Apitizer\Transformers\DateTimeFormat;
 
 class DateTimeField extends Field
 {
-    public function format(string $format = null): Field
+    /**
+     * @return $this
+     */
+    public function format(string $format = null): DateTimeField
     {
         $format = $format ?? ($this->type == 'date' ? 'Y-m-d' : 'Y-m-d H:i:s');
 

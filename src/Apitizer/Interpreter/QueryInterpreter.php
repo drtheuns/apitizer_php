@@ -1,6 +1,6 @@
 <?php
 
-namespace Apitizer;
+namespace Apitizer\Interpreter;
 
 use Apitizer\Types\FetchSpec;
 use Apitizer\QueryBuilder;
