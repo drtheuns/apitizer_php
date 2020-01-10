@@ -285,8 +285,6 @@ abstract class QueryBuilder
     /**
      * Fetch and return paginated data.
      *
-     * 
-     *
      * @return LengthAwarePaginator
      */
     public function paginate(int $perPage = null, ...$rest): LengthAwarePaginator
