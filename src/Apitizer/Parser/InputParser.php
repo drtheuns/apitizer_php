@@ -153,7 +153,7 @@ class InputParser implements Parser
         return preg_split('//u', $raw, null, PREG_SPLIT_NO_EMPTY);
     }
 
-    protected function isBlacklistedCharacter(int $character)
+    protected function isBlacklistedCharacter(int $character): bool
     {
         // This is just a best-attempt, probably not good enough.
         return

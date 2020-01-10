@@ -18,7 +18,7 @@ class RawInput
         $this->sorts = $sorts;
     }
 
-    public static function fromRequest(Request $request)
+    public static function fromRequest(Request $request): self
     {
         return new static(
             $request->input(Apitizer::getFieldKey(), ''),
@@ -27,7 +27,7 @@ class RawInput
         );
     }
 
-    public static function fromArray(array $input)
+    public static function fromArray(array $input): self
     {
         return new static(
             $input['fields'] ?? '',

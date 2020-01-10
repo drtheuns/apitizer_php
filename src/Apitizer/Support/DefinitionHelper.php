@@ -65,7 +65,7 @@ class DefinitionHelper
     private static function isValidAssociation(
         QueryBuilder $queryBuilder,
         Association $association
-    )
+    ): bool
     {
         $key = $association->getKey();
         $model = $queryBuilder->model();
@@ -85,7 +85,7 @@ class DefinitionHelper
         return $sorts;
     }
 
-    static function validateSort(QueryBuilder $queryBuilder, string $name, $sort)
+    static function validateSort(QueryBuilder $queryBuilder, string $name, $sort): void
     {
         if (! $sort instanceof Sort) {
             throw DefinitionException::sortDefinitionExpected($queryBuilder, $name, $sort);
@@ -106,7 +106,7 @@ class DefinitionHelper
         return $filters;
     }
 
-    static function validateFilter(QueryBuilder $queryBuilder, string $name, $filter)
+    static function validateFilter(QueryBuilder $queryBuilder, string $name, $filter): void
     {
         if (! $filter instanceof Filter) {
             throw DefinitionException::filterDefinitionExpected($queryBuilder, $name, $filter);

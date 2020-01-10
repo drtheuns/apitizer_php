@@ -25,12 +25,15 @@ class Sort
         $this->order = $order;
     }
 
-    public function getField()
+    public function getField(): string
     {
         return $this->field;
     }
 
-    public function getOrder()
+    /**
+     * @return 'asc'|'desc'
+     */
+    public function getOrder(): string
     {
         return $this->order;
     }

@@ -40,7 +40,7 @@ class Context
         $this->parent = $parent;
     }
 
-    public function makeChildContext()
+    public function makeChildContext(): self
     {
         return new self($this);
     }

@@ -48,7 +48,7 @@ class SchemaValidator
         return $this;
     }
 
-    public function validateFields(QueryBuilder $queryBuilder)
+    public function validateFields(QueryBuilder $queryBuilder): void
     {
         // Associations can fail the moment fields() is called.
         foreach ($queryBuilder->fields() as $name => $field) {
@@ -60,7 +60,7 @@ class SchemaValidator
         }
     }
 
-    public function validateFilters(QueryBuilder $queryBuilder)
+    public function validateFilters(QueryBuilder $queryBuilder): void
     {
         foreach ($queryBuilder->filters() as $name => $filter) {
             try {
@@ -71,7 +71,7 @@ class SchemaValidator
         }
     }
 
-    public function validateSorting(QueryBuilder $queryBuilder)
+    public function validateSorting(QueryBuilder $queryBuilder): void
     {
         foreach ($queryBuilder->sorts() as $name => $sort) {
             try {
@@ -82,7 +82,7 @@ class SchemaValidator
         }
     }
 
-    private function catchAll(Closure $callback)
+    private function catchAll(Closure $callback): void
     {
         // If something unexpected happens, add the error and continue
         // validating.
