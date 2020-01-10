@@ -82,4 +82,17 @@ class PaginationTest extends TestCase
         $paginator = UserBuilder::make($request)->paginate(1000);
         $this->assertEquals(1, $paginator->perPage());
     }
+
+    /** @test */
+    public function the_paginator_returns_the_requested_number_of_rows()
+    {
+        $users = factory(User::class, 2)->create();
+
+        $request = $this->request()->limit(1)->fields('id')->make();
+        $paginator = UserBuilder::make($request)->paginate();
+
+        $this->assertEquals(1, $paginator->perPage());
+        $this->assertCount(1, $paginator->getCollection());
+        $this->assertEquals([$users->first()->only('id')], $paginator->toArray()['data']);
+    }
 }

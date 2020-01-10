@@ -299,14 +299,15 @@ abstract class QueryBuilder
     protected function getPerPage(int $perPage = null)
     {
         $limitKey = Apitizer::getLimitKey();
+        $request = $this->getRequest();
 
-        if ($this->getRequest()->has($limitKey)) {
+        if ($request->has($limitKey)) {
             // The limit must be in range(1, $this->maximumLimit)
-            $perPage = $this->getRequest()->input($limitKey);
+            $perPage = $request->input($limitKey);
         }
 
         if (isset($perPage)) {
-            $perPage = max(1, min($this->getRequest()->input($limitKey), $this->getMaximumLimit()));
+            $perPage = max(1, min($request->input($limitKey), $this->getMaximumLimit()));
         }
 
         return $perPage;

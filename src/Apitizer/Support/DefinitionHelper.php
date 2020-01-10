@@ -68,9 +68,9 @@ class DefinitionHelper
     )
     {
         $key = $association->getKey();
+        $model = $queryBuilder->model();
 
-        return method_exists($queryBuilder->model(), $key)
-            && $queryBuilder->model()->{$key}() instanceof EloquentRelation;
+        return method_exists($model, $key) && $model->{$key}() instanceof EloquentRelation;
     }
 
     /**
