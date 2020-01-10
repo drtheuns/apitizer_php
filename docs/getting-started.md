@@ -66,7 +66,6 @@ class UserController extends Controller
 
 ## Install
 
-<!-- TODO: composer require if the package ever gets published to packagist -->
 Add the package repository to your `composer.json` and require the package:
 
 ```json
@@ -96,7 +95,7 @@ I recommend any project to always have their own base query builder, in case
 they ever want to change the behaviour globally. A simple override without
 anything else should be enough to get started:
 
-```
+```php
 // File: /my_project/app/QueryBuilders/QueryBuilder.php
 <?php
 
@@ -147,7 +146,7 @@ class UserBuilder extends QueryBuilder
 
 Add a controller that uses this builder:
 
-```
+```php
 // File: /my_project/app/Http/Controllers/UserController.php
 <?php
 
@@ -167,7 +166,7 @@ class UserController extends Controller
 
 Add the route:
 
-```
+```php
 // File: /my_projects/routes/api.php
 Route::get('users', 'UserController@index');
 ```
@@ -187,7 +186,7 @@ configuration.
 
 Within this config file, add (or modify) the following:
 
-```
+```php
 // File: /my_project/config/apitizer.php
 return [
     'query_builders' => [
