@@ -3,12 +3,14 @@
 namespace Apitizer\Types;
 
 use Apitizer\QueryBuilder;
+use Apitizer\Rendering\Renderer;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use ArrayAccess;
 
 class Association extends Factory
 {
+    use RendersValues;
+
     /**
      * The key of this association on the data source.
      *
@@ -27,9 +29,11 @@ class Association extends Factory
         $this->key = $key;
     }
 
-    public function render(ArrayAccess $row)
+    public function render($row, Renderer $renderer)
     {
-        return $this->getQueryBuilder()->render($row[$this->key], $this->fields);
+        $assocData = $this->valueFromRow($row, $this->getKey());
+
+        return $renderer->render($this->getQueryBuilder(), $assocData, $this->fields);
     }
 
     public function getFields()

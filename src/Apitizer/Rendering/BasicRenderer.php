@@ -31,7 +31,7 @@ class BasicRenderer implements Renderer
         $acc = [];
 
         foreach ($selectedFields as $fieldOrAssoc) {
-            $acc[$fieldOrAssoc->getName()] = $fieldOrAssoc->render($row);
+            $acc[$fieldOrAssoc->getName()] = $fieldOrAssoc->render($row, $this);
         }
 
         return $acc;

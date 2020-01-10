@@ -39,9 +39,7 @@ class RenderTest extends TestCase
     /** @test */
     public function it_renders_a_collection_of_data()
     {
-        $users = factory(User::class, 2)->make()->map(function ($user) {
-            return $user->toArray();
-        });
+        $users = factory(User::class, 2)->make()->map->toArray();
         $request = $this->request()->fields('name,email')->make();
         $result = UserBuilder::make($request)->render($users);
 
@@ -54,10 +52,21 @@ class RenderTest extends TestCase
     /** @test */
     public function it_renders_objects()
     {
-        $user = factory(User::class)->create();
-        $request = $this->request()->fields('id,name')->make();
-        $result = UserBuilder::make($request)->render((object) $user->only('id', 'name'));
+        $user = factory(User::class)->make();
+        $request = $this->request()->fields('name,email')->make();
+        $result = UserBuilder::make($request)->render((object) $user->only('name', 'email'));
 
-        $this->assertEquals($user->only('id', 'name'), $result);
+        $this->assertEquals($user->only('name', 'email'), $result);
+    }
+
+    /** @test */
+    public function it_can_render_data_using_a_manual_fetch_specification()
+    {
+        $user = factory(User::class)->make();
+        $result = UserBuilder::make()->render($user, [
+            'fields' => 'name,email'
+        ]);
+
+        $this->assertEquals($user->only('name', 'email'), $result);
     }
 }

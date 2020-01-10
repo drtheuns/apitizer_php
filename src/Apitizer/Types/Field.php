@@ -6,10 +6,13 @@ use Apitizer\Exceptions\CastException;
 use Apitizer\Exceptions\InvalidInputException;
 use Apitizer\Exceptions\InvalidOutputException;
 use Apitizer\QueryBuilder;
+use Apitizer\Rendering\Renderer;
 use ArrayAccess;
 
 class Field extends Factory
 {
+    use RendersValues;
+
     /**
      * The key that this field occupies on the data source.
      */
@@ -59,15 +62,9 @@ class Field extends Factory
      */
     public function render($row)
     {
-        $value = null;
-
-        if ($row instanceof ArrayAccess || is_array($row)) {
-            $value = $row[$this->getKey()];
-        } else if (is_object($row)) {
-            $value = $row->{$this->getKey()};
-        }
-
-        $value = $this->validateValue($value, $row);
+        $value = $this->validateValue(
+            $this->valueFromRow($row, $this->getKey()), $row
+        );
 
         foreach ($this->transformers as $transformer) {
             try {

@@ -157,12 +157,9 @@ abstract class QueryBuilder
     }
 
     /**
-     * Create a new instance with a request object.
-     *
-     * If you need to pass other variables, such as a custom QueryInterpreter,
-     * use the constructor instead.
+     * Static alias for the constructor.
      */
-    public static function make(Request $request)
+    public static function make(Request $request = null)
     {
         return (new static($request));
     }
@@ -250,10 +247,10 @@ abstract class QueryBuilder
      */
     public function render($data, array $fields = null): array
     {
-        $fieldsToRender = $fields ?? $this->makeFetchSpecification()->getFields();
-        // TODO: Validate & convert the fields that were passed in.
+        $rawInput = is_array($fields) ? RawInput::fromArray($fields) : null;
+        $fetchSpec = $this->makeFetchSpecification($rawInput);
 
-        return $this->getRenderer()->render($this, $data, $fieldsToRender);
+        return $this->getRenderer()->render($this, $data, $fetchSpec->getFields());
     }
 
     /**
@@ -332,11 +329,10 @@ abstract class QueryBuilder
      *
      * @return FetchSpec
      */
-    protected function makeFetchSpecification(): FetchSpec
+    protected function makeFetchSpecification(RawInput $rawInput = null): FetchSpec
     {
-        $fetchSpec = $this->validateRequestInput(
-            $this->getParser()->parse(RawInput::fromRequest($this->getRequest()))
-        );
+        $rawInput = $rawInput ?? RawInput::fromRequest($this->getRequest());
+        $fetchSpec = $this->validateRequestInput($this->getParser()->parse($rawInput));
 
         if (empty($fetchSpec->getFields())) {
             // If nothing (valid) is selected, return all non-association fields.

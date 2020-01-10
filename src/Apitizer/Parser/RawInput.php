@@ -4,6 +4,7 @@ namespace Apitizer\Parser;
 
 use Apitizer\Apitizer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 
 class RawInput
 {
@@ -24,6 +25,15 @@ class RawInput
             $request->input(Apitizer::getFieldKey(), ''),
             $request->input(Apitizer::getFilterKey(), []),
             $request->input(Apitizer::getSortKey(), [])
+        );
+    }
+
+    public static function fromArray(array $input)
+    {
+        return new static(
+            Arr::get($input, 'fields', ''),
+            Arr::get($input, 'filters', []),
+            Arr::get($input, 'sorts', [])
         );
     }
 

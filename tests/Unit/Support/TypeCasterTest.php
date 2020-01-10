@@ -96,6 +96,9 @@ class TypeCasterTest extends TestCase
     {
         $uuid = Str::uuid();
         $this->assertEquals($uuid, TypeCaster::cast($uuid, 'uuid'));
+
+        $uuid = (string) Str::uuid();
+        $this->assertEquals($uuid, TypeCaster::cast($uuid, 'uuid'));
     }
 
     /** @test */
@@ -109,5 +112,27 @@ class TypeCasterTest extends TestCase
         $uuid = Str::uuid();
         $invalidUuid = substr($uuid, strlen($uuid) - 1);
         $this->assertEquals($invalidUuid, TypeCaster::cast($invalidUuid, 'uuid'));
+    }
+
+    /**
+     * @test
+     * @dataProvider invalidCasts
+     */
+    public function if_casting_fails_a_cast_exception_is_thrown($type, $value)
+    {
+        $this->expectException(CastException::class);
+        TypeCaster::cast($value, $type);
+    }
+
+    public function invalidCasts()
+    {
+        // You'd be surprised how much garbage data PHP's casting allows.
+        return [
+            // type, value
+            ['uuid', 'invalid'],
+            ['uuid', 1],
+            ['uuid', 1.0],
+            ['string', (object) ['wow' => 'oops']],
+        ];
     }
 }
