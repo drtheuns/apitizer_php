@@ -15,6 +15,7 @@ class RequestBuilder
     protected $fields;
     protected $filters = [];
     protected $sorts;
+    protected $limit;
 
     public function __construct(string $method = null, string $url = null)
     {
@@ -64,6 +65,13 @@ class RequestBuilder
         return $this;
     }
 
+    public function limit(int $limit): self
+    {
+        $this->limit = $limit;
+
+        return $this;
+    }
+
     public function make(): Request
     {
         $queryParams = [];
@@ -78,6 +86,10 @@ class RequestBuilder
 
         if ($this->sorts) {
             $queryParams[Apitizer::getSortKey()] = $this->sorts;
+        }
+
+        if (! is_null($this->limit)) {
+            $queryParams['limit'] = $this->limit;
         }
 
         $request = Request::create($this->url, $this->method);

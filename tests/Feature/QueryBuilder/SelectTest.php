@@ -14,12 +14,12 @@ class SelectTest extends TestCase
         /** @test */
     public function it_can_select_the_specified_fields()
     {
-        $user = factory(User::class)->create();
+        $post = factory(Post::class)->create();
 
-        $request = $this->request()->fields('id,name')->make();
-        $results = UserBuilder::make($request)->all();
+        $request = $this->request()->fields('id,title,status')->make();
+        $results = PostBuilder::make($request)->all();
 
-        $this->assertEquals([$user->only('id', 'name')], $results);
+        $this->assertEquals([$post->only('id', 'title', 'status')], $results);
     }
 
     /** @test */

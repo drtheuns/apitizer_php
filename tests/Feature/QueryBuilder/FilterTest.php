@@ -86,4 +86,36 @@ class FilterTest extends TestCase
 
         $this->assertEquals([$post->only('id')], $result);
     }
+
+    /** @test */
+    public function it_can_filter_by_field()
+    {
+        $users = factory(User::class, 2)->create();
+        $expectedUser = $users->first();
+
+        $request = $this->request()
+                        ->filter('name', [$expectedUser->name])
+                        ->fields('id')
+                        ->make();
+        $result = UserBuilder::make($request)->all();
+
+        $this->assertEquals([$expectedUser->only('id')], $result);
+    }
+
+    /** @test */
+    public function it_filters_by_custom_operators()
+    {
+        $users = factory(User::class, 2)->create();
+        $expectedUser = $users->first();
+        $expectedUser->created_at = '2021-01-02 13:00:00';
+        $expectedUser->save();
+
+        $request = $this->request()
+                        ->filter('created_at', '2021-01-01 00:00:00')
+                        ->fields('id')
+                        ->make();
+        $result = UserBuilder::make($request)->all();
+
+        $this->assertEquals([$expectedUser->only('id')], $result);
+    }
 }

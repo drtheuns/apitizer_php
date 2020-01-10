@@ -3,18 +3,14 @@
 namespace Tests\Feature\Builders;
 
 use Apitizer\QueryBuilder;
+use Tests\Feature\Models\User;
 use Illuminate\Database\Eloquent\Model;
-use Tests\Feature\Models\Tag;
 
-class TagBuilder extends QueryBuilder
+class EmptyBuilder extends QueryBuilder
 {
     public function fields(): array
     {
-        return [
-            'id'     => $this->int('id'),
-            'name'   => $this->string('name'),
-            'weight' => $this->float('weight'),
-        ];
+        return [];
     }
 
     public function filters(): array
@@ -29,6 +25,6 @@ class TagBuilder extends QueryBuilder
 
     public function model(): Model
     {
-        return new Tag();
+        return new User();
     }
 }

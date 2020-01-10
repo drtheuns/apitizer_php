@@ -2,19 +2,15 @@
 
 namespace Apitizer;
 
-use Apitizer\Types\Apidoc;
 use Apitizer\Types\ApidocCollection;
 
 class Apitizer
 {
     public static function getQueryBuilderDocumentation(): ApidocCollection
     {
-        $builders = collect(config('apitizer.query_builders', []))
-                  ->map(function (string $builderClass) {
-                      return new Apidoc(new $builderClass);
-                  });
-
-        return new ApidocCollection($builders);
+        return ApidocCollection::forQueryBuilders(
+            config('apitizer.query_builders', [])
+        );
     }
 
     public static function getFieldKey()
@@ -30,5 +26,24 @@ class Apitizer
     public static function getFilterKey()
     {
         return config('apitizer.query_parameters.filters');
+    }
+
+    public static function getLimitKey()
+    {
+        return config('apitizer.query_parameters.limit');
+    }
+
+    public static function getQueryParams()
+    {
+        return array_values(config('apitizer.query_parameters', []));
+    }
+
+    public static function getRouteUrl(): ?string
+    {
+        if (! config('apitizer.generate_documentation', true)) {
+            return null;
+        }
+
+        return config('apitizer.route_prefix');
     }
 }

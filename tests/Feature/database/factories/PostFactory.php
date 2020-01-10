@@ -11,7 +11,8 @@ $factory->define(Post::class, function (Faker $faker, array $attributes) {
         'body' => $faker->text,
         'author_id' => $attributes['author_id'] ?? function () {
             return factory(User::class)->create()->id;
-        }
+        },
+        'status' => $faker->randomElement(['published', 'draft', 'scrapped', 'another-status']),
     ];
 });
 

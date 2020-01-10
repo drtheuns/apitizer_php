@@ -2,8 +2,21 @@
 
 namespace Apitizer;
 
+use Apitizer\ExceptionStrategy\Raise;
+use Apitizer\ExceptionStrategy\Strategy;
+use Apitizer\Parser\InputParser;
+use Apitizer\Parser\Parser;
+use Apitizer\Rendering\BasicRenderer;
+use Apitizer\Rendering\Renderer;
+
 class ServiceProvider extends \Illuminate\Support\ServiceProvider
 {
+    public $bindings = [
+        Strategy::class => Raise::class,
+        Parser::class   => InputParser::class,
+        Renderer::class => BasicRenderer::class,
+    ];
+
     /**
      * Register the service provider
      *

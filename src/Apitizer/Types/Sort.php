@@ -29,11 +29,6 @@ class Sort extends Factory
         return $this;
     }
 
-    public function getField()
-    {
-        return $this->field;
-    }
-
     public function getOrder()
     {
         return $this->order;

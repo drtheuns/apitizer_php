@@ -2,6 +2,7 @@
 
 namespace Apitizer\Support;
 
+use Apitizer\Exceptions\CastException;
 use DateTime;
 use DateTimeInterface;
 
@@ -29,27 +30,26 @@ class TypeCaster
             case 'double':
                 return (float) $value;
             case 'date':
-                return self::castToDate($value, $format ?? 'Y-m-d');
+                return self::castToDate($value, $type, $format ?? 'Y-m-d');
             case 'datetime':
-                return self::castToDate($value, $format ?? 'Y-m-d H:i:s');
+                return self::castToDate($value, $type, $format ?? 'Y-m-d H:i:s');
             default:
                 return $value;
         }
     }
 
-    public static function castToDate($value, $format): ?DateTimeInterface
+    public static function castToDate($value, $type, $format): ?DateTimeInterface
     {
         if ($value instanceof DateTimeInterface) {
             return $value;
         }
 
         if (is_string($value)) {
-            $datetime = DateTime::createFromFormat($format, $value);
-
-            // createFromFormat may return false if it fails.
-            return $datetime ? $datetime : null;
+            if ($datetime = DateTime::createFromFormat($format, $value)) {
+                return $datetime;
+            }
         }
 
-        throw new \UnexpectedValueException('Unable to cast ' . gettype($value) . ' to string');
+        throw new CastException($value, $type, $format);
     }
 }

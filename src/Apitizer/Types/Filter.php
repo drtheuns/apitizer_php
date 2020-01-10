@@ -2,6 +2,8 @@
 
 namespace Apitizer\Types;
 
+use Apitizer\Exceptions\InvalidInputException;
+use Apitizer\Exceptions\CastException;
 use Apitizer\Filters\AssociationFilter;
 use Apitizer\Support\TypeCaster;
 use Apitizer\Filters\LikeFilter;
@@ -121,15 +123,16 @@ class Filter extends Factory
     /**
      * Get the validated, type casted input.
      *
-     * @throws \UnexpectedValueException
+     * @throws InvalidInputException
+     * @throws CastException
      *
      * @return array|mixed
      */
-    public function validateInput($input)
+    protected function validateInput($input)
     {
         if ($this->expectArray) {
             if (! \is_array($input)) {
-                throw new \UnexpectedValueException();
+                throw InvalidInputException::filterTypeError($this, $input);
             }
 
             return array_map(function ($value) {
@@ -138,7 +141,7 @@ class Filter extends Factory
         }
 
         if (\is_array($input)) {
-            throw new \UnexpectedValueException();
+            throw InvalidInputException::filterTypeError($this, $input);
         }
 
         return TypeCaster::cast($input, $this->type);
@@ -154,9 +157,11 @@ class Filter extends Factory
         return $this->value;
     }
 
-    public function setValue($value)
+    public function setValue($value): self
     {
         $this->value = $this->validateInput($value);
+
+        return $this;
     }
 
     public function getInputType()

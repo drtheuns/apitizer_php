@@ -102,11 +102,6 @@ class Apidoc
         return $this->queryBuilder;
     }
 
-    public function getAnchorName(string $suffix)
-    {
-        return $this->getName() . '-' . $suffix;
-    }
-
     protected function guessQueryBuilderResourceName()
     {
         // It might be better to guess based on the model's name.
@@ -114,7 +109,7 @@ class Apidoc
 
         // UserBuilder -> User
         // UserQueryBuilder -> User
-        \preg_match('/(.+?)(?:Query)?Builder/', $className, $re);
+        \preg_match('/(.+?)(?:Query)?Builder$/', $className, $re);
 
         if (isset($re[1])) {
             return Str::title($re[1]);
@@ -136,5 +131,14 @@ class Apidoc
     public function hasAssociations(): bool
     {
         return ! empty($this->getAssociations());
+    }
+
+    public function printAssociationType(Association $association)
+    {
+        $name = $this->getName();
+
+        return $association->returnsCollection()
+            ? "array of $name"
+            : $name;
     }
 }

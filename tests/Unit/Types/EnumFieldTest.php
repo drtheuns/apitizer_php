@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Types;
 
+use Apitizer\Exceptions\InvalidOutputException;
 use Apitizer\Types\EnumField;
 use Tests\Unit\TestCase;
-use UnexpectedValueException;
 use Tests\Feature\Builders\UserBuilder;
 
 class EnumFieldTest extends TestCase
@@ -14,7 +14,7 @@ class EnumFieldTest extends TestCase
     /** @test */
     public function it_raises_an_exception_when_a_value_is_rendered_that_is_not_in_the_enum()
     {
-        $this->expectException(UnexpectedValueException::class);
+        $this->expectException(InvalidOutputException::class);
 
         $this->enumField(static::DEFAULT)->render(['key' => 'unexpected']);
     }

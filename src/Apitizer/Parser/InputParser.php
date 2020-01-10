@@ -2,6 +2,7 @@
 
 namespace Apitizer\Parser;
 
+use Apitizer\Exceptions\InvalidInputException;
 use Apitizer\Parser\Context;
 use Apitizer\Parser\Relation;
 use Apitizer\Parser\Sort;
@@ -41,7 +42,6 @@ class InputParser implements Parser
 
         $context = new Context();
 
-        // TODO: Add line/column numbers for debugging
         foreach ($this->stringToArray($rawFields) as $character) {
             if ($context->isQuoted && $character !== '"') {
                 $context->accumulator .= $character;
@@ -116,12 +116,17 @@ class InputParser implements Parser
         }
 
         if (! is_array($rawSorts)) {
-            throw new \UnexpectedValueException('expected an array, got: ' . gettype($rawSorts));
+            // We cannot parse this, ignore the given sorting.
+            return [];
         }
 
         $sorts = [];
 
         foreach ($rawSorts as $rawSort) {
+            if (! is_string($rawSort)) {
+                continue;
+            }
+
             $rawSort = trim($rawSort);
             $pos = mb_strpos($rawSort, '.');
 

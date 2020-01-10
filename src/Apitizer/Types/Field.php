@@ -2,9 +2,11 @@
 
 namespace Apitizer\Types;
 
+use Apitizer\Exceptions\CastException;
+use Apitizer\Exceptions\InvalidInputException;
+use Apitizer\Exceptions\InvalidOutputException;
 use Apitizer\QueryBuilder;
 use ArrayAccess;
-use UnexpectedValueException;
 
 class Field extends Factory
 {
@@ -49,7 +51,7 @@ class Field extends Factory
      *
      * @param ArrayAccess|array|object $row
      *
-     * @throws UnexpectedValueException if the value does not adhere to the requirements set by the field.
+     * @throws InvalidInputException if the value does not adhere to the requirements set by the field.
      *         For example, if the field is not nullable but the value is null, this will throw an error.
      *         Enum field may also throw an error if the value is not in the enum.
      *
@@ -65,19 +67,29 @@ class Field extends Factory
             $value = $row->{$this->getKey()};
         }
 
-        $value = $this->validateValue($value);
+        $value = $this->validateValue($value, $row);
 
         foreach ($this->transformers as $transformer) {
-            $value = $transformer($value, $this);
+            try {
+                $value = call_user_func($transformer, $value, $this);
+            } catch (CastException $e) {
+                $e = InvalidOutputException::castError($this, $e, $row);
+                $this->getQueryBuilder()->handleException($e);
+
+                // If the error is ignored, continuing transformations will likely
+                // generate more unexpected errors.
+                $value = null;
+                break;
+            }
         }
 
         return $value;
     }
 
-    protected function validateValue($value)
+    protected function validateValue($value, $row)
     {
         if (is_null($value) && !$this->isNullable()) {
-            throw new UnexpectedValueException();
+            throw InvalidOutputException::fieldIsNull($this, $row);
         }
 
         return $value;

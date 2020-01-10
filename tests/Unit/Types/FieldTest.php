@@ -2,12 +2,11 @@
 
 namespace Tests\Unit\Types;
 
-use Apitizer\QueryBuilder;
+use Apitizer\Exceptions\InvalidOutputException;
 use Apitizer\Types\Field;
 use ArrayAccess;
 use Tests\Unit\TestCase;
 use Tests\Feature\Builders\UserBuilder;
-use UnexpectedValueException;
 
 class FieldTest extends TestCase
 {
@@ -25,7 +24,7 @@ class FieldTest extends TestCase
     /** @test */
     public function non_nullable_fields_throw_when_null_value_is_rendered()
     {
-        $this->expectException(UnexpectedValueException::class);
+        $this->expectException(InvalidOutputException::class);
         $this->field()->render(['key' => null]);
     }
 

@@ -17,6 +17,8 @@ class CreateTagsTable extends Migration
             $table->increments('id');
             $table->uuid('uuid');
             $table->string('name');
+            // Is only a float to test the float type.
+            $table->float('weight')->default(0.5);
         });
 
         Schema::create('taggables', function (Blueprint $table) {

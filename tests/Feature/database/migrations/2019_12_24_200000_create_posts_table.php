@@ -19,7 +19,7 @@ class CreatePostsTable extends Migration
             $table->unsignedInteger('author_id');
             $table->enum('status', ['published', 'draft', 'scrapped', 'another-status'])->default('draft');
             $table->string('title');
-            $table->text('body');
+            $table->text('body')->nullable();
             $table->timestamps();
 
             $table->foreign('author_id')->references('id')->on('users')->onDelete('cascade');

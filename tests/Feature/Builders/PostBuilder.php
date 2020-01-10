@@ -3,17 +3,20 @@
 namespace Tests\Feature\Builders;
 
 use Apitizer\QueryBuilder;
+use Apitizer\Types\Apidoc;
 use Illuminate\Database\Eloquent\Model;
 use Tests\Feature\Models\Post;
 
 class PostBuilder extends QueryBuilder
 {
+    const DESCRIPTION = 'A blog post';
+
     public function fields(): array
     {
         return [
             'id'         => $this->int('id'),
             'title'      => $this->string('title'),
-            'body'       => $this->any('body'),
+            'body'       => $this->any('body')->nullable(),
             'status'     => $this->enum('status', ['published', 'draft', 'scrapped', 'another-status']),
             'author'     => $this->association('author', UserBuilder::class),
             'comments'   => $this->association('comments', CommentBuilder::class),
@@ -40,5 +43,10 @@ class PostBuilder extends QueryBuilder
     public function model(): Model
     {
         return new Post();
+    }
+
+    public function apidoc(Apidoc $apidoc)
+    {
+        $apidoc->setDescription(self::DESCRIPTION);
     }
 }

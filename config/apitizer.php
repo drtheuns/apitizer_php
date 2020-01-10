@@ -7,8 +7,9 @@ return [
      */
     'query_parameters' => [
         'filters' => 'filters',
-        'fields' => 'fields',
-        'sort' => 'sort',
+        'fields'  => 'fields',
+        'sort'    => 'sort',
+        'limit'   => 'limit',
     ],
 
     /*

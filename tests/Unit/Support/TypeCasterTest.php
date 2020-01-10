@@ -2,11 +2,11 @@
 
 namespace Tests\Unit\Support;
 
+use Apitizer\Exceptions\CastException;
 use Apitizer\Support\TypeCaster;
 use DateTime;
 use DateTimeInterface;
 use Tests\Unit\TestCase;
-use UnexpectedValueException;
 
 class TypeCasterTest extends TestCase
 {
@@ -49,7 +49,7 @@ class TypeCasterTest extends TestCase
     /** @test */
     public function it_throws_an_exception_if_datetime_casting_receives_unexpected_type()
     {
-        $this->expectException(UnexpectedValueException::class);
+        $this->expectException(CastException::class);
         TypeCaster::cast(1, 'datetime');
     }
 

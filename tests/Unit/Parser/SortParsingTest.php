@@ -2,10 +2,10 @@
 
 namespace Tests\Unit\Parser;
 
+use Apitizer\Exceptions\InvalidInputException;
 use Apitizer\Parser\InputParser;
 use Apitizer\Parser\Sort;
 use Tests\Unit\TestCase;
-use UnexpectedValueException;
 
 class SortParsingTest extends TestCase
 {
@@ -74,11 +74,17 @@ class SortParsingTest extends TestCase
     }
 
     /** @test */
-    public function an_exception_is_raised_if_a_non_array_or_string_is_passed()
+    public function sorting_is_ignored_if_invalid_input_is_passed()
     {
-        $this->expectException(UnexpectedValueException::class);
+        $sorts = $this->parse(1);
 
-        $this->parse((object) ['name.asc']);
+        $this->assertEmpty($sorts);
+    }
+
+    /** @test */
+    public function an_exception_is_raised_if_an_invalid_array_is_passed()
+    {
+        $this->assertEquals([], $this->parse([[]]));
     }
 
     private function parse($sort)

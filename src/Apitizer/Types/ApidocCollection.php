@@ -7,6 +7,27 @@ use Illuminate\Support\Collection;
 class ApidocCollection extends Collection
 {
     /**
+     * @param string[] $builders
+     */
+    public static function forQueryBuilders(array $builders)
+    {
+        $collection = [];
+
+        foreach ($builders as $builderClass) {
+            $collection[$builderClass] = new Apidoc(new $builderClass);
+        }
+
+        return new static($collection);
+    }
+
+    public function findAssociationType(Association $assoc): ?Apidoc
+    {
+        $builder = \get_class($assoc->getQueryBuilder());
+
+        return $this->items[$builder] ?? null;
+    }
+
+    /**
      * @return \ArrayIterator|Apidoc[]
      */
     public function getIterator()
@@ -16,29 +37,4 @@ class ApidocCollection extends Collection
         return parent::getIterator();
     }
 
-    public function findAssociationType(Association $assoc): ?Apidoc
-    {
-        $builder = $assoc->getQueryBuilder();
-
-        foreach ($this->all() as $apidoc) {
-            if (\get_class($apidoc->getQueryBuilder()) === \get_class($builder)) {
-                return $apidoc;
-            }
-        }
-
-        return null;
-    }
-
-    public function printAssociationType(Association $assoc): string
-    {
-        if ($apidoc = $this->findAssociationType($assoc)) {
-            $name = $apidoc->getName();
-
-            return $assoc->returnsCollection()
-                ? "array of $name"
-                : $name;
-        }
-
-        return '';
-    }
 }

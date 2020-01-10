@@ -50,4 +50,14 @@ class RenderTest extends TestCase
             return Arr::only($user, ['name', 'email']);
         })->all(), $result);
     }
+
+    /** @test */
+    public function it_renders_objects()
+    {
+        $user = factory(User::class)->create();
+        $request = $this->request()->fields('id,name')->make();
+        $result = UserBuilder::make($request)->render((object) $user->only('id', 'name'));
+
+        $this->assertEquals($user->only('id', 'name'), $result);
+    }
 }

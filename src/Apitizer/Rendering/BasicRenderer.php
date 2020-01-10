@@ -6,17 +6,11 @@ use Apitizer\QueryBuilder;
 
 class BasicRenderer implements Renderer
 {
-    /**
-     * @var QueryBuilder
-     */
-    protected $queryBuilder;
-
-    public function __construct(QueryBuilder $queryBuilder)
-    {
-        $this->queryBuilder = $queryBuilder;
-    }
-
-    public function render($data, array $selectedFields): array
+    public function render(
+        QueryBuilder $queryBuilder,
+        $data,
+        array $selectedFields
+    ): array
     {
         // Check if we're dealing with a single row of data.
         if ($this->isSingleDataModel($data) || $this->isNonCollectionObject($data)) {

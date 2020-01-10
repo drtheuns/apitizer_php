@@ -2,13 +2,16 @@
 
 namespace Apitizer;
 
+use Apitizer\Exceptions\ApitizerException;
+use Apitizer\Exceptions\DefinitionException;
+use Apitizer\Exceptions\InvalidInputException;
+use Apitizer\ExceptionStrategy\Strategy;
 use Apitizer\Interpreter\QueryInterpreter;
 use Apitizer\Parser\InputParser;
 use Apitizer\Parser\ParsedInput;
 use Apitizer\Parser\Parser;
 use Apitizer\Parser\RawInput;
 use Apitizer\Parser\Relation;
-use Apitizer\Rendering\BasicRenderer;
 use Apitizer\Rendering\Renderer;
 use Apitizer\Types\Apidoc;
 use Apitizer\Types\Association;
@@ -18,10 +21,11 @@ use Apitizer\Types\Filter;
 use Apitizer\Types\Sort;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation as EloquentRelation;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\AbstractPaginator;
 use Illuminate\Pagination\LengthAwarePaginator;
-use UnexpectedValueException;
+use Illuminate\Support\Arr;
 
 abstract class QueryBuilder
 {
@@ -78,6 +82,20 @@ abstract class QueryBuilder
      * @var QueryBuilder
      */
     protected $parent;
+
+    /**
+     * The maximum number of rows that the client is able to request.
+     *
+     * @param int
+     */
+    protected $maximumLimit = 50;
+
+    /**
+     * The strategy to use when an exception is raised.
+     *
+     * @var Strategy
+     */
+    protected $exceptionStrategy;
 
     /**
      * A function that returns the fields that are available to the client.
@@ -154,9 +172,9 @@ abstract class QueryBuilder
      *
      * @return Builder
      */
-    public static function build(): Builder
+    public static function build(Request $request = null): Builder
     {
-        return (new static())->buildQuery();
+        return (new static($request))->buildQuery();
     }
 
     /**
@@ -184,6 +202,10 @@ abstract class QueryBuilder
             $builderInstance = $this->createChildBuilder($builderClass);
         }
 
+        if (! $this->isValidAssociation($key)) {
+            throw DefinitionException::associationDoesNotExist($key);
+        }
+
         return new Association($builderInstance, $key);
     }
 
@@ -192,15 +214,19 @@ abstract class QueryBuilder
         $builder = new $builderClass();
 
         if (! $builder instanceof QueryBuilder) {
-            throw new UnexpectedValueException(
-                "Expected [$builderClass] to be a query builder class"
-            );
+            throw DefinitionException::builderClassExpected($builderClass);
         }
 
         // setParent will take care of all the other setters.
         $builder->setParent($this);
 
         return $builder;
+    }
+
+    protected function isValidAssociation(string $associationName)
+    {
+        return method_exists($this->model(), $associationName)
+            && $this->model()->{$associationName}() instanceof EloquentRelation;
     }
 
     /**
@@ -237,7 +263,7 @@ abstract class QueryBuilder
         $fieldsToRender = $fields ?? $this->makeFetchSpecification()->getFields();
         // TODO: Validate & convert the fields that were passed in.
 
-        return $this->getRenderer()->render($data, $fieldsToRender);
+        return $this->getRenderer()->render($this, $data, $fieldsToRender);
     }
 
     /**
@@ -250,6 +276,7 @@ abstract class QueryBuilder
         $fetchSpec = $this->makeFetchSpecification();
 
         return $this->getRenderer()->render(
+            $this,
             $this->getQueryInterpreter()->build($this, $fetchSpec)->get(),
             $fetchSpec->getFields()
         );
@@ -258,20 +285,46 @@ abstract class QueryBuilder
     /**
      * Fetch and return paginated data.
      *
+     * 
+     *
      * @return LengthAwarePaginator
      */
-    public function paginate(): LengthAwarePaginator
+    public function paginate(int $perPage = null, ...$rest): LengthAwarePaginator
     {
         $fetchSpec = $this->makeFetchSpecification();
-        $paginator = $this->getQueryInterpreter()->build($this, $fetchSpec)->paginate();
+        $perPage = $this->getPerPage($perPage);
+        $paginator = $this->getQueryInterpreter()
+                          ->build($this, $fetchSpec)
+                          ->paginate($perPage, ...$rest);
 
         return tap($paginator, function (AbstractPaginator $paginator) use ($fetchSpec) {
             $renderedData = $this->getRenderer()->render(
-                $paginator->getCollection(), $fetchSpec->getFields()
+                $this, $paginator->getCollection(), $fetchSpec->getFields()
             );
 
             $paginator->setCollection(collect($renderedData));
+
+            // Ensure the all the supported query parameters that were passed in are
+            // also present in the pagination links.
+            $queryParameters = Arr::only($this->getRequest()->query(), Apitizer::getQueryParams());
+            $paginator->appends($queryParameters);
         });
+    }
+
+    protected function getPerPage(int $perPage = null)
+    {
+        $limitKey = Apitizer::getLimitKey();
+
+        if ($this->getRequest()->has($limitKey)) {
+            // The limit must be in range(1, $this->maximumLimit)
+            $perPage = $this->getRequest()->input($limitKey);
+        }
+
+        if (isset($perPage)) {
+            $perPage = max(1, min($this->getRequest()->input($limitKey), $this->getMaximumLimit()));
+        }
+
+        return $perPage;
     }
 
     /**
@@ -327,9 +380,7 @@ abstract class QueryBuilder
             }
 
             if (! $field instanceof Field) {
-                throw new \UnexpectedValueException(
-                    "Unexpected field type for {$name}: {gettype($field)}"
-                );
+                throw DefinitionException::fieldDefinitionExpected($name, $field);
             }
 
             $field->setName($name);
@@ -343,9 +394,7 @@ abstract class QueryBuilder
     {
         foreach ($filters as $name => $filter) {
             if (! $filter instanceof Filter) {
-                throw new \UnexpectedValueException(
-                    "expected Filter to be returned for {$name}"
-                );
+                throw DefinitionException::filterDefinitionExpected($name, $filter);
             }
 
             $filter->setName($name);
@@ -358,9 +407,7 @@ abstract class QueryBuilder
     {
         foreach ($sorts as $name => $sort) {
             if (! $sort instanceof Sort) {
-                throw new \UnexpectedValueException(
-                    "Expected Sort to be returned for {$name}"
-                );
+                throw DefinitionException::sortDefinitionExpected($name, $sort);
             }
             $sort->setName($name);
         }
@@ -447,8 +494,8 @@ abstract class QueryBuilder
                     $filter->setValue($filterInput);
                     $validatedFilters[$name] = $filter;
                 }
-            } catch (\UnexpectedValueException $e) {
-                // Ignore this filter.
+            } catch (InvalidInputException $e) {
+                $this->getExceptionStrategy()->handle($this, $e);
             }
         }
 
@@ -515,7 +562,11 @@ abstract class QueryBuilder
 
     public function getRequest(): Request
     {
-        return $this->request ?? request();
+        if (! $this->request) {
+            $this->request = request();
+        }
+
+        return $this->request;
     }
 
     public function setRequest(?Request $request): self
@@ -528,7 +579,7 @@ abstract class QueryBuilder
     public function getRenderer(): Renderer
     {
         if (! $this->renderer) {
-           $this->renderer = new BasicRenderer($this);
+            $this->renderer = app(Renderer::class);
         }
 
         return $this->renderer;
@@ -560,7 +611,7 @@ abstract class QueryBuilder
     public function getParser(): Parser
     {
         if (! $this->parser) {
-            $this->parser = new InputParser();
+            $this->parser = app(Parser::class);
         }
 
         return $this->parser;
@@ -571,6 +622,27 @@ abstract class QueryBuilder
         $this->parser = $requestParser;
 
         return $this;
+    }
+
+    public function getExceptionStrategy(): Strategy
+    {
+        if (! $this->exceptionStrategy) {
+            $this->exceptionStrategy = app(Strategy::class);
+        }
+
+        return $this->exceptionStrategy;
+    }
+
+    public function setExceptionStrategy(Strategy $strategy): self
+    {
+        $this->exceptionStrategy = $strategy;
+
+        return $this;
+    }
+
+    public function handleException(ApitizerException $e)
+    {
+        return $this->getExceptionStrategy()->handle($this, $e);
     }
 
     public function getParent(): ?QueryBuilder
@@ -585,6 +657,18 @@ abstract class QueryBuilder
              ->setQueryInterpreter($parent->getQueryInterpreter())
              ->setParser($parent->getParser())
              ->setRenderer($parent->getRenderer());
+
+        return $this;
+    }
+
+    public function getMaximumLimit(): int
+    {
+        return $this->maximumLimit;
+    }
+
+    public function setMaximumLimit(int $limit): self
+    {
+        $this->maximumLimit = $limit;
 
         return $this;
     }

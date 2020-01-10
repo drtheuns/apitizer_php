@@ -2,8 +2,9 @@
 
 namespace Apitizer\Types;
 
+use Apitizer\Exceptions\InvalidInputException;
+use Apitizer\Exceptions\InvalidOutputException;
 use Apitizer\QueryBuilder;
-use UnexpectedValueException;
 
 /**
  * Specialization of the field type to display enumerable values.
@@ -28,15 +29,12 @@ class EnumField extends Field
         $this->enum = $enum;
     }
 
-    protected function validateValue($value)
+    protected function validateValue($value, $row)
     {
-        $value = parent::validateValue($value);
+        $value = parent::validateValue($value, $row);
 
         if (! in_array($value, $this->enum)) {
-            $options = implode(', ', $this->enum);
-            throw new UnexpectedValueException(
-                "Expected value [{$value}] to be one of [{$options}]"
-            );
+            throw InvalidOutputException::invalidEnum($this, $value, $row);
         }
 
         return $value;
