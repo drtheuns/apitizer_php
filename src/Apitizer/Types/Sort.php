@@ -34,7 +34,7 @@ class Sort extends Factory
         return $this->order;
     }
 
-    public function setOrder(string $order)
+    public function setOrder(string $order): self
     {
         $this->order = $order;
 
@@ -46,8 +46,10 @@ class Sort extends Factory
         return $this->handler;
     }
 
-    public function handleUsing(callable $handler)
+    public function handleUsing(callable $handler): self
     {
         $this->handler = $handler;
+
+        return $this;
     }
 }

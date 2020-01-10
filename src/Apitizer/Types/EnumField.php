@@ -40,12 +40,12 @@ class EnumField extends Field
         return $value;
     }
 
-    public function printType()
+    public function printType(): string
     {
         return $this->typeOrNull("enum of {$this->type}");
     }
 
-    public function getEnum()
+    public function getEnum(): array
     {
         return $this->enum;
     }

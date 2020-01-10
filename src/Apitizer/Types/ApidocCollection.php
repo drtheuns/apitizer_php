@@ -9,7 +9,7 @@ class ApidocCollection extends Collection
     /**
      * @param string[] $builders
      */
-    public static function forQueryBuilders(array $builders)
+    public static function forQueryBuilders(array $builders): ApidocCollection
     {
         $collection = [];
 

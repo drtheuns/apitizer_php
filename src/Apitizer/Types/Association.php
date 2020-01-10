@@ -19,7 +19,7 @@ class Association extends Factory
     protected $key;
 
     /**
-     * The fields to render on the related query builder.
+     * @var null|array The fields to render on the related query builder.
      */
     protected $fields;
 
@@ -36,7 +36,7 @@ class Association extends Factory
         return $renderer->render($this->getQueryBuilder(), $assocData, $this->fields);
     }
 
-    public function getFields()
+    public function getFields(): ?array
     {
         return $this->fields;
     }
@@ -48,7 +48,7 @@ class Association extends Factory
         return $this;
     }
 
-    public function getKey()
+    public function getKey(): string
     {
         return $this->key;
     }
@@ -56,7 +56,7 @@ class Association extends Factory
     /**
      * Check if this association returns a collection of related rows.
      */
-    public function returnsCollection()
+    public function returnsCollection(): bool
     {
         $model = $this->getQueryBuilder()->getParent()->model();
         $relation = $model->{$this->key}();

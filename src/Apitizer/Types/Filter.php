@@ -35,7 +35,7 @@ class Filter extends Factory
      */
     protected $value = null;
 
-    public function expect(string $type)
+    public function expect(string $type): self
     {
         $this->expectArray = false;
         $this->type = $type;
@@ -43,7 +43,7 @@ class Filter extends Factory
         return $this;
     }
 
-    public function expectMany(string $type)
+    public function expectMany(string $type): self
     {
         $this->expectArray = true;
         $this->type = $type;
@@ -51,7 +51,7 @@ class Filter extends Factory
         return $this;
     }
 
-    public function handleUsing(callable $handler)
+    public function handleUsing(callable $handler): self
     {
         $this->handler = $handler;
 
@@ -147,7 +147,7 @@ class Filter extends Factory
         return TypeCaster::cast($input, $this->type);
     }
 
-    public function getHandler()
+    public function getHandler(): ?callable
     {
         return $this->handler;
     }
@@ -168,7 +168,7 @@ class Filter extends Factory
         return $this;
     }
 
-    public function getInputType()
+    public function getInputType(): string
     {
         return $this->expectArray
             ? "array of {$this->type}"

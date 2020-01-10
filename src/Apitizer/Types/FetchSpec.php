@@ -36,7 +36,7 @@ class FetchSpec
         $this->filters = $filters;
     }
 
-    public function getFields()
+    public function getFields(): array
     {
         return $this->fields;
     }
@@ -48,12 +48,12 @@ class FetchSpec
         return $this;
     }
 
-    public function getSorts()
+    public function getSorts(): array
     {
         return $this->sorts;
     }
 
-    public function getFilters()
+    public function getFilters(): array
     {
         return $this->filters;
     }

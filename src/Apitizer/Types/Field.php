@@ -14,7 +14,7 @@ class Field extends Factory
     use RendersValues;
 
     /**
-     * The key that this field occupies on the data source.
+     * @var string The key that this field occupies on the data source.
      */
     protected $key;
 
@@ -112,17 +112,17 @@ class Field extends Factory
         return $this;
     }
 
-    public function getType()
+    public function getType(): string
     {
         return $this->type;
     }
 
-    public function getKey()
+    public function getKey(): string
     {
         return $this->key;
     }
 
-    public function isNullable()
+    public function isNullable(): bool
     {
         return $this->nullable;
     }
@@ -133,12 +133,12 @@ class Field extends Factory
      * This is a separate function to allow specialized field types from having
      * deviating types vs how they are displayed, such as enums.
      */
-    public function printType()
+    public function printType(): string
     {
         return $this->typeOrNull($this->getType());
     }
 
-    protected function typeOrNull(string $type)
+    protected function typeOrNull(string $type): string
     {
         return $this->isNullable()
             ? "$type or null"

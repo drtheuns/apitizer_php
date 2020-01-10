@@ -29,9 +29,7 @@ class Apidoc
     protected $associations = [];
 
     /**
-     * A description of this resource.
-     *
-     * @var string
+     * @var string A description of this resource.
      */
     protected $description;
 
@@ -53,7 +51,7 @@ class Apidoc
         $queryBuilder->apidoc($this);
     }
 
-    public function getDescription()
+    public function getDescription(): ?string
     {
         return $this->description;
     }
@@ -65,7 +63,7 @@ class Apidoc
         return $this;
     }
 
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
@@ -77,27 +75,27 @@ class Apidoc
         return $this;
     }
 
-    public function getFields()
+    public function getFields(): array
     {
         return $this->fields;
     }
 
-    public function getAssociations()
+    public function getAssociations(): array
     {
         return $this->associations;
     }
 
-    public function getSorts()
+    public function getSorts(): array
     {
         return $this->queryBuilder->getSorts();
     }
 
-    public function getFilters()
+    public function getFilters(): array
     {
         return $this->queryBuilder->getFilters();
     }
 
-    public function getQueryBuilder()
+    public function getQueryBuilder(): QueryBuilder
     {
         return $this->queryBuilder;
     }
@@ -133,7 +131,7 @@ class Apidoc
         return ! empty($this->getAssociations());
     }
 
-    public function printAssociationType(Association $association)
+    public function printAssociationType(Association $association): string
     {
         $name = $this->getName();
 
