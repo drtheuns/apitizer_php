@@ -2,6 +2,7 @@
 
 namespace Apitizer;
 
+use Apitizer\QueryBuilder;
 use Apitizer\Types\ApidocCollection;
 
 class Apitizer
@@ -11,6 +12,16 @@ class Apitizer
         return ApidocCollection::forQueryBuilders(
             config('apitizer.query_builders', [])
         );
+    }
+
+    /**
+     * @return QueryBuilder[]
+     */
+    public static function getQueryBuilders(): array
+    {
+        return array_map(function (string $builderClass) {
+            return new $builderClass;
+        }, config('apitizer.query_builders', []));
     }
 
     public static function getFieldKey()

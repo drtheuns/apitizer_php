@@ -2,6 +2,10 @@
 
 namespace Apitizer\Exceptions;
 
+use Apitizer\QueryBuilder;
+use Apitizer\Types\Association;
+use Apitizer\Types\Filter;
+
 /**
  * This exception occurs when the programmer gives an unexpected definition in
  * the query builder.
@@ -9,46 +13,107 @@ namespace Apitizer\Exceptions;
 class DefinitionException extends ApitizerException
 {
     /**
-     * The query builder where the definition error lies.
+     * @var QueryBuilder The query builder where the definition error lies.
      */
     protected $queryBuilder;
 
     /**
-     * @var 'filter'|'sort'|'field'|'association'|'other'
+     * @var 'filter'|'sort'|'field'|'association'
      */
     protected $namespace;
 
+    const NAMESPACES = ['filter', 'sort', 'field', 'association'];
+
     /**
-     * @var string
+     * @var string The field/sort/filter name where this exception occured.
      */
     protected $name;
 
-    public static function builderClassExpected(string $givenClass)
-    {
-        return new static("Expected [$givenClass] to be a query builder class");
+    public function __construct(
+        string $message,
+        QueryBuilder $queryBuilder,
+        string $namespace,
+        string $name = null
+    ) {
+        parent::__construct($message);
+        $this->queryBuilder = $queryBuilder;
+        $this->namespace = $namespace;
+        $this->name = $name;
     }
 
-    public static function fieldDefinitionExpected(string $fieldName, $given)
+    static function builderClassExpected(QueryBuilder $queryBuilder, string $key, $given): self
     {
-        $type = gettype($given);
-        return new static("Unexpected field type for [$fieldName]: {$type}");
+        $class = get_class($queryBuilder);
+        $message = "Expected association by [$key] on [$class] to be a "
+                 ."query builder class but got [$given]";
+
+        return new static($message, $queryBuilder, 'association');
     }
 
-    public static function filterDefinitionExpected(string $filterName, $given)
+    static function associationDoesNotExist(QueryBuilder $queryBuilder, Association $associaton): self
     {
-        $type = gettype($given);
-        return new static("Unexpected filter type for [$filterName]: {$type}");
+        $name = $associaton->getName();
+        $class = get_class($queryBuilder);
+        $key = $associaton->getKey();
+        $modelClass = get_class($queryBuilder->model());
+        $message = "Association [$name] on [$class] refers to association [$key] which"
+            . " does not exist on the model [$modelClass]";
+
+
+        return new static($message, $queryBuilder, 'association', $associaton->getName());
     }
 
-    public static function sortDefinitionExpected(string $sortName, $given)
+    static function fieldDefinitionExpected(QueryBuilder $queryBuilder, string $name, $given): self
     {
-        $type = gettype($given);
-        return new static("Unexpected sort type for [$sortName]: {$type}");
+        $class = get_class($queryBuilder);
+        $type = is_object($given) ? get_class($given) : gettype($given);
+        $message = "Expected [$name] on [$class] to be a field definition, but got"
+                 . " a [$type]";
+
+        return new static($message, $queryBuilder, 'field', $name);
     }
 
-    public static function associationDoesNotExist(string $key)
+    static function filterDefinitionExpected(QueryBuilder $queryBuilder, string $name, $given): self
     {
-        // TODO: Improve this message to include the model.
-        return new static("An association by the name $key does not exist");
+        $class = get_class($queryBuilder);
+        $type = is_object($given) ? get_class($given) : gettype($given);
+        $message = "Expected [$name] on [$class] to be a filter definition, but got"
+                 . " a [$type]";
+
+        return new static($message, $queryBuilder, 'filter', $name);
+    }
+
+    static function filterHandlerNotDefined(QueryBuilder $queryBuilder, Filter $filter): self
+    {
+        $class = get_class($queryBuilder);
+        $name = $filter->getName();
+        $message = "Filter [$name] on [$class] does not have a handler defined";
+
+        return new static($message, $queryBuilder, 'filter', $filter->getName());
+    }
+
+    static function sortDefinitionExpected(QueryBuilder $queryBuilder, string $name, $given): self
+    {
+        $class = get_class($queryBuilder);
+        $type = is_object($given) ? get_class($given) : gettype($given);
+        $message = "Expected [$name] on [$class] to be a sort definition, but got"
+            . " a [$type]";
+
+        return new static($message, $queryBuilder, 'sort', $name);
+    }
+
+    public function getQueryBuilder(): QueryBuilder
+    {
+        return $this->queryBuilder;
+    }
+
+    public function getNamespace(): string
+    {
+        return $this->namespace;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
     }
 }

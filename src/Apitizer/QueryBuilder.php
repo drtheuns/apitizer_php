@@ -13,6 +13,7 @@ use Apitizer\Parser\Parser;
 use Apitizer\Parser\RawInput;
 use Apitizer\Parser\Relation;
 use Apitizer\Rendering\Renderer;
+use Apitizer\Support\DefinitionHelper;
 use Apitizer\Types\Apidoc;
 use Apitizer\Types\Association;
 use Apitizer\Types\FetchSpec;
@@ -21,7 +22,6 @@ use Apitizer\Types\Filter;
 use Apitizer\Types\Sort;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\Relation as EloquentRelation;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\AbstractPaginator;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -199,34 +199,24 @@ abstract class QueryBuilder
         $builderInstance = $this->getParentByClassName($builderClass);
 
         if (! $builderInstance) {
-            $builderInstance = $this->createChildBuilder($builderClass);
-        }
-
-        if (! $this->isValidAssociation($key)) {
-            throw DefinitionException::associationDoesNotExist($key);
+            $builderInstance = $this->createChildBuilder($key, $builderClass);
         }
 
         return new Association($builderInstance, $key);
     }
 
-    protected function createChildBuilder(string $builderClass)
+    protected function createChildBuilder(string $key, string $builderClass)
     {
         $builder = new $builderClass();
 
         if (! $builder instanceof QueryBuilder) {
-            throw DefinitionException::builderClassExpected($builderClass);
+            throw DefinitionException::builderClassExpected($this, $key, $builderClass);
         }
 
         // setParent will take care of all the other setters.
         $builder->setParent($this);
 
         return $builder;
-    }
-
-    protected function isValidAssociation(string $associationName)
-    {
-        return method_exists($this->model(), $associationName)
-            && $this->model()->{$associationName}() instanceof EloquentRelation;
     }
 
     /**
@@ -356,63 +346,6 @@ abstract class QueryBuilder
         return $fetchSpec;
     }
 
-    /**
-     * Validate that each field has a correct type, possibly assigning the any
-     * type.
-     *
-     * @return Map<string, Field|Association>
-     */
-    protected function castFields(array $fields): array
-    {
-        $castFields = [];
-
-        foreach ($fields as $name => $field) {
-            if ($field instanceof Association) {
-                $field->setName($name);
-                $castFields[$name] = $field;
-                continue;
-            }
-
-            if (is_string($field)) {
-                $field = $this->any($field);
-            }
-
-            if (! $field instanceof Field) {
-                throw DefinitionException::fieldDefinitionExpected($name, $field);
-            }
-
-            $field->setName($name);
-            $castFields[$name] = $field;
-        }
-
-        return $castFields;
-    }
-
-    protected function castFilters(array $filters): array
-    {
-        foreach ($filters as $name => $filter) {
-            if (! $filter instanceof Filter) {
-                throw DefinitionException::filterDefinitionExpected($name, $filter);
-            }
-
-            $filter->setName($name);
-        }
-
-        return $filters;
-    }
-
-    protected function castSorts(array $sorts): array
-    {
-        foreach ($sorts as $name => $sort) {
-            if (! $sort instanceof Sort) {
-                throw DefinitionException::sortDefinitionExpected($name, $sort);
-            }
-            $sort->setName($name);
-        }
-
-        return $sorts;
-    }
-
     protected function validateRequestInput(ParsedInput $unvalidatedInput): FetchSpec
     {
         $validated = new FetchSpec(
@@ -503,7 +436,7 @@ abstract class QueryBuilder
     public function getFields(): array
     {
         if (is_null($this->availableFields)) {
-            $this->availableFields = $this->castFields($this->fields());
+            $this->availableFields = DefinitionHelper::validateFields($this, $this->fields());
         }
 
         return $this->availableFields;
@@ -512,7 +445,7 @@ abstract class QueryBuilder
     public function getSorts(): array
     {
         if (is_null($this->availableSorts)) {
-            $this->availableSorts = $this->castSorts($this->sorts());
+            $this->availableSorts = DefinitionHelper::validateSorts($this, $this->sorts());
         }
 
         return $this->availableSorts;
@@ -521,7 +454,7 @@ abstract class QueryBuilder
     public function getFilters(): array
     {
         if (is_null($this->availableFilters)) {
-            $this->availableFilters = $this->castFilters($this->filters());
+            $this->availableFilters = DefinitionHelper::validateFilters($this, $this->filters());
         }
 
         return $this->availableFilters;

@@ -44,6 +44,12 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
         }
 
         $this->loadViewsFrom($root . '/resources/views', 'apitizer');
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                Commands\ValidateSchemaCommand::class,
+            ]);
+        }
     }
 
     protected function registerRoutes()
