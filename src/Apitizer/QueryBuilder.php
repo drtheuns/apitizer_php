@@ -392,7 +392,7 @@ abstract class QueryBuilder
                     $fieldInstance->setFields($fieldInstance->getQueryBuilder()->getOnlyFields());
                 }
 
-                $validatedFields[] = $availableFields[$field];
+                $validatedFields[] = $fieldInstance;
             }
         }
 
@@ -516,7 +516,7 @@ abstract class QueryBuilder
         return $this->renderer;
     }
 
-    public function setRenderer(Renderer $renderer): self
+    public function setRenderer(?Renderer $renderer): self
     {
         $this->renderer = $renderer;
 
@@ -532,7 +532,7 @@ abstract class QueryBuilder
         return $this->queryInterpreter;
     }
 
-    public function setQueryInterpreter(QueryInterpreter $queryInterpreter): self
+    public function setQueryInterpreter(?QueryInterpreter $queryInterpreter): self
     {
         $this->queryInterpreter = $queryInterpreter;
 
@@ -548,7 +548,7 @@ abstract class QueryBuilder
         return $this->parser;
     }
 
-    public function setParser(Parser $requestParser): self
+    public function setParser(?Parser $requestParser): self
     {
         $this->parser = $requestParser;
 
@@ -564,7 +564,7 @@ abstract class QueryBuilder
         return $this->exceptionStrategy;
     }
 
-    public function setExceptionStrategy(Strategy $strategy): self
+    public function setExceptionStrategy(?Strategy $strategy): self
     {
         $this->exceptionStrategy = $strategy;
 

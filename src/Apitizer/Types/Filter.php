@@ -159,7 +159,11 @@ class Filter extends Factory
 
     public function setValue($value): self
     {
-        $this->value = $this->validateInput($value);
+        try {
+            $this->value = $this->validateInput($value);
+        } catch (CastException $e) {
+            throw InvalidInputException::filterTypeError($this, $value);
+        }
 
         return $this;
     }

@@ -27,6 +27,15 @@ class FilterTest extends TestCase
         $filter->setValue('name');
     }
 
+    /** @test */
+    public function it_validates_the_type_of_the_input()
+    {
+        $this->expectException(InvalidInputException::class);
+
+        $filter = $this->filter()->expectMany('uuid');
+        $filter->setValue(['should be uuid']);
+    }
+
     private function filter()
     {
         return new Filter(new UserBuilder());

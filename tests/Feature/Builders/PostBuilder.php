@@ -14,13 +14,14 @@ class PostBuilder extends QueryBuilder
     public function fields(): array
     {
         return [
-            'id'         => $this->int('id'),
-            'title'      => $this->string('title'),
-            'body'       => $this->any('body')->nullable(),
-            'status'     => $this->enum('status', ['published', 'draft', 'scrapped', 'another-status']),
-            'author'     => $this->association('author', UserBuilder::class),
-            'comments'   => $this->association('comments', CommentBuilder::class),
-            'tags'       => $this->association('tags', TagBuilder::class),
+            'id'       => $this->int('id'),
+            'uuid'     => $this->uuid('uuid'),
+            'title'    => $this->string('title'),
+            'body'     => $this->any('body')->nullable(),
+            'status'   => $this->enum('status', ['published', 'draft', 'scrapped', 'another-status']),
+            'author'   => $this->association('author', UserBuilder::class),
+            'comments' => $this->association('comments', CommentBuilder::class),
+            'tags'     => $this->association('tags', TagBuilder::class),
         ];
     }
 

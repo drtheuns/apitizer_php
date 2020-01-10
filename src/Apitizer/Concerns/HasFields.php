@@ -29,6 +29,11 @@ trait HasFields
         return $this->field($key, 'int')->transform(new CastValue);
     }
 
+    protected function uuid(string $key): Field
+    {
+        return $this->field($key, 'uuid')->transform(new CastValue);
+    }
+
     protected function float(string $key): Field
     {
         return $this->field($key, 'float')->transform(new CastValue);

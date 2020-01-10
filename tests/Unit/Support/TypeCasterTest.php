@@ -6,6 +6,7 @@ use Apitizer\Exceptions\CastException;
 use Apitizer\Support\TypeCaster;
 use DateTime;
 use DateTimeInterface;
+use Illuminate\Support\Str;
 use Tests\Unit\TestCase;
 
 class TypeCasterTest extends TestCase
@@ -88,5 +89,25 @@ class TypeCasterTest extends TestCase
     public function nulls_will_remain_nulls()
     {
         $this->assertEquals(null, TypeCaster::cast(null, 'string'));
+    }
+
+    /** @test */
+    public function it_can_validate_and_cast_uuids()
+    {
+        $uuid = Str::uuid();
+        $this->assertEquals($uuid, TypeCaster::cast($uuid, 'uuid'));
+    }
+
+    /** @test */
+    public function it_raises_when_invalid_uuids_are_given()
+    {
+        $this->expectException(CastException::class);
+
+        $invalidUuid = 'obvious';
+        $this->assertEquals($invalidUuid, TypeCaster::cast($invalidUuid, 'uuid'));
+
+        $uuid = Str::uuid();
+        $invalidUuid = substr($uuid, strlen($uuid) - 1);
+        $this->assertEquals($invalidUuid, TypeCaster::cast($invalidUuid, 'uuid'));
     }
 }

@@ -5,10 +5,24 @@ namespace Apitizer\Support;
 use Apitizer\Exceptions\CastException;
 use DateTime;
 use DateTimeInterface;
+use Exception;
+use Ramsey\Uuid\Uuid;
 
 class TypeCaster
 {
     public static function cast($value, string $type, ?string $format = null)
+    {
+        try {
+            return static::doCast($value, $type, $format);
+        } catch (Exception $e) {
+            if ($e instanceof CastException) {
+                throw $e;
+            }
+            throw new CastException($value, $type, $format);
+        }
+    }
+
+    private static function doCast($value, $type, $format)
     {
         // Null values should evaluate to "false" in the boolean cast,
         // which is why this check comes before the null check.
@@ -23,6 +37,8 @@ class TypeCaster
         switch ($type) {
             case 'string':
                 return (string) $value;
+            case 'uuid':
+                return static::castUuid($value, $type, $format);
             case 'int':
             case 'integer':
                 return (int) $value;
@@ -38,7 +54,7 @@ class TypeCaster
         }
     }
 
-    public static function castToDate($value, $type, $format): ?DateTimeInterface
+    private static function castToDate($value, $type, $format): ?DateTimeInterface
     {
         if ($value instanceof DateTimeInterface) {
             return $value;
@@ -51,5 +67,20 @@ class TypeCaster
         }
 
         throw new CastException($value, $type, $format);
+    }
+
+    private static function castUuid($value, $type, $format)
+    {
+        if ($value instanceof Uuid) {
+            return $value;
+        }
+
+        $value = (string) $value;
+
+        if (! Uuid::isValid($value)) {
+            throw new CastException($value, $type, $format);
+        }
+
+        return $value;
     }
 }
