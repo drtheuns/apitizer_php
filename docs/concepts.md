@@ -8,6 +8,18 @@ Eloquent does not define a schema in it's models, so the query builder takes on
 that role. This allows for very specific selection of columns from the database
 instead of the typical `select *`.
 
+The schema can be validated using `artisan apitizer:validate-schema`. This will
+print a list of errors that it managed to find with your query builders. An
+example of the about can be seen below:
+
+```
+QueryBuilders\PostBuilder
+-----------------------------
+* Association
+  * Association [tags] on [App\QueryBuilders\PostBuilder] refers to association [tag] which does not exist on the model [App\Models\Post]
+```
+
+
 ## Fields
 
 Fields allow consumers of the API to select only the columns that they need.
