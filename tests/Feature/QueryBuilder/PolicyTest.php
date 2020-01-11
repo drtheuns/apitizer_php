@@ -121,16 +121,19 @@ class PolicyTest extends TestCase
     public function policies_are_applied_for_each_row_in_an_association()
     {
         $user = factory(User::class)->state('withPosts')->create();
+        // We're going to fail the policy for the first post, all others will
+        // succeed.
         $policy = new FailId($user->posts->first()->id);
         $fields = [
             'posts' => $this->association('posts', new PostBuilder())->policy($policy),
         ];
+
         $request = $this->request()->fields('posts(id)')->make();
         $result = PolicyTestBuilder::new($request, $fields)->render($user);
 
         $this->assertEquals([
             'posts' => $user->posts->slice(1)->values()->map->only('id')->all()
-        ], $result);
+        ], $result, 'all but the first row should be filtered out');
     }
 
     /** @test */
