@@ -69,8 +69,6 @@ class SelectTest extends TestCase
         $request = $this->request()->make();
         $result = UserBuilder::make($request)->all();
 
-        // TODO: Get these fields dynamically from the query builder to make
-        // this test more robust against changes to the Builder.
         $expected = [
             [
                 'id' => $user->id,

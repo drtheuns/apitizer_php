@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\QueryBuilder;
 
+use Apitizer\Policies\CachePolicy;
 use Apitizer\Policies\OwnerPolicy;
 use Apitizer\Policies\Policy;
 use Apitizer\Types\Field;
@@ -95,9 +96,27 @@ class PolicyTest extends TestCase
         $this->assertEquals(['name' => $user->name], $result);
     }
 
-    private function field(string $name): Field
+    /** @test */
+    public function policies_can_easily_be_cached_and_shared_amongst_fields()
     {
-        return (new Field(new EmptyBuilder, $name, 'string'))->setName($name);
+        // The same policy used in both fields, but should only be executed once.
+        $policy = new CachablePolicy();
+        $cachedPolicy = new CachePolicy($policy);
+        $fields = [
+            'id' => $this->field('id', 'int')->policy($cachedPolicy),
+            'name' => $this->field('name')->policy($cachedPolicy),
+        ];
+        $user = factory(User::class)->create();
+        $request = $this->request()->fields('id,name')->make();
+        $result = PolicyTestBuilder::new($request, $fields)->render($user);
+
+        $this->assertEquals($user->only('id', 'name'), $result);
+        $this->assertEquals(1, $policy->called);
+    }
+
+    private function field(string $name, string $type = 'string'): Field
+    {
+        return (new Field(new EmptyBuilder, $name, $type))->setName($name);
     }
 }
 
@@ -136,5 +155,16 @@ class PolicyTestBuilder extends EmptyBuilder
     public function fields(): array
     {
         return $this->fields;
+    }
+}
+
+class CachablePolicy implements Policy
+{
+    public $called = 0;
+
+    public function passes($value, $row, Field $field): bool
+    {
+        $this->called++;
+        return true;
     }
 }
