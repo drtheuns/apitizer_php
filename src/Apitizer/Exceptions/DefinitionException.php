@@ -18,7 +18,7 @@ class DefinitionException extends ApitizerException
     protected $queryBuilder;
 
     /**
-     * @var 'filter'|'sort'|'field'|'association'
+     * @var string one of the namespaces from the NAMESPACES const.
      */
     protected $namespace;
 

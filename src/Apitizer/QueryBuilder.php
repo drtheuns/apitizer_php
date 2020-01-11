@@ -152,6 +152,36 @@ abstract class QueryBuilder
         //
     }
 
+    /**
+     * This function is called before the query is built and conditions are applied.
+     * It allows query builders to hook into the query building process and
+     * modify the query based on state and user input.
+     *
+     * For example, if you need to always add conditions to the query based on
+     * the user's role, this would be the place to put it.
+     *
+     * @see QueryBuilder::getRequest()
+     * @see FetchSpec::fieldSelected
+     * @see FetchSpec::filterSelected
+     * @see FetchSpec::sortSelected
+     */
+    public function beforeQuery(Builder $query, FetchSpec $fetchSpec): Builder
+    {
+        return $query;
+    }
+
+    /**
+     * Same as the beforeQuery method, this function can be used to hook into
+     * the query building process when it is done (but the data hasn't been
+     * fetched yet).
+     *
+     * @see QueryBuilder::beforeQuery
+     */
+    public function afterQuery(Builder $query, FetchSpec $fetchSpec): Builder
+    {
+        return $query;
+    }
+
     public function __construct(Request $request = null) {
         $this->setRequest($request);
     }
@@ -196,24 +226,17 @@ abstract class QueryBuilder
         $builderInstance = $this->getParentByClassName($builderClass);
 
         if (! $builderInstance) {
-            $builderInstance = $this->createChildBuilder($key, $builderClass);
+            $builderInstance = new $builderClass();
+
+            if (! $builderInstance instanceof QueryBuilder) {
+                throw DefinitionException::builderClassExpected($this, $key, $builderClass);
+            }
+
+            // setParent will take care of all the other setters.
+            $builderInstance->setParent($this);
         }
 
         return new Association($builderInstance, $key);
-    }
-
-    protected function createChildBuilder(string $key, string $builderClass)
-    {
-        $builder = new $builderClass();
-
-        if (! $builder instanceof QueryBuilder) {
-            throw DefinitionException::builderClassExpected($this, $key, $builderClass);
-        }
-
-        // setParent will take care of all the other setters.
-        $builder->setParent($this);
-
-        return $builder;
     }
 
     /**

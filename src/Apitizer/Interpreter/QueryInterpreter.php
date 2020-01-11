@@ -15,10 +15,13 @@ class QueryInterpreter
     public function build(QueryBuilder $queryBuilder, FetchSpec $fetchSpec): Builder
     {
         $query = $queryBuilder->model()->query();
+        $query = $queryBuilder->beforeQuery($query, $fetchSpec);
 
         $this->applySelect($query, $fetchSpec->getFields());
         $this->applySorting($query, $fetchSpec->getSorts());
         $this->applyFilters($query, $fetchSpec->getFilters());
+
+        $query = $queryBuilder->afterQuery($query, $fetchSpec);
 
         return $query;
     }
@@ -73,7 +76,7 @@ class QueryInterpreter
     {
         foreach ($sorts as $sort) {
             if ($handler = $sort->getHandler()) {
-                $handler($query, $sort);
+                call_user_func($handler, $query, $sort);
             }
         }
     }
