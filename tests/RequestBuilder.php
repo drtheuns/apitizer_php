@@ -16,6 +16,7 @@ class RequestBuilder
     protected $filters = [];
     protected $sorts;
     protected $limit;
+    protected $user;
 
     public function __construct(string $method = null, string $url = null)
     {
@@ -72,6 +73,13 @@ class RequestBuilder
         return $this;
     }
 
+    public function user($user): self
+    {
+        $this->user = $user;
+
+        return $this;
+    }
+
     public function make(): Request
     {
         $queryParams = [];
@@ -94,6 +102,9 @@ class RequestBuilder
 
         $request = Request::create($this->url, $this->method);
         $request->merge($queryParams);
+        $request->setUserResolver(function () {
+            return $this->user;
+        });
 
         return $request;
     }

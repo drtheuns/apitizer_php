@@ -247,7 +247,7 @@ abstract class QueryBuilder
             $builderInstance->setParent($this);
         }
 
-        return new Association($builderInstance, $key);
+        return new Association($this, $builderInstance, $key);
     }
 
     /**
@@ -404,9 +404,11 @@ abstract class QueryBuilder
                 $association = $availableFields[$field->name];
 
                 // Validate the fields recursively
-                $queryBuilder = $association->getQueryBuilder();
+                $queryBuilder = $association->getRelatedQueryBuilder();
                 $association->setFields(
-                    $queryBuilder->getValidatedFields($field->fields, $queryBuilder->getFields())
+                    $queryBuilder->getValidatedFields(
+                        $field->fields, $queryBuilder->getFields()
+                    )
                 );
 
                 $validatedFields[] = $association;
@@ -420,7 +422,9 @@ abstract class QueryBuilder
                 // /posts?fields=comments
                 // .. so we select everything from that query builder.
                 if ($fieldInstance instanceof Association) {
-                    $fieldInstance->setFields($fieldInstance->getQueryBuilder()->getOnlyFields());
+                    $fieldInstance->setFields(
+                        $fieldInstance->getRelatedQueryBuilder()->getOnlyFields()
+                    );
                 }
 
                 $validatedFields[] = $fieldInstance;

@@ -1,19 +1,19 @@
 <?php
 
-namespace Apitizer\Types;
+namespace Apitizer\Types\Concerns;
 
 use ArrayAccess;
 
-trait RendersValues
+trait FetchesValueFromRow
 {
     protected function valueFromRow($row, string $key)
     {
         $value = null;
 
         if ($row instanceof ArrayAccess || is_array($row)) {
-            $value = $row[$this->getKey()];
+            $value = $row[$key];
         } else if (is_object($row)) {
-            $value = $row->{$this->getKey()};
+            $value = $row->{$key};
         }
 
         return $value;

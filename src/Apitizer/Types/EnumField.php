@@ -2,7 +2,6 @@
 
 namespace Apitizer\Types;
 
-use Apitizer\Exceptions\InvalidInputException;
 use Apitizer\Exceptions\InvalidOutputException;
 use Apitizer\QueryBuilder;
 

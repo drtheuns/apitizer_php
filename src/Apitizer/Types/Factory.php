@@ -28,7 +28,7 @@ abstract class Factory
 
     public function __construct(QueryBuilder $queryBuilder)
     {
-        $this->queryBuilder = $queryBuilder;
+        $this->setQueryBuilder($queryBuilder);
     }
 
     /**
@@ -65,5 +65,12 @@ abstract class Factory
     public function getQueryBuilder(): QueryBuilder
     {
         return $this->queryBuilder;
+    }
+
+    public function setQueryBuilder(QueryBuilder $queryBuilder): self
+    {
+        $this->queryBuilder = $queryBuilder;
+
+        return $this;
     }
 }

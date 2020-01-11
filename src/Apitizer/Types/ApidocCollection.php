@@ -22,7 +22,7 @@ class ApidocCollection extends Collection
 
     public function findAssociationType(Association $assoc): ?Apidoc
     {
-        $builder = \get_class($assoc->getQueryBuilder());
+        $builder = \get_class($assoc->getRelatedQueryBuilder());
 
         return $this->items[$builder] ?? null;
     }

@@ -2,6 +2,7 @@
 
 namespace Apitizer\Rendering;
 
+use Apitizer\Policies\PolicyFailed;
 use Apitizer\QueryBuilder;
 
 class BasicRenderer implements Renderer
@@ -31,7 +32,13 @@ class BasicRenderer implements Renderer
         $acc = [];
 
         foreach ($selectedFields as $fieldOrAssoc) {
-            $acc[$fieldOrAssoc->getName()] = $fieldOrAssoc->render($row, $this);
+            $renderedValue = $fieldOrAssoc->render($row, $this);
+
+            if ($renderedValue instanceof PolicyFailed) {
+                continue;
+            }
+
+            $acc[$fieldOrAssoc->getName()] = $renderedValue;
         }
 
         return $acc;

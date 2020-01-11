@@ -9,12 +9,10 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Association extends Factory
 {
-    use RendersValues;
+    use Concerns\FetchesValueFromRow;
 
     /**
-     * The key of this association on the data source.
-     *
-     * @var string
+     * @var string The key of this association on the data source.
      */
     protected $key;
 
@@ -23,9 +21,18 @@ class Association extends Factory
      */
     protected $fields;
 
-    public function __construct(QueryBuilder $queryBuilder, string $key)
-    {
-        parent::__construct($queryBuilder);
+    /**
+     * @var QueryBuilder the query builder that renders the associated data.
+     */
+    protected $relatedBuilder;
+
+    public function __construct(
+        QueryBuilder $declaredBuilder,
+        QueryBuilder $relatedBuilder,
+        string $key
+    ) {
+        parent::__construct($declaredBuilder);
+        $this->relatedBuilder = $relatedBuilder;
         $this->key = $key;
     }
 
@@ -33,7 +40,9 @@ class Association extends Factory
     {
         $assocData = $this->valueFromRow($row, $this->getKey());
 
-        return $renderer->render($this->getQueryBuilder(), $assocData, $this->fields);
+        return $renderer->render(
+            $this->getRelatedQueryBuilder(), $assocData, $this->fields
+        );
     }
 
     public function getFields(): ?array
@@ -58,9 +67,14 @@ class Association extends Factory
      */
     public function returnsCollection(): bool
     {
-        $model = $this->getQueryBuilder()->getParent()->model();
+        $model = $this->getRelatedQueryBuilder()->getParent()->model();
         $relation = $model->{$this->key}();
 
         return ! $relation instanceof BelongsTo && ! $relation instanceof HasOne;
+    }
+
+    public function getRelatedQueryBuilder(): QueryBuilder
+    {
+        return $this->relatedBuilder;
     }
 }

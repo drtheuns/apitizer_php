@@ -5,13 +5,14 @@ namespace Apitizer\Types;
 use Apitizer\Exceptions\CastException;
 use Apitizer\Exceptions\InvalidInputException;
 use Apitizer\Exceptions\InvalidOutputException;
+use Apitizer\Policies\PolicyFailed;
 use Apitizer\QueryBuilder;
-use Apitizer\Rendering\Renderer;
 use ArrayAccess;
 
 class Field extends Factory
 {
-    use RendersValues;
+    use Concerns\FetchesValueFromRow,
+        Concerns\HasPolicy;
 
     /**
      * @var string The key that this field occupies on the data source.
@@ -65,6 +66,10 @@ class Field extends Factory
         $value = $this->validateValue(
             $this->valueFromRow($row, $this->getKey()), $row
         );
+
+        if (! $this->passesPolicy($value, $row, $this)) {
+            return new PolicyFailed();
+        }
 
         foreach ($this->transformers as $transformer) {
             try {

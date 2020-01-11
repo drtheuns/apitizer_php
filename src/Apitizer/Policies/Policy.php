@@ -1,0 +1,34 @@
+<?php
+
+namespace Apitizer\Policies;
+
+use Apitizer\Types\Field;
+use Illuminate\Database\Eloquent\Model;
+
+/**
+ * Policies allow a field to be visible only to those that have access to it.
+ *
+ * A policy is only called after the data is fetched, but before transformations
+ * are applied. As a policy might depend on a specific value being present on
+ * the model, the $alwaysLoadColumns property on the query builder can be used
+ * to ensure that the value is always available.
+ */
+interface Policy
+{
+    /**
+     * Check if the value passes the validation.
+     *
+     * @param $value the current value that is being evaluated.
+
+     * @param Model|array|mixed $row the current row that is being rendered.
+     * This value will usually be a Model instance; however, the query builders
+     * can be used to render just about any data. This should be taken into
+     * account when writing a policy.
+
+     * @param Field $field the field instance that is currently being rendered.
+     * A field instance also holds a reference to the current query builder if
+     * that is needed in the policy. The request instance can also be fetched
+     * from the query builder.
+     */
+    public function passes($value, $row, Field $field): bool;
+}
