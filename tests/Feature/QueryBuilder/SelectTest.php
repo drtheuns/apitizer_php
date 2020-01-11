@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\QueryBuilder;
 
+use Tests\Feature\Builders\EmptyBuilder;
 use Tests\Feature\TestCase;
 use Tests\Feature\Builders\PostBuilder;
 use Tests\Feature\Builders\UserBuilder;
@@ -162,4 +163,24 @@ class SelectTest extends TestCase
             ],
         ], $result);
     }
+
+    /** @test */
+    public function it_loads_the_alwaysLoadColumns_columns()
+    {
+        $builder = LoadColumn::build();
+
+        $this->assertTrue(in_array('name', $builder->getQuery()->columns));
+    }
+
+    /** @test */
+    public function it_always_loads_the_primary_key()
+    {
+        $builder = EmptyBuilder::build();
+        $this->assertEquals(['id'], $builder->getQuery()->columns);
+    }
+}
+
+class LoadColumn extends EmptyBuilder
+{
+    protected $alwaysLoadColumns = ['name'];
 }

@@ -37,6 +37,17 @@ abstract class QueryBuilder
     protected $request;
 
     /**
+     * Columns that should always be loaded, even if they were not explicitly
+     * requested. These should be the columns on the Eloquent model, not the
+     * field name. Although these columns will be loaded, they will not be added
+     * to the response output.
+     *
+     * This can be especially helpful when you have policies or other checks
+     * that depend on certain data being present.
+     */
+    protected $alwaysLoadColumns = [];
+
+    /**
      * @var InputParser
      */
     protected $parser;
@@ -287,7 +298,7 @@ abstract class QueryBuilder
 
         return $this->getRenderer()->render(
             $this,
-            $this->getQueryInterpreter()->build($this, $fetchSpec)->get(),
+            $this->doBuildQuery($fetchSpec)->get(),
             $fetchSpec->getFields()
         );
     }
@@ -301,9 +312,7 @@ abstract class QueryBuilder
     {
         $fetchSpec = $this->makeFetchSpecification();
         $perPage = $this->getPerPage($perPage);
-        $paginator = $this->getQueryInterpreter()
-                          ->build($this, $fetchSpec)
-                          ->paginate($perPage, ...$rest);
+        $paginator = $this->doBuildQuery($fetchSpec)->paginate($perPage, ...$rest);
 
         return tap($paginator, function (AbstractPaginator $paginator) use ($fetchSpec) {
             $renderedData = $this->getRenderer()->render(
@@ -343,9 +352,14 @@ abstract class QueryBuilder
      */
     public function buildQuery(): Builder
     {
-        return $this->getQueryInterpreter()->build(
-            $this, $this->makeFetchSpecification()
-        );
+        return $this->doBuildQuery($this->makeFetchSpecification());
+    }
+
+    protected function doBuildQuery(FetchSpec $fetchSpec): Builder
+    {
+        return $this->getQueryInterpreter()
+                    ->build($this, $fetchSpec)
+                    ->addSelect($this->alwaysLoadColumns);
     }
 
     /**
