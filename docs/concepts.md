@@ -29,6 +29,6 @@ These field selects were based on
 
 The ability for clients to specify which fields should be fetched adds some
 constraints to the backend. Namely, each field should be treated independently
-because it is known ahead of time which fields will be selected. Consequently,
-things such as transformations, validation, rendering, etc. should be done
-individually.
+because it is not known ahead of time which fields will be selected.
+Consequently, things such as transformations, validation, rendering, etc. should
+be done individually.
