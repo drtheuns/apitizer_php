@@ -2,14 +2,17 @@
 
 namespace Apitizer\Types;
 
+use Apitizer\Policies\PolicyFailed;
 use Apitizer\QueryBuilder;
 use Apitizer\Rendering\Renderer;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class Association extends Factory
 {
-    use Concerns\FetchesValueFromRow;
+    use Concerns\FetchesValueFromRow,
+        Concerns\HasPolicy;
 
     /**
      * @var string The key of this association on the data source.
@@ -40,6 +43,18 @@ class Association extends Factory
     {
         $assocData = $this->valueFromRow($row, $this->getKey());
 
+        if ($this->returnsCollection()) {
+            foreach ($assocData as $key => $value) {
+                if (! $this->passesPolicy($value, $row, $this)) {
+                    $assocData[$key] = new PolicyFailed;
+                }
+            }
+        } else {
+            if (! $this->passesPolicy($assocData, $row, $this)) {
+                $assocData = new PolicyFailed;
+            }
+        }
+
         return $renderer->render(
             $this->getRelatedQueryBuilder(), $assocData, $this->fields
         );
@@ -67,10 +82,12 @@ class Association extends Factory
      */
     public function returnsCollection(): bool
     {
-        $model = $this->getRelatedQueryBuilder()->getParent()->model();
+        $model = $this->getQueryBuilder()->model();
         $relation = $model->{$this->key}();
 
-        return ! $relation instanceof BelongsTo && ! $relation instanceof HasOne;
+        return ! $relation instanceof BelongsTo
+            && ! $relation instanceof HasOne
+            && ! $relation instanceof MorphOne;
     }
 
     public function getRelatedQueryBuilder(): QueryBuilder

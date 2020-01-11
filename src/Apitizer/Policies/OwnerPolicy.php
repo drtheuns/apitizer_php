@@ -37,9 +37,9 @@ class OwnerPolicy implements Policy
         $this->userKey = $userKey;
     }
 
-    public function passes($value, $row, Field $field): bool
+    public function passes($value, $row, $fieldOrAssoc): bool
     {
-        $user = $field->getQueryBuilder()->getRequest()->user();
+        $user = $fieldOrAssoc->getQueryBuilder()->getRequest()->user();
 
         if (! $user) {
             return false;

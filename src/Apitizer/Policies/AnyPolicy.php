@@ -2,8 +2,6 @@
 
 namespace Apitizer\Policies;
 
-use Apitizer\Types\Field;
-
 /**
  * Passes if any of the given policies pass.
  */
@@ -19,10 +17,10 @@ class AnyPolicy implements Policy
         $this->policies = $policies;
     }
 
-    public function passes($value, $row, Field $field): bool
+    public function passes($value, $row, $fieldOrAssoc): bool
     {
         foreach ($this->policies as $policy) {
-            if ($policy->passes($value, $row, $field)) {
+            if ($policy->passes($value, $row, $fieldOrAssoc)) {
                 return true;
             }
         }

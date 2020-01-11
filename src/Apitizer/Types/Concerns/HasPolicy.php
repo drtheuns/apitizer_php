@@ -4,7 +4,6 @@ namespace Apitizer\Types\Concerns;
 
 use Apitizer\Policies\AnyPolicy;
 use Apitizer\Policies\Policy;
-use Apitizer\Types\Field;
 
 trait HasPolicy
 {
@@ -19,6 +18,10 @@ trait HasPolicy
      *
      * This function can safely be called multiple times without overwriting the
      * already defined policies.
+     *
+     * If the policy is applied to an association but is not dependent on the
+     * association data, you will probably want to use the CachedPolicy because
+     * the associations are called for each row in the association.
      */
     public function policy(Policy ...$policies): self
     {
@@ -36,6 +39,8 @@ trait HasPolicy
      * policyAny:
      *
      * (policy1 OR policy2 OR ...policyN) AND (policy1 OR policy2 OR ...policyN) AND ...
+     *
+     * @see HasPolicy::policy
      */
     public function policyAny(Policy ...$policies): self
     {
@@ -47,10 +52,10 @@ trait HasPolicy
     /**
      * Check if the current field/value passes the policies.
      */
-    protected function passesPolicy($value, $row, Field $field): bool
+    protected function passesPolicy($value, $row, $fieldOrAssoc): bool
     {
         foreach ($this->policies as $policy) {
-            if (! $policy->passes($value, $row, $field)) {
+            if (! $policy->passes($value, $row, $fieldOrAssoc)) {
                 return false;
             }
         }

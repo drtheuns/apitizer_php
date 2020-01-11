@@ -2,8 +2,6 @@
 
 namespace Apitizer\Policies;
 
-use Apitizer\Types\Field;
-
 /**
  * Wrapper for other policies to cache the results.
  *
@@ -12,7 +10,7 @@ use Apitizer\Types\Field;
  * happening, the expensive policy can be wrapped in this policy which will only
  * execute it once and cache the results.
  */
-class CachePolicy implements Policy
+class CachedPolicy implements Policy
 {
     /**
      * @var Policy the policy whose result should be cached.
@@ -29,10 +27,10 @@ class CachePolicy implements Policy
         $this->policy = $policy;
     }
 
-    public function passes($value, $row, Field $field): bool
+    public function passes($value, $row, $fieldOrAssoc): bool
     {
         if (is_null($this->hasPassed)) {
-            $this->hasPassed = $this->policy->passes($value, $row, $field);
+            $this->hasPassed = $this->policy->passes($value, $row, $fieldOrAssoc);
         }
 
         return $this->hasPassed;

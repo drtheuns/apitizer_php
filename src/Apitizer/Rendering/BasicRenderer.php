@@ -21,6 +21,10 @@ class BasicRenderer implements Renderer
         $result = [];
 
         foreach ($data as $row) {
+            if ($row instanceof PolicyFailed) {
+                continue;
+            }
+
             $result[] = $this->renderOne($row, $selectedFields);
         }
 

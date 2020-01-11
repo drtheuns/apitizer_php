@@ -2,12 +2,15 @@
 
 namespace Tests\Feature\QueryBuilder;
 
-use Apitizer\Policies\CachePolicy;
+use Apitizer\Policies\CachedPolicy;
 use Apitizer\Policies\OwnerPolicy;
 use Apitizer\Policies\Policy;
+use Apitizer\QueryBuilder;
+use Apitizer\Types\Association;
 use Apitizer\Types\Field;
 use Illuminate\Http\Request;
 use Tests\Feature\Builders\EmptyBuilder;
+use Tests\Feature\Builders\PostBuilder;
 use Tests\Feature\TestCase;
 use Tests\Feature\Models\User;
 
@@ -100,8 +103,8 @@ class PolicyTest extends TestCase
     public function policies_can_easily_be_cached_and_shared_amongst_fields()
     {
         // The same policy used in both fields, but should only be executed once.
-        $policy = new CachablePolicy();
-        $cachedPolicy = new CachePolicy($policy);
+        $policy = new CountCalledPolicy();
+        $cachedPolicy = new CachedPolicy($policy);
         $fields = [
             'id' => $this->field('id', 'int')->policy($cachedPolicy),
             'name' => $this->field('name')->policy($cachedPolicy),
@@ -114,15 +117,50 @@ class PolicyTest extends TestCase
         $this->assertEquals(1, $policy->called);
     }
 
+    /** @test */
+    public function policies_are_applied_for_each_row_in_an_association()
+    {
+        $user = factory(User::class)->state('withPosts')->create();
+        $policy = new FailId($user->posts->first()->id);
+        $fields = [
+            'posts' => $this->association('posts', new PostBuilder())->policy($policy),
+        ];
+        $request = $this->request()->fields('posts(id)')->make();
+        $result = PolicyTestBuilder::new($request, $fields)->render($user);
+
+        $this->assertEquals([
+            'posts' => $user->posts->slice(1)->values()->map->only('id')->all()
+        ], $result);
+    }
+
+    /** @test */
+    public function policies_are_applied_to_the_fields_in_an_association()
+    {
+        $user = factory(User::class)->state('withPosts')->create();
+        $request = $this->request()->fields('id,posts(id,name)')->make();
+        $result = PolicyUserBuilder::make($request)->render($user);
+
+        $this->assertEquals([
+            'id' => $user->id,
+            'posts' => $user->posts->map->only('id')->all(),
+        ], $result);
+    }
+
     private function field(string $name, string $type = 'string'): Field
     {
         return (new Field(new EmptyBuilder, $name, $type))->setName($name);
+    }
+
+    private function association(string $name, QueryBuilder $builder): Association
+    {
+        return (new Association(new EmptyBuilder(), $builder, $name))
+            ->setName($name);
     }
 }
 
 class TrueP implements Policy
 {
-    public function passes($value, $row, Field $field): bool
+    public function passes($value, $row, $fieldOrAssoc): bool
     {
         return true;
     }
@@ -130,7 +168,7 @@ class TrueP implements Policy
 
 class FalseP implements Policy
 {
-    public function passes($value, $row, Field $field): bool
+    public function passes($value, $row, $fieldOrAssoc): bool
     {
         return false;
     }
@@ -158,13 +196,59 @@ class PolicyTestBuilder extends EmptyBuilder
     }
 }
 
-class CachablePolicy implements Policy
+class CountCalledPolicy implements Policy
 {
     public $called = 0;
+    public $retval;
 
-    public function passes($value, $row, Field $field): bool
+    public function __construct($retval = true)
+    {
+        $this->retval = $retval;
+    }
+
+    public function passes($value, $row, $fieldOrAssoc): bool
     {
         $this->called++;
-        return true;
+        return $this->retval;
+    }
+}
+
+class FailId implements Policy
+{
+    protected $id;
+
+    public function __construct($idToFail)
+    {
+        $this->id = $idToFail;
+    }
+
+    public function passes($value, $row, $fieldOrAssoc): bool
+    {
+        assert($fieldOrAssoc instanceof Association);
+
+        // Fail a specific id.
+        return $value['id'] !== $this->id;
+    }
+}
+
+class PolicyUserBuilder extends EmptyBuilder
+{
+    public function fields(): array
+    {
+        return [
+            'id' => $this->int('id'),
+            'posts' => $this->association('posts', PolicyPostBuilder::class),
+        ];
+    }
+}
+
+class PolicyPostBuilder extends EmptyBuilder
+{
+    public function fields(): array
+    {
+        return [
+            'id' => $this->int('id'),
+            'title' => $this->string('name')->policy(new FalseP),
+        ];
     }
 }
