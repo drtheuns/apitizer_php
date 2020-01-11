@@ -11,8 +11,9 @@ class CommentBuilder extends QueryBuilder
     public function fields(): array
     {
         return [
-            'id'    => $this->int('id'),
-            'body' => $this->string('body'),
+            'id'     => $this->int('id'),
+            'body'   => $this->string('body'),
+            'author' => $this->association('author', UserBuilder::class),
         ];
     }
 

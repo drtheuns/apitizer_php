@@ -335,11 +335,6 @@ abstract class QueryBuilder
         $rawInput = $rawInput ?? RawInput::fromRequest($this->getRequest());
         $fetchSpec = $this->validateRequestInput($this->getParser()->parse($rawInput));
 
-        if (empty($fetchSpec->getFields())) {
-            // If nothing (valid) is selected, return all non-association fields.
-            $fetchSpec->setFields($this->getOnlyFields());
-        }
-
         return $fetchSpec;
     }
 
@@ -368,14 +363,16 @@ abstract class QueryBuilder
         foreach ($unvalidatedFields as $field) {
             if ($field instanceof Relation && isset($availableFields[$field->name])) {
                 // Convert the Parser\Relation to an Association object.
+                /** @var Association */
                 $association = $availableFields[$field->name];
 
                 // Validate the fields recursively
+                $queryBuilder = $association->getQueryBuilder();
                 $association->setFields(
-                    $this->getValidatedFields($field->fields, $association->getQueryBuilder()->getFields())
+                    $queryBuilder->getValidatedFields($field->fields, $queryBuilder->getFields())
                 );
-                $validatedFields[] = $association;
 
+                $validatedFields[] = $association;
                 continue;
             }
 
@@ -391,6 +388,10 @@ abstract class QueryBuilder
 
                 $validatedFields[] = $fieldInstance;
             }
+        }
+
+        if (empty($validatedFields)) {
+            $validatedFields = $this->getOnlyFields();
         }
 
         return $validatedFields;

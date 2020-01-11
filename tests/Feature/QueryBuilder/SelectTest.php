@@ -84,6 +84,20 @@ class SelectTest extends TestCase
     }
 
     /** @test */
+    public function if_no_valid_fields_are_selected_in_an_association_all_fields_are_returned()
+    {
+        $post = factory(Post::class)->state('withComments')->create();
+        // comments doesn't have an 'authors' assoc/field.
+        $request = $this->request()->fields('id,comments(authors)')->make();
+        $result = PostBuilder::make($request)->render($post);
+
+        $this->assertEquals([
+            'id' => $post->id,
+            'comments' => $post->comments->map->only('id', 'body')->all(),
+        ], $result);
+    }
+
+    /** @test */
     public function selecting_an_association_without_specifying_fields_fetches_all_fields()
     {
         $user = factory(User::class)->create();
