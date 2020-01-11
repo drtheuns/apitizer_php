@@ -13,7 +13,7 @@ print a list of errors that it managed to find with your query builders. An
 example of the about can be seen below:
 
 ```
-QueryBuilders\PostBuilder
+App\QueryBuilders\PostBuilder
 -----------------------------
 * Association
   * Association [tags] on [App\QueryBuilders\PostBuilder] refers to association [tag] which does not exist on the model [App\Models\Post]
