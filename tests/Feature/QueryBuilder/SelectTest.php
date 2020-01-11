@@ -165,9 +165,15 @@ class SelectTest extends TestCase
     /** @test */
     public function it_loads_the_alwaysLoadColumns_columns()
     {
-        $builder = LoadColumn::build();
+        $user = factory(User::class)->state('withPosts')->create();
+        $request = $this->request()->fields('id,posts(id)')->make();
+        $builder = LoadColumn::make($request)->buildQuery();
 
         $this->assertTrue(in_array('name', $builder->getQuery()->columns));
+
+        $user = $builder->find($user->id);
+
+        $this->assertNotNull($user->posts->first()->status);
     }
 
     /** @test */
@@ -181,4 +187,24 @@ class SelectTest extends TestCase
 class LoadColumn extends EmptyBuilder
 {
     protected $alwaysLoadColumns = ['name'];
+
+    public function fields(): array
+    {
+        return [
+            'id' => $this->int('id'),
+            'posts' => $this->association('posts', LoadRelatedColumn::class),
+        ];
+    }
+}
+
+class LoadRelatedColumn extends EmptyBuilder
+{
+    protected $alwaysLoadColumns = ['status'];
+
+    public function fields(): array
+    {
+        return [
+            'id' => $this->int('id'),
+        ];
+    }
 }

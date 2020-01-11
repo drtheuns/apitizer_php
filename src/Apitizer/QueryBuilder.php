@@ -298,7 +298,7 @@ abstract class QueryBuilder
 
         return $this->getRenderer()->render(
             $this,
-            $this->doBuildQuery($fetchSpec)->get(),
+            $this->getQueryInterpreter()->build($this, $fetchSpec)->get(),
             $fetchSpec->getFields()
         );
     }
@@ -312,7 +312,9 @@ abstract class QueryBuilder
     {
         $fetchSpec = $this->makeFetchSpecification();
         $perPage = $this->getPerPage($perPage);
-        $paginator = $this->doBuildQuery($fetchSpec)->paginate($perPage, ...$rest);
+        $paginator = $this->getQueryInterpreter()
+                          ->build($this, $fetchSpec)
+                          ->paginate($perPage, ...$rest);
 
         return tap($paginator, function (AbstractPaginator $paginator) use ($fetchSpec) {
             $renderedData = $this->getRenderer()->render(
@@ -352,14 +354,8 @@ abstract class QueryBuilder
      */
     public function buildQuery(): Builder
     {
-        return $this->doBuildQuery($this->makeFetchSpecification());
-    }
-
-    protected function doBuildQuery(FetchSpec $fetchSpec): Builder
-    {
         return $this->getQueryInterpreter()
-                    ->build($this, $fetchSpec)
-                    ->addSelect($this->alwaysLoadColumns);
+                    ->build($this, $this->makeFetchSpecification());
     }
 
     /**
@@ -641,5 +637,10 @@ abstract class QueryBuilder
         $this->maximumLimit = $limit;
 
         return $this;
+    }
+
+    public function getAlwaysLoadColumns(): array
+    {
+        return $this->alwaysLoadColumns;
     }
 }

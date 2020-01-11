@@ -51,7 +51,7 @@ class Association extends Factory
             }
         } else {
             if (! $this->passesPolicy($assocData, $row, $this)) {
-                $assocData = new PolicyFailed;
+                return new PolicyFailed;
             }
         }
 

@@ -8,9 +8,11 @@ use Apitizer\Policies\Policy;
 use Apitizer\QueryBuilder;
 use Apitizer\Types\Association;
 use Apitizer\Types\Field;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Tests\Feature\Builders\EmptyBuilder;
 use Tests\Feature\Builders\PostBuilder;
+use Tests\Feature\Models\Post;
 use Tests\Feature\TestCase;
 use Tests\Feature\Models\User;
 
@@ -137,6 +139,16 @@ class PolicyTest extends TestCase
     }
 
     /** @test */
+    public function policies_are_applied_to_single_value_associations()
+    {
+        $post = factory(Post::class)->create();
+        $request = $this->request()->fields('id,author(id)')->make();
+        $result = PolicyPostBuilder::make($request)->render($post);
+
+        $this->assertEquals($post->only('id'), $result);
+    }
+
+    /** @test */
     public function policies_are_applied_to_the_fields_in_an_association()
     {
         $user = factory(User::class)->state('withPosts')->create();
@@ -252,6 +264,13 @@ class PolicyPostBuilder extends EmptyBuilder
         return [
             'id' => $this->int('id'),
             'title' => $this->string('name')->policy(new FalseP),
+            'author' => $this->association('author', PolicyUserBuilder::class)
+                             ->policy(new FalseP),
         ];
+    }
+
+    public function model(): Model
+    {
+        return new Post();
     }
 }

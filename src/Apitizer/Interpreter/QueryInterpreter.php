@@ -17,7 +17,9 @@ class QueryInterpreter
         $query = $queryBuilder->model()->query();
         $query = $queryBuilder->beforeQuery($query, $fetchSpec);
 
-        $this->applySelect($query, $fetchSpec->getFields());
+        $this->applySelect(
+            $query, $fetchSpec->getFields(), $queryBuilder->getAlwaysLoadColumns()
+        );
         $this->applySorting($query, $fetchSpec->getSorts());
         $this->applyFilters($query, $fetchSpec->getFilters());
 
@@ -58,6 +60,11 @@ class QueryInterpreter
                         $additionalSelects = $relation instanceof HasOneOrMany
                                            ? [$relation->getForeignKeyName()]
                                            : [];
+
+                        $additionalSelects = array_merge(
+                            $additionalSelects,
+                            $fieldOrAssoc->getRelatedQueryBuilder()->getAlwaysLoadColumns()
+                        );
 
                         $this->applySelect(
                             $relation->getQuery(),

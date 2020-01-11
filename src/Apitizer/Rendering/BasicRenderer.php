@@ -21,6 +21,7 @@ class BasicRenderer implements Renderer
         $result = [];
 
         foreach ($data as $row) {
+            // When dealing with e.g. hasMany associations
             if ($row instanceof PolicyFailed) {
                 continue;
             }
@@ -38,6 +39,8 @@ class BasicRenderer implements Renderer
         foreach ($selectedFields as $fieldOrAssoc) {
             $renderedValue = $fieldOrAssoc->render($row, $this);
 
+            // When a specific value fails, or when an association that returns
+            // a single row fails (e.g. belongsTo)
             if ($renderedValue instanceof PolicyFailed) {
                 continue;
             }
