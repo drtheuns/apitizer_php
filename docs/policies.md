@@ -14,7 +14,9 @@ address, birth date, email, etc.
 
 ```php
 // File: /my_project/app/QueryBuilders/UserBuilder.php
-<?php namespace App\QueryBuilders;
+<?php
+
+namespace App\QueryBuilders;
 
 class UserBuilder extends QueryBuilder
 {
@@ -28,6 +30,8 @@ class UserBuilder extends QueryBuilder
             'member_since' => $this->datetime('member_since'),
         ];
     }
+    
+    // filters(), sorts(), and model() omitted for brevity.
 }
 ```
 
@@ -41,7 +45,9 @@ in user available on the `Request` object.
 
 ```php
 // File: /my_project/app/QueryBuilders/Policies/Authenticated.php
-<?php namespace App\QueryBuilder\Policies;
+<?php
+
+namespace App\QueryBuilder\Policies;
 
 use Apitizer\Policies\Policy;
 
@@ -86,6 +92,8 @@ class UserBuilder extends QueryBuilder
                                    ->policy(new Authenticated),
         ];
     }
+
+    // filters(), sorts(), and model() omitted for brevity.
 }
 ```
 
@@ -175,6 +183,8 @@ class UserBuilder extends QueryBuilder
             'member_since' => $this->datetime('member_since')->policy($policy),
         ];
     }
+
+    // filters(), sorts(), and model() omitted for brevity.
 }
 ```
 
