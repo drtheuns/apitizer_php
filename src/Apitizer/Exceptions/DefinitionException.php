@@ -22,7 +22,7 @@ class DefinitionException extends ApitizerException
      */
     protected $namespace;
 
-    const NAMESPACES = ['filter', 'sort', 'field', 'association'];
+    const NAMESPACES = ['association', 'field', 'filter', 'sort'];
 
     /**
      * @var string The field/sort/filter name where this exception occured.
