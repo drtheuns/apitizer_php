@@ -1,7 +1,7 @@
 # Apitizer
 
-A query builder for quickly generating API's with some added features, such as
-(nested) field selection, filtering and sorting.
+Apitizer is a Laravel library that primarily offers a Query Builder that allows
+you to easily create documented API endpoints that are capable of filtering,
+sorting, and selection of sparse fieldsets.
 
-Take a look at [the example Laravel project](https://git.sr.ht/~drtheuns/apitizer_blog)
-for how this project might be used.
+For more information, see [the "Getting started" page](https://drtheuns.github.io/apitizer_php/index).
