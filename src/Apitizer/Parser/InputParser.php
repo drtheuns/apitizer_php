@@ -98,6 +98,13 @@ class InputParser implements Parser
      */
     public function parseFilters($rawFilters): array
     {
+        // We expect filters to be in the format of:
+        // filters[search]=query
+        // which means the filters must always be an (assoc) array.
+        if (! is_array($rawFilters)) {
+            return null;
+        }
+
         return $rawFilters;
     }
 
