@@ -5,7 +5,6 @@ namespace Tests\Unit\Parser;
 use Apitizer\Parser\InputParser;
 use Apitizer\Parser\ParsedInput;
 use Apitizer\Parser\RawInput;
-use Apitizer\Types\RequestInput;
 use Tests\Unit\TestCase;
 
 /*

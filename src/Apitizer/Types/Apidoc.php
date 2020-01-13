@@ -6,6 +6,14 @@ use Apitizer\QueryBuilder;
 use Illuminate\Support\Str;
 use ReflectionClass;
 
+/**
+ * This class holds information about a single query builder and is intended to
+ * be used to generate documentation.
+ *
+ * Each query builder has a callback `QueryBuilder::apidoc` where you can attach
+ * extra information, such as a description or custom metadata, to the
+ * documentation.
+ */
 class Apidoc
 {
     /**
@@ -32,6 +40,12 @@ class Apidoc
      * @var string A description of this resource.
      */
     protected $description;
+
+    /**
+     * @var mixed a free form data attribute that allows custom user data to be
+     * attached to the documentation.
+     */
+    protected $metadata;
 
     public function __construct(QueryBuilder $queryBuilder)
     {
@@ -138,5 +152,27 @@ class Apidoc
         return $association->returnsCollection()
             ? "array of $name"
             : $name;
+    }
+
+    /**
+     * Get the metadata that was defined for this documentation.
+     *
+     * @return mixed
+     */
+    public function getMetadata()
+    {
+        return $this->metadata;
+    }
+
+    /**
+     * The metadata is a free form variable that can be filled with anything. If
+     * you want to extend the documentation with your own metadata, this would
+     * be the first place to look.
+     */
+    public function setMetadata($data): self
+    {
+        $this->metadata = $data;
+
+        return $this;
     }
 }

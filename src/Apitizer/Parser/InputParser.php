@@ -6,6 +6,7 @@ use Apitizer\Exceptions\InvalidInputException;
 use Apitizer\Parser\Context;
 use Apitizer\Parser\Relation;
 use Apitizer\Parser\Sort;
+use Illuminate\Support\Arr;
 
 /**
  * The request parser is responsible for turning the request data that we
@@ -101,8 +102,8 @@ class InputParser implements Parser
         // We expect filters to be in the format of:
         // filters[search]=query
         // which means the filters must always be an (assoc) array.
-        if (! is_array($rawFilters)) {
-            return null;
+        if (! is_array($rawFilters) || ! Arr::isAssoc($rawFilters)) {
+            return [];
         }
 
         return $rawFilters;

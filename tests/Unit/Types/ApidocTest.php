@@ -2,7 +2,6 @@
 
 namespace Tests\Unit\Types;
 
-use Apitizer\QueryBuilder;
 use Apitizer\Types\Apidoc;
 use Tests\Feature\Builders\EmptyBuilder;
 use Tests\Feature\Builders\UserBuilder;
@@ -33,6 +32,15 @@ class ApidocTest extends TestCase
     {
         $apidoc = new Apidoc(new NonBuilderName());
         $this->assertEquals('NonBuilderName', $apidoc->getName());
+    }
+
+    /** @test */
+    public function arbitrary_metadata_can_be_attached_to_the_documenation()
+    {
+        $apidoc = new Apidoc(new UserBuilder());
+        $apidoc->setMetadata(['deprecated' => true]);
+
+        $this->assertEquals(['deprecated' => true], $apidoc->getMetadata());
     }
 }
 
