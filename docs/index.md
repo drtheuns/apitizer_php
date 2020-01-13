@@ -66,25 +66,11 @@ class UserController extends Controller
 
 ## Install
 
-Add the package repository to your `composer.json` and require the package:
+The packagist page: https://packagist.org/packages/drtheuns/apitizer_php
 
-```json
-{
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://git.sr.ht/~drtheuns/apitizer_php"
-    }
-  ],
-  "require": {
-    "drtheuns/apitizer_php": "dev-master"
-  }
-}
 ```
-
-Finally, run `composer update drtheuns/apitizer_php`.
-
-
+composer require drtheuns/apitizer_php
+```
 
 ## Setup
 
