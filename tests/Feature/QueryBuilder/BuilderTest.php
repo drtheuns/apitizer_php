@@ -18,4 +18,15 @@ class BuilderTest extends TestCase
         $this->assertInstanceOf(Builder::class, $query);
         $this->assertCount(2, $query->getQuery()->columns);
     }
+
+    /** @test */
+    public function queries_can_be_build_according_to_manual_spec()
+    {
+        $query = UserBuilder::make()->fromSpecification([
+            'fields' => 'id, name',
+        ])->buildQuery();
+
+        $this->assertCount(2, $query->getQuery()->columns);
+        $this->assertEquals(['id', 'name'], $query->getQuery()->columns);
+    }
 }

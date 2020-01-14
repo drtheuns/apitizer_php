@@ -63,9 +63,9 @@ class RenderTest extends TestCase
     public function it_can_render_data_using_a_manual_fetch_specification()
     {
         $user = factory(User::class)->make();
-        $result = UserBuilder::make()->render($user, [
-            'fields' => 'name,email'
-        ]);
+        $result = UserBuilder::make()->fromSpecification([
+            'fields' => 'name,email',
+        ])->render($user);
 
         $this->assertEquals($user->only('name', 'email'), $result);
     }

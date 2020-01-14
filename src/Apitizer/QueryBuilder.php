@@ -84,6 +84,13 @@ abstract class QueryBuilder
     protected $availableFilters;
 
     /**
+     * @var array|null the specification that should be used when fetching or
+     * rendering data. This is an alternative to the input from the Request
+     * object; therefore, it this is null, the request's input will be used.
+     */
+    protected $specification;
+
+    /**
      * The parent query builder instance.
      *
      * This is used to prevent infinite loops when dealing with associations and
@@ -216,6 +223,20 @@ abstract class QueryBuilder
     }
 
     /**
+     * @param array the specification of data that should be used for this
+     * builder. This array may contain three keys: `fields`, `filters`, and
+     * `sorts`. The value for these should be the same as what you would send in
+     * a request; in other words, fields may be a comma separated string of
+     * fields (or an array), etc.
+     */
+    public function fromSpecification(array $specification)
+    {
+        $this->specification = $specification;
+
+        return $this;
+    }
+
+    /**
      * Defines a relationship to another querybuilder.
      *
      * This can be used in the `fields` callback to handle nested selects such
@@ -275,14 +296,12 @@ abstract class QueryBuilder
      * request, or the fields that were passed in.
      *
      * @param mixed $data
-     * @param (Field|Association)[] $fields
      *
      * @return array
      */
-    public function render($data, array $fields = null): array
+    public function render($data): array
     {
-        $rawInput = is_array($fields) ? RawInput::fromArray($fields) : null;
-        $fetchSpec = $this->makeFetchSpecification($rawInput);
+        $fetchSpec = $this->makeFetchSpecification();
 
         return $this->getRenderer()->render($this, $data, $fetchSpec->getFields());
     }
@@ -363,10 +382,15 @@ abstract class QueryBuilder
      *
      * @return FetchSpec
      */
-    protected function makeFetchSpecification(RawInput $rawInput = null): FetchSpec
+    protected function makeFetchSpecification(): FetchSpec
     {
-        $rawInput = $rawInput ?? RawInput::fromRequest($this->getRequest());
-        $fetchSpec = $this->validateRequestInput($this->getParser()->parse($rawInput));
+        $rawInput = is_null($this->specification)
+                  ? RawInput::fromRequest($this->getRequest())
+                  : RawInput::fromArray($this->specification);
+
+        $fetchSpec = $this->validateRequestInput(
+            $this->getParser()->parse($rawInput)
+        );
 
         return $fetchSpec;
     }
