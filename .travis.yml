@@ -1,0 +1,23 @@
+dist: bionic
+language: php
+
+php:
+  - "7.2"
+  - "7.3"
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+
+services:
+  - postgres
+
+before_install:
+  - travis_retry composer self-update
+  - createdb -U postgres -h 127.0.0.1 apitizer_testing
+
+install:
+  - travis_retry composer update --prefer-dist --no-interaction --prefer-stable --no-suggest
+
+script:
+  - composer test
