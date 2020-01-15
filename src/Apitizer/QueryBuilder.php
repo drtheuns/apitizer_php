@@ -400,7 +400,7 @@ abstract class QueryBuilder
         $validated = new FetchSpec(
             $this->getValidatedFields($unvalidatedInput->fields, $this->getFields()),
             $this->getValidatedSorting($unvalidatedInput->sorts, $this->getSorts()),
-            $this->getValidatedFilters($unvalidatedInput->filters, $this->getFilters()),
+            $this->getValidatedFilters($unvalidatedInput->filters, $this->getFilters())
         );
 
         return $validated;
