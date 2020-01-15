@@ -1,0 +1,47 @@
+version: v1.0
+name: Initial Pipeline
+agent:
+  machine:
+    type: e1-standard-2
+    os_image: ubuntu1804
+blocks:
+  - name: Checkout code
+    task:
+      jobs:
+        - name: setup
+          commands:
+            - checkout
+            - cache restore
+            - composer install
+            - cache store
+  - name: Testing
+    task:
+      env_vars:
+        - name: DB_CONNECTION
+          value: pgsql
+        - name: DB_DATABASE
+          value: apitizer_testing
+        - name: DB_USERNAME
+          value: postgres
+        - name: DB_PASSWORD
+          value: postgres
+      jobs:
+        - name: run tests
+          commands:
+            - checkout
+            - cache restore
+            - sem-service start postgres
+            - createdb -U postgres -h 127.0.0.1 apitizer_testing
+            - echo 'Running tests'
+            - composer test
+  - name: Extra
+    task:
+      jobs:
+        - name: security check
+          commands:
+            - checkout
+            - cache restore
+            - 'git clone https://github.com/sensiolabs/security-checker.git'
+            - cd security-checker
+            - composer install
+            - 'php security-checker security:check ../composer.lock'
