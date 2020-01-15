@@ -14,7 +14,7 @@ blocks:
               values: [ "7.1", "7.2", "7.3" ]
           commands:
             - checkout
-            - cache restore
+            - cache restore $PHP_VERSION
             - sem-version php $PHP_VERSION
             - composer install
             - cache store $PHP_VERSION
