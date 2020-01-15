@@ -20,7 +20,7 @@ blocks:
         - name: run tests
           matrix:
             - env_var: PHP_VERSION
-              values: [7.1, 7.2, 7.3]
+              values: [ "7.1", "7.2", "7.3" ]
           commands:
             - checkout
             - sem-version php $PHP_VERSION
