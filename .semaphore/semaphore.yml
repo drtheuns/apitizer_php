@@ -1,5 +1,5 @@
 version: v1.0
-name: Initial Pipeline
+name: Test pipeline
 agent:
   machine:
     type: e1-standard-2
@@ -9,16 +9,11 @@ blocks:
     task:
       jobs:
         - name: composer setup
-          matrix:
-            - env_var: PHP_VERSION
-              values: [ "7.1", "7.2", "7.3" ]
           commands:
             - checkout
-            - cache restore vendor-$PHP_VERSION vendor
-            - phpbrew --no-progress install $PHP_VERSION
-            - sem-version php $PHP_VERSION
+            - cache restore
             - composer install
-            - cache store vendor-$PHP_VERSION vendor
+            - cache store
   - name: Testing
     task:
       env_vars:
@@ -30,17 +25,28 @@ blocks:
           value: postgres
         - name: DB_PASSWORD
           value: postgres
+      prologue:
+        commands:
+          - checkout
+          - cache restore
       jobs:
         - name: run tests
-          matrix:
-            - env_var: PHP_VERSION
-              values: [ "7.1", "7.2", "7.3" ]
           commands:
-            - checkout
-            - cache restore vendor-$PHP_VERSION
-            - sem-version php $PHP_VERSION
             - sem-service start postgres
             - createdb -U postgres -h 127.0.0.1 apitizer_testing
             - echo 'Running tests'
             - php --version
             - composer test
+  - name: Checks
+    task:
+      prologue:
+        commands:
+          - checkout
+          - cache restore
+      jobs:
+        - name: security
+          commands:
+            - git clone https://github.com/sensiolabs/security-checker.git
+            - cd security-checker
+            - composer install
+            - php security-checker security:check ../composer.lock
