@@ -14,10 +14,11 @@ blocks:
               values: [ "7.1", "7.2", "7.3" ]
           commands:
             - checkout
-            - cache restore $PHP_VERSION
+            - cache restore vendor-$PHP_VERSION vendor
+            - phpbrew --no-progress install $PHP_VERSION
             - sem-version php $PHP_VERSION
             - composer install
-            - cache store $PHP_VERSION
+            - cache store vendor-$PHP_VERSION vendor
   - name: Testing
     task:
       env_vars:
@@ -36,7 +37,7 @@ blocks:
               values: [ "7.1", "7.2", "7.3" ]
           commands:
             - checkout
-            - cache restore $PHP_VERSION
+            - cache restore vendor-$PHP_VERSION
             - sem-version php $PHP_VERSION
             - sem-service start postgres
             - createdb -U postgres -h 127.0.0.1 apitizer_testing
