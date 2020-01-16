@@ -25,9 +25,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
         $this->app->bind(Parser::class, InputParser::class);
         $this->app->bind(Renderer::class, BasicRenderer::class);
         $this->app->singleton(QueryBuilderLoader::class, function () {
-            $loader = new QueryBuilderLoader();
-            $loader->loadFromConfig();
-            return $loader;
+            return new QueryBuilderLoader();
         });
     }
 
