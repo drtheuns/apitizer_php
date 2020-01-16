@@ -14,7 +14,7 @@ class Apitizer
     public static function getQueryBuilderDocumentation(): ApidocCollection
     {
         return ApidocCollection::forQueryBuilders(
-            self::schema()->getQueryBuilders(),
+            self::schema()->getQueryBuilders()
         );
     }
 
