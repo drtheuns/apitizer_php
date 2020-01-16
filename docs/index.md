@@ -166,71 +166,23 @@ curl localhost:8000/api/users?fields=id
 
 ## Documentation
 
-To generate documentation, we need to be aware of which query builders are
-available. To accomplish this, Apitizer has a Schema. Besides documentation this
-schema is also used for validation using the `apitizer:validate-schema` command.
+If you have followed along with the setup, you can now generate documentation by
+starting the webserver with `./artisan serve` and navigating to
+`localhost:8000/apidoc`. However, if you used different namespaces, you will
+need to register them in the configuration:
 
-Create a schema first:
-
-```php
-// File: /project_root/app/QueryBuilders/Schema.php
-<?php
-
-namespace App\QueryBuilders;
-
-class Schema extends \Apitizer\Schema
-{
-    protected function registerBuilders()
-    {
-        $this->register(UserBuilder::class);
-    }
-}
 ```
-
-Next, we need to either create a new config file:
-`/my_project/config/apitizer.php` or use `./artisan vendor:publish --provider
-'Apitizer\\ServiceProvider'` to publish the configuration.
-
-Within this config file, add (or modify) the following:
-
-```php
-// File: /my_project/config/apitizer.php
+// File: /project_root/config/apitizer.php
 return [
-    'schema' => \App\QueryBuilders\Schema::class,
+    'query_builders' => [
+        'classes' => [
+            // Register individual classes here, for example:
+            \App\Api\UserBuilder::class,
+        ],
+        'namespaces' => [
+            // Register entire namespaces here (non recursive)
+            'App\Api'
+        ]
+    ]
 ];
-```
-
-Now when you start the webserver (`./artisan serve`) and navigate to
-`localhost:8000/apidoc`, you will see the generated documentation, including the
-documentation for the user builder.
-
-## Extending the schema
-
-Once you get past a few query builders, it becomes tedious to manage the
-registration:
-
-```php
-$this->register([
-    UserBuilder::class,
-    PostBuilder::class,
-    // ...
-]);
-```
-
-Furthermore, it's easy to forget to register a query builder after creating it.
-To ease this, you can use the `registerFromNamespace` method to register all
-query builders within some namespace:
-
-```php
-$this->registerFromNamespace('App\QueryBuilders');
-```
-
-This method requires your project to use composer as well as PSR-4 namespacing,
-as it uses the `composer.json` file to figure out where the namespace is located
-on disk, and composer's autoloading to load the actual classes. If the method is
-unable to find the path to your project root (where the `composer.json` file is
-located), you may specify it manually:
-
-```php
-$this->registerFromNamespace('App\QueryBuilders', '/path/to/project_root');
 ```
