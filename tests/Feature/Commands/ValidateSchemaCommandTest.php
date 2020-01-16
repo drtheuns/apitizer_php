@@ -2,17 +2,18 @@
 
 namespace Tests\Feature\Commands;
 
-use Apitizer\Schema;
+use Apitizer\QueryBuilderLoader;
 use Tests\Feature\TestCase;
 use Tests\Support\Builders\EmptyBuilder;
 use Tests\Support\Builders\UserBuilder;
+use Mockery\MockInterface;
 
 class ValidateSchemaCommandTest extends TestCase
 {
     /** @test */
     public function it_validates_all_registered_query_builders()
     {
-        $this->mock(Schema::class, function ($mock) {
+        $this->mock(QueryBuilderLoader::class, function (MockInterface $mock) {
             $mock->shouldReceive('getQueryBuilders')
                  ->once()
                  ->andReturn([

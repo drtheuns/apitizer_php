@@ -11,12 +11,6 @@ use Apitizer\Rendering\Renderer;
 
 class ServiceProvider extends \Illuminate\Support\ServiceProvider
 {
-    public $bindings = [
-        Strategy::class => Raise::class,
-        Parser::class   => InputParser::class,
-        Renderer::class => BasicRenderer::class,
-    ];
-
     /**
      * Register the service provider
      *
@@ -30,10 +24,10 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
         $this->app->bind(Strategy::class, Raise::class);
         $this->app->bind(Parser::class, InputParser::class);
         $this->app->bind(Renderer::class, BasicRenderer::class);
-
-        $this->app->singleton(Schema::class, function () {
-            $schema = config('apitizer.schema');
-            return new $schema;
+        $this->app->singleton(QueryBuilderLoader::class, function () {
+            $loader = new QueryBuilderLoader();
+            $loader->loadFromConfig();
+            return $loader;
         });
     }
 

@@ -6,16 +6,14 @@ use Apitizer\Types\ApidocCollection;
 
 class Apitizer
 {
-    public static function schema(): Schema
+    public static function getQueryBuilders()
     {
-        return app(Schema::class);
+        return app(QueryBuilderLoader::class)->getQueryBuilders();
     }
 
     public static function getQueryBuilderDocumentation(): ApidocCollection
     {
-        return ApidocCollection::forQueryBuilders(
-            self::schema()->getQueryBuilders()
-        );
+        return ApidocCollection::forQueryBuilders(self::getQueryBuilders());
     }
 
     public static function getFieldKey()

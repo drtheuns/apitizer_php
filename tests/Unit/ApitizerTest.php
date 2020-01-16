@@ -1,9 +1,8 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Unit;
 
 use Apitizer\Apitizer;
-use Apitizer\Schema;
 use Apitizer\Types\Apidoc;
 use Apitizer\Types\ApidocCollection;
 
@@ -15,7 +14,7 @@ class ApitizerTest extends TestCase
         $apidoc = Apitizer::getQueryBuilderDocumentation();
 
         $this->assertInstanceOf(ApidocCollection::class, $apidoc);
-        $this->assertCount(count(app(Schema::class)->getQueryBuilders()), $apidoc);
+        $this->assertCount(count($this->builderClasses), $apidoc);
 
         $classes = [];
         foreach ($apidoc as $doc) {
@@ -23,6 +22,11 @@ class ApitizerTest extends TestCase
             $classes[] = get_class($doc->getQueryBuilder());
         }
 
-        $this->assertEquals(Apitizer::schema()->getQueryBuilders(), $classes);
+        $this->assertEquals(Apitizer::getQueryBuilders(), $classes);
+    }
+
+    protected function getPackageProviders($app)
+    {
+        return ['Apitizer\ServiceProvider'];
     }
 }

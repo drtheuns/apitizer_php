@@ -15,7 +15,7 @@ class DocumentationControllerTest extends TestCase
                          ->assertOk()
                          ->assertSeeTextInOrder(['Post', 'Comment', 'User', 'Tag']);
 
-        foreach (Apitizer::schema()->getQueryBuilders() as $class) {
+        foreach (Apitizer::getQueryBuilders() as $class) {
             $builder = new $class();
 
             $fields = collect($builder->getFields())->map->getName()->values();

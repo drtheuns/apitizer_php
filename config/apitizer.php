@@ -23,8 +23,22 @@ return [
      */
     'route_prefix' => 'apidoc',
 
-    /**
-     * The schema that registers all the query builders.
+    /*
+     * Register the query builders of this project.
      */
-    'schema' => \App\QueryBuilders\Schema::class,
+    'query_builders' => [
+        /*
+         * Individual classes can be registered here. Expects the fully qualified namespace.
+         */
+        'classes' => [
+            //
+        ],
+
+        /*
+         * Register all the query builders from the given namespaces.
+         */
+        'namespaces' => [
+            'App\QueryBuilders',
+        ],
+    ],
 ];

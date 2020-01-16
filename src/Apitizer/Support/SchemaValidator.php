@@ -26,7 +26,7 @@ class SchemaValidator
     {
         $queryBuilders = $queryBuilders ?? array_map(function (string $builderClass) {
             return new $builderClass;
-        }, Apitizer::schema()->getQueryBuilders());
+        }, Apitizer::getQueryBuilders());
 
         foreach ($queryBuilders as $queryBuilder) {
             $this->validate($queryBuilder);

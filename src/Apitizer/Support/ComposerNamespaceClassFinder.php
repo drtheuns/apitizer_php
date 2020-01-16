@@ -13,8 +13,7 @@ use RegexIterator;
 
 /**
  * A helper class to search for all classes that extends some other class within
- * a namespace. This is used in the \Apitizer\Schema to find all classes that
- * extend the query builder.
+ * a namespace. This is used to find all classes that extend the query builder.
  */
 class ComposerNamespaceClassFinder implements IteratorAggregate
 {
