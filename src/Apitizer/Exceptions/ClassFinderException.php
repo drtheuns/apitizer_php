@@ -9,8 +9,8 @@ class ClassFinderException extends ApitizerException
         return new static("Could not find composer file on path [$path]");
     }
 
-    public static function psr4NotFound()
+    public static function psr4NotFound(string $composerPath)
     {
-        return new static("Could not find PSR-4 definition in the composer.json");
+        return new static("Could not find PSR-4 definition in [$composerPath]");
     }
 }

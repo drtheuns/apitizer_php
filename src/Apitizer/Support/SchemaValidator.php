@@ -20,15 +20,15 @@ class SchemaValidator
      *
      * Requires the query builders to be defined in the config.
      *
-     * @param null|QueryBuilder[] the list of query builders to validate.
+     * @param null|(string|QueryBuilder)[] the list of query builders to validate.
      */
     public function validateAll(array $queryBuilders = null): self
     {
-        $queryBuilders = $queryBuilders ?? array_map(function (string $builderClass) {
-            return new $builderClass;
-        }, Apitizer::getQueryBuilders());
+        foreach ($queryBuilders ?? Apitizer::getQueryBuilders() as $queryBuilder) {
+            if (is_string($queryBuilder)) {
+                $queryBuilder = new $queryBuilder;
+            }
 
-        foreach ($queryBuilders as $queryBuilder) {
             $this->validate($queryBuilder);
         }
 

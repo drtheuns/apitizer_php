@@ -11,16 +11,12 @@ use Illuminate\Support\Arr;
 class AssociationFilter
 {
     /**
-     * The name of the relation on the query builder.
-     *
-     * @var string
+     * @var string The name of the relation on the query builder.
      */
     protected $relation;
 
     /**
-     * The column name to apply the filtering to.
-     *
-     * @var string
+     * @var string The column name to apply the filtering to.
      */
     protected $column;
 
@@ -52,6 +48,8 @@ class AssociationFilter
         // If we filter from the "posts" on the author through the users.id,
         // then we don't need to use a subquery/join and we can instead just
         // use the posts.author_id directly.
+        // From: select * from posts where author_id in (select id from users where id in (VALUES))
+        // To  : select * from posts where author_id in (VALUES)
         if ($relation instanceof BelongsTo && $foreignJoinKey === $this->column) {
             $query->whereIn($localJoinKey, $values);
             return;

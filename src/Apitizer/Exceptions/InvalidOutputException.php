@@ -79,7 +79,7 @@ class InvalidOutputException extends ApitizerException
     }
 
     /**
-     * Do a best attempt at getting a reference to the object that cause an
+     * Do a best attempt at getting a reference to the object that caused an
      * exception.
      *
      * The entire row of data cannot be used because there might be sensitive

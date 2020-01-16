@@ -19,7 +19,7 @@ interface Policy
     /**
      * Check if the value passes the validation.
      *
-     * @param $value the current value that is being evaluated.
+     * @param mixed $value the current value that is being evaluated.
      *
      * @param Model|array|mixed $row the current row that is being rendered.
      * This value will usually be a Model instance; however, the query builders
@@ -29,7 +29,7 @@ interface Policy
      * @param Field|Association $fieldOrAssoc the field or association instance
      * that is currently being rendered. This instance also holds a reference to
      * the current query builder if that is needed in the policy. Furthermore,
-     * the request instance can also be fetched from the query builder.
+     * the request instance can also be fetched from that query builder.
      */
     public function passes($value, $row, $fieldOrAssoc): bool;
 }

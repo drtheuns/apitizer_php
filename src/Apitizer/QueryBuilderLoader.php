@@ -6,6 +6,11 @@ use Apitizer\Exceptions\ClassFinderException;
 use Apitizer\QueryBuilder;
 use Apitizer\Support\ComposerNamespaceClassFinder;
 
+/**
+ * The loader responsible for preparing a list of query builders based on the
+ * configuration. Query builders can be references directly by name, or by
+ * using the namespace (assuming PSR-4 and composer are used).
+ */
 class QueryBuilderLoader
 {
     /**
@@ -13,7 +18,10 @@ class QueryBuilderLoader
      */
     protected $queryBuilders;
 
-    public function loadFromConfig()
+    /**
+     * Load all query builders based on the config/apitizer.php configuration.
+     */
+    public function loadFromConfig(): void
     {
         $this->queryBuilders = array_unique(array_merge(
             $this->loadIndividualClasses(),
@@ -21,12 +29,22 @@ class QueryBuilderLoader
         ));
     }
 
-    public function loadIndividualClasses()
+    /**
+     * Load all the classes that were registered by name directly.
+     *
+     * @return string[]
+     */
+    protected function loadIndividualClasses(): array
     {
         return config('apitizer.query_builders.classes');
     }
 
-    public function loadNamespaces()
+    /**
+     * Load all query builders from the registered namespaces.
+     *
+     * @return string[]
+     */
+    protected function loadNamespaces(): array
     {
         $classes = [];
 
@@ -37,12 +55,23 @@ class QueryBuilderLoader
         return $classes;
     }
 
-    public function loadFromNamespace(string $namespace)
+    /**
+     * Load the query builders non recursively from a namespace.
+     *
+     * @param string $namespace
+     * @return string[]
+     */
+    protected function loadFromNamespace(string $namespace): array
     {
         return ComposerNamespaceClassFinder::make($namespace, QueryBuilder::class)->all();
     }
 
-    public function getQueryBuilders()
+    /**
+     * Get a list of fully-qualified namespaces to the registered query builders.
+     *
+     * @return string[]
+     */
+    public function getQueryBuilders(): array
     {
         if (is_null($this->queryBuilders)) {
             $this->loadFromConfig();

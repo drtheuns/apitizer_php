@@ -12,6 +12,13 @@ use Illuminate\Database\Eloquent\Relations\HasOneOrMany;
 
 class QueryInterpreter
 {
+    /**
+     * Prepare the query based on the fetch specification.
+     *
+     * This will apply selects, filters, and sorting. The `beforeQuery` and
+     * `afterQuery` hooks are called on the query builder before and after the
+     * query is built.
+     */
     public function build(QueryBuilder $queryBuilder, FetchSpec $fetchSpec): Builder
     {
         $query = $queryBuilder->model()->query();

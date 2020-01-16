@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 
 class RawInput
 {
+    // No types are given since this is user input and could therefore be anything.
     protected $fields;
     protected $filters;
     protected $sorts;

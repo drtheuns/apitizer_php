@@ -93,7 +93,7 @@ class ComposerNamespaceClassFinder implements IteratorAggregate
 
         $composerContent = json_decode(file_get_contents($composerFile), true);
         if (! $psr4 = Arr::get($composerContent, 'autoload.psr-4')) {
-            throw ClassFinderException::psr4NotFound();
+            throw ClassFinderException::psr4NotFound($composerFile);
         }
 
         // Find the first registered psr-4 namespace that starts with

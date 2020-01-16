@@ -4,17 +4,13 @@ namespace Apitizer\Rendering;
 
 use Apitizer\Policies\PolicyFailed;
 use Apitizer\QueryBuilder;
+use Illuminate\Support\Arr;
 
 class BasicRenderer implements Renderer
 {
-    public function render(
-        QueryBuilder $queryBuilder,
-        $data,
-        array $selectedFields
-    ): array
+    public function render(QueryBuilder $queryBuilder, $data, array $selectedFields): array
     {
-        // Check if we're dealing with a single row of data.
-        if ($this->isSingleDataModel($data) || $this->isNonCollectionObject($data)) {
+        if ($this->isSingleRowOfData($data)) {
             return $this->renderOne($data, $selectedFields);
         }
 
@@ -51,22 +47,18 @@ class BasicRenderer implements Renderer
         return $acc;
     }
 
-    protected function isSingleDataModel($data): bool
+    /**
+     * Check if we're dealing with a single row of data or a collection of rows.
+     */
+    protected function isSingleRowOfData($data): bool
     {
-        // Distinguish between arrays as list and arrays as maps.
-        return is_array($data) && $this->isAssoc($data);
-    }
+        return
+            // Distinguish between arrays as lists of data, or arrays as maps.
+            // Associative arrays (maps) are considered a single row of data.
+            (is_array($data) && Arr::isAssoc($data))
 
-    protected function isNonCollectionObject($data): bool
-    {
-        // Distinguish between e.g. Eloquent objects and Collection objects.
-        return is_object($data) && !is_iterable($data);
-    }
-
-    private function isAssoc(array $array): bool
-    {
-        $keys = array_keys($array);
-
-        return array_keys($keys) !== $keys;
+            // Distinguish between e.g. Eloquent objects and Collection objects.
+            // Non-iterable objects are considered a single row of data.
+            || (is_object($data) && ! is_iterable($data));
     }
 }

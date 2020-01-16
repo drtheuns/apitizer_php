@@ -3,7 +3,6 @@
 namespace Apitizer\Policies;
 
 use Apitizer\Types\Concerns\FetchesValueFromRow;
-use Apitizer\Types\Field;
 
 /**
  * This policy can be used to check if the current object is owned by the
