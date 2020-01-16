@@ -2,10 +2,10 @@
 
 namespace Tests\Feature\QueryBuilder;
 
-use Tests\Feature\Builders\EmptyBuilder;
+use Tests\Support\Builders\EmptyBuilder;
 use Tests\Feature\TestCase;
-use Tests\Feature\Builders\PostBuilder;
-use Tests\Feature\Builders\UserBuilder;
+use Tests\Support\Builders\PostBuilder;
+use Tests\Support\Builders\UserBuilder;
 use Tests\Feature\Models\User;
 use Tests\Feature\Models\Post;
 use Tests\Feature\Models\Comment;

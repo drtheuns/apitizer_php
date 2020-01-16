@@ -4,7 +4,7 @@ namespace Tests\Feature\QueryBuilder;
 
 use Apitizer\Exceptions\InvalidInputException;
 use Apitizer\ExceptionStrategy\Ignore;
-use Tests\Feature\Builders\UserBuilder;
+use Tests\Support\Builders\UserBuilder;
 use Tests\Feature\TestCase;
 use Tests\Feature\Models\User;
 

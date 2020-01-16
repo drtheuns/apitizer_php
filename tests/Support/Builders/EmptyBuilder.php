@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Builders;
+namespace Tests\Support\Builders;
 
 use Apitizer\QueryBuilder;
 use Tests\Feature\Models\User;

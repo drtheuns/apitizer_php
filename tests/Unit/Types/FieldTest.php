@@ -6,7 +6,7 @@ use Apitizer\Exceptions\InvalidOutputException;
 use Apitizer\Types\Field;
 use ArrayAccess;
 use Tests\Unit\TestCase;
-use Tests\Feature\Builders\UserBuilder;
+use Tests\Support\Builders\UserBuilder;
 
 class FieldTest extends TestCase
 {

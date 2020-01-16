@@ -2,7 +2,7 @@
 
 namespace Tests;
 
-use Tests\Feature\Builders;
+use Tests\Support\Schema;
 
 class TestCase extends \Orchestra\Testbench\TestCase
 {
@@ -13,16 +13,9 @@ class TestCase extends \Orchestra\Testbench\TestCase
 
     protected function getEnvironmentSetUp($app)
     {
-        $this->builderClasses = [
-            Builders\PostBuilder::class,
-            Builders\CommentBuilder::class,
-            Builders\UserBuilder::class,
-            Builders\TagBuilder::class,
-        ];
-
         // Use the default config when running tests.
         $app['config']->set('apitizer', require __DIR__.'/../config/apitizer.php');
-        $app['config']->set('apitizer.query_builders', $this->builderClasses);
+        $app['config']->set('apitizer.schema', Schema::class);
     }
 
     protected function request(string $method = null, string $url = null)

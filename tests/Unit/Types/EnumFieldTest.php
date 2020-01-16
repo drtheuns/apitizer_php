@@ -5,7 +5,7 @@ namespace Tests\Unit\Types;
 use Apitizer\Exceptions\InvalidOutputException;
 use Apitizer\Types\EnumField;
 use Tests\Unit\TestCase;
-use Tests\Feature\Builders\UserBuilder;
+use Tests\Support\Builders\UserBuilder;
 
 class EnumFieldTest extends TestCase
 {

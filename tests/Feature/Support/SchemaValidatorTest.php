@@ -5,8 +5,8 @@ namespace Tests\Feature\Support;
 use Apitizer\Exceptions\DefinitionException;
 use Apitizer\QueryBuilder;
 use Apitizer\Support\SchemaValidator;
-use Tests\Feature\Builders\EmptyBuilder;
-use Tests\Feature\Builders\UserBuilder;
+use Tests\Support\Builders\EmptyBuilder;
+use Tests\Support\Builders\UserBuilder;
 use Tests\Feature\TestCase;
 
 class SchemaValidatorTest extends TestCase

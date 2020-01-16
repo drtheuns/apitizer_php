@@ -2,26 +2,20 @@
 
 namespace Apitizer;
 
-use Apitizer\QueryBuilder;
 use Apitizer\Types\ApidocCollection;
 
 class Apitizer
 {
+    public static function schema(): Schema
+    {
+        return app(Schema::class);
+    }
+
     public static function getQueryBuilderDocumentation(): ApidocCollection
     {
         return ApidocCollection::forQueryBuilders(
-            config('apitizer.query_builders', [])
+            self::schema()->getQueryBuilders(),
         );
-    }
-
-    /**
-     * @return QueryBuilder[]
-     */
-    public static function getQueryBuilders(): array
-    {
-        return array_map(function (string $builderClass) {
-            return new $builderClass;
-        }, config('apitizer.query_builders', []));
     }
 
     public static function getFieldKey()
@@ -46,7 +40,7 @@ class Apitizer
 
     public static function getQueryParams()
     {
-        return array_values(config('apitizer.query_parameters', []));
+        return config('apitizer.query_parameters', []);
     }
 
     public static function getRouteUrl(): ?string

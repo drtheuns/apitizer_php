@@ -26,6 +26,15 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
     {
         $configPath = __DIR__ . '/../../config/apitizer.php';
         $this->mergeConfigFrom($configPath, 'apitizer');
+
+        $this->app->bind(Strategy::class, Raise::class);
+        $this->app->bind(Parser::class, InputParser::class);
+        $this->app->bind(Renderer::class, BasicRenderer::class);
+
+        $this->app->singleton(Schema::class, function () {
+            $schema = config('apitizer.schema');
+            return new $schema;
+        });
     }
 
     /**

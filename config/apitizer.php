@@ -23,10 +23,8 @@ return [
      */
     'route_prefix' => 'apidoc',
 
-    /*
-     * The registered query builders.
-     *
-     * This should be set by the applications that use this library.
+    /**
+     * The schema that registers all the query builders.
      */
-    'query_builders' => [],
+    'schema' => \App\QueryBuilders\Schema::class,
 ];

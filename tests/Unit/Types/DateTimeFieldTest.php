@@ -5,7 +5,7 @@ namespace Tests\Unit\Types;
 use Apitizer\Transformers\CastValue;
 use Apitizer\Types\DateTimeField;
 use DateTimeInterface;
-use Tests\Feature\Builders\UserBuilder;
+use Tests\Support\Builders\UserBuilder;
 use Tests\Unit\TestCase;
 
 class DateTimeFieldTest extends TestCase

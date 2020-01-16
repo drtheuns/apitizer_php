@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use Apitizer\Apitizer;
+use Apitizer\Schema;
 use Apitizer\Types\Apidoc;
 use Apitizer\Types\ApidocCollection;
 
@@ -14,7 +15,7 @@ class ApitizerTest extends TestCase
         $apidoc = Apitizer::getQueryBuilderDocumentation();
 
         $this->assertInstanceOf(ApidocCollection::class, $apidoc);
-        $this->assertCount(count($this->builderClasses), $apidoc);
+        $this->assertCount(count(app(Schema::class)->getQueryBuilders()), $apidoc);
 
         $classes = [];
         foreach ($apidoc as $doc) {
@@ -22,6 +23,6 @@ class ApitizerTest extends TestCase
             $classes[] = get_class($doc->getQueryBuilder());
         }
 
-        $this->assertEquals($this->builderClasses, $classes);
+        $this->assertEquals(Apitizer::schema()->getQueryBuilders(), $classes);
     }
 }

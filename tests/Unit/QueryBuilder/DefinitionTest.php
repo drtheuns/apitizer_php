@@ -4,7 +4,7 @@ namespace Tests\Unit\QueryBuilder;
 
 use Apitizer\Types\Field;
 use Tests\Unit\TestCase;
-use Tests\Feature\Builders\EmptyBuilder;
+use Tests\Support\Builders\EmptyBuilder;
 
 class DefinitionTest extends TestCase
 {

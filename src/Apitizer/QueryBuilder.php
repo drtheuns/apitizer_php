@@ -344,7 +344,10 @@ abstract class QueryBuilder
 
             // Ensure the all the supported query parameters that were passed in are
             // also present in the pagination links.
-            $queryParameters = Arr::only($this->getRequest()->query(), Apitizer::getQueryParams());
+            $queryParameters = Arr::only(
+                $this->getRequest()->query(),
+                array_values(Apitizer::getQueryParams())
+            );
             $paginator->appends($queryParameters);
         });
     }
