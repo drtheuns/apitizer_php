@@ -11,12 +11,6 @@ use Apitizer\Rendering\Renderer;
 
 class ServiceProvider extends \Illuminate\Support\ServiceProvider
 {
-    public $bindings = [
-        Strategy::class => Raise::class,
-        Parser::class   => InputParser::class,
-        Renderer::class => BasicRenderer::class,
-    ];
-
     /**
      * Register the service provider
      *
@@ -26,6 +20,13 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
     {
         $configPath = __DIR__ . '/../../config/apitizer.php';
         $this->mergeConfigFrom($configPath, 'apitizer');
+
+        $this->app->bind(Strategy::class, Raise::class);
+        $this->app->bind(Parser::class, InputParser::class);
+        $this->app->bind(Renderer::class, BasicRenderer::class);
+        $this->app->singleton(QueryBuilderLoader::class, function () {
+            return new QueryBuilderLoader();
+        });
     }
 
     /**

@@ -6,7 +6,7 @@ use Apitizer\Apitizer;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Tests\Feature\Models\User;
 use Tests\Feature\TestCase;
-use Tests\Feature\Builders\UserBuilder;
+use Tests\Support\Builders\UserBuilder;
 
 class PaginationTest extends TestCase
 {

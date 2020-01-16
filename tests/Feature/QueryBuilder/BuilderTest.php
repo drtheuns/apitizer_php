@@ -4,7 +4,7 @@ namespace Tests\Feature\QueryBuilder;
 
 use Illuminate\Database\Eloquent\Builder;
 use Tests\Feature\TestCase;
-use Tests\Feature\Builders\UserBuilder;
+use Tests\Support\Builders\UserBuilder;
 
 class BuilderTest extends TestCase
 {

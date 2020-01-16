@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Unit;
 
 use Apitizer\Apitizer;
 use Apitizer\Types\Apidoc;
@@ -22,6 +22,11 @@ class ApitizerTest extends TestCase
             $classes[] = get_class($doc->getQueryBuilder());
         }
 
-        $this->assertEquals($this->builderClasses, $classes);
+        $this->assertEquals(Apitizer::getQueryBuilders(), $classes);
+    }
+
+    protected function getPackageProviders($app)
+    {
+        return ['Apitizer\ServiceProvider'];
     }
 }

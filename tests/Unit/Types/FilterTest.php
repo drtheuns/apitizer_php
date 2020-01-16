@@ -4,7 +4,7 @@ namespace Tests\Unit\Types;
 
 use Apitizer\Exceptions\InvalidInputException;
 use Apitizer\Types\Filter;
-use Tests\Feature\Builders\UserBuilder;
+use Tests\Support\Builders\UserBuilder;
 use Tests\Unit\TestCase;
 
 class FilterTest extends TestCase

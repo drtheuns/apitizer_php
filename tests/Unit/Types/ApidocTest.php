@@ -3,8 +3,8 @@
 namespace Tests\Unit\Types;
 
 use Apitizer\Types\Apidoc;
-use Tests\Feature\Builders\EmptyBuilder;
-use Tests\Feature\Builders\UserBuilder;
+use Tests\Support\Builders\EmptyBuilder;
+use Tests\Support\Builders\UserBuilder;
 use Tests\Unit\TestCase;
 
 class ApidocTest extends TestCase

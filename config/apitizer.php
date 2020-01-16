@@ -24,9 +24,21 @@ return [
     'route_prefix' => 'apidoc',
 
     /*
-     * The registered query builders.
-     *
-     * This should be set by the applications that use this library.
+     * Register the query builders of this project.
      */
-    'query_builders' => [],
+    'query_builders' => [
+        /*
+         * Individual classes can be registered here. Expects the fully qualified namespace.
+         */
+        'classes' => [
+            //
+        ],
+
+        /*
+         * Register all the query builders from the given namespaces.
+         */
+        'namespaces' => [
+            'App\QueryBuilders',
+        ],
+    ],
 ];

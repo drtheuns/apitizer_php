@@ -2,26 +2,25 @@
 
 namespace Tests\Feature\Commands;
 
+use Apitizer\QueryBuilderLoader;
 use Tests\Feature\TestCase;
-use Tests\Feature\Builders\EmptyBuilder;
-use Tests\Feature\Builders\UserBuilder;
+use Tests\Support\Builders\EmptyBuilder;
+use Tests\Support\Builders\UserBuilder;
+use Mockery\MockInterface;
 
 class ValidateSchemaCommandTest extends TestCase
 {
-    protected function getEnvironmentSetUp($app)
-    {
-        $this->builderClasses = [
-            AssociationDoesNotExist::class,
-        ];
-
-        // Use the default config when running tests.
-        $app['config']->set('apitizer', require __DIR__ . '/../../../config/apitizer.php');
-        $app['config']->set('apitizer.query_builders', $this->builderClasses);
-    }
-
     /** @test */
     public function it_validates_all_registered_query_builders()
     {
+        $this->mock(QueryBuilderLoader::class, function (MockInterface $mock) {
+            $mock->shouldReceive('getQueryBuilders')
+                 ->once()
+                 ->andReturn([
+                     AssociationDoesNotExist::class,
+                 ]);
+        });
+
         $this->artisan('apitizer:validate-schema')
             ->assertExitCode(1);
     }

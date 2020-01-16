@@ -4,10 +4,16 @@ namespace Tests\Feature\Documentation;
 
 use Apitizer\Apitizer;
 use Tests\Feature\TestCase;
-use Tests\Feature\Builders;
+use Tests\Support\Builders;
 
 class MissingDocumentationTest extends TestCase
 {
+    protected $builderClasses = [
+        Builders\CommentBuilder::class,
+        Builders\PostBuilder::class,
+        Builders\UserBuilder::class,
+    ];
+
     /** @test */
     public function it_should_still_work_when_documentation_is_missing()
     {
@@ -15,20 +21,5 @@ class MissingDocumentationTest extends TestCase
 
         $response->assertDontSeeText('Tag');
         $response->assertSeeText('Documentation is missing');
-    }
-
-    protected function getEnvironmentSetUp($app)
-    {
-        $this->builderClasses = [
-            Builders\PostBuilder::class,
-            Builders\CommentBuilder::class,
-            Builders\UserBuilder::class,
-            // Missing: TagBuilder
-        ];
-
-        $app['config']->set(
-            'apitizer', require __DIR__ . '/../../../config/apitizer.php'
-        );
-        $app['config']->set('apitizer.query_builders', $this->builderClasses);
     }
 }

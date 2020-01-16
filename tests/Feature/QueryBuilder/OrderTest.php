@@ -3,7 +3,7 @@
 namespace Tests\Feature\QueryBuilder;
 
 use Tests\Feature\TestCase;
-use Tests\Feature\Builders\UserBuilder;
+use Tests\Support\Builders\UserBuilder;
 use Tests\Feature\Models\User;
 
 class OrderTest extends TestCase

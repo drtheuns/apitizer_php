@@ -3,9 +3,8 @@
 namespace Tests\Feature\Documentation;
 
 use Apitizer\Apitizer;
-use Tests\Feature\Builders\PostBuilder;
+use Tests\Support\Builders\PostBuilder;
 use Tests\Feature\TestCase;
-use Tests\Feature\Builders;
 
 class DocumentationControllerTest extends TestCase
 {
@@ -16,7 +15,7 @@ class DocumentationControllerTest extends TestCase
                          ->assertOk()
                          ->assertSeeTextInOrder(['Post', 'Comment', 'User', 'Tag']);
 
-        foreach ($this->builderClasses as $class) {
+        foreach (Apitizer::getQueryBuilders() as $class) {
             $builder = new $class();
 
             $fields = collect($builder->getFields())->map->getName()->values();

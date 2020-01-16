@@ -5,7 +5,7 @@ namespace Tests\Feature;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Tests\Feature\Models\User;
-use Tests\Feature\Builders\UserBuilder;
+use Tests\Support\Builders\UserBuilder;
 
 /**
  * The query builder can be used JUST to render data, rather than also fetching

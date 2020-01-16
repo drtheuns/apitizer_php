@@ -2,7 +2,6 @@
 
 namespace Apitizer\Parser;
 
-use Apitizer\Exceptions\InvalidInputException;
 use Apitizer\Parser\Context;
 use Apitizer\Parser\Relation;
 use Apitizer\Parser\Sort;

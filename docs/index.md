@@ -166,21 +166,23 @@ curl localhost:8000/api/users?fields=id
 
 ## Documentation
 
-Either create a new config file: `/my_project/config/apitizer.php` or use
-`./artisan vendor:publish --provider 'Apitizer\\ServiceProvider'` to publish the
-configuration.
+If you have followed along with the setup, you can now generate documentation by
+starting the webserver with `./artisan serve` and navigating to
+`localhost:8000/apidoc`. However, if you used different namespaces, you will
+need to register them in the configuration:
 
-Within this config file, add (or modify) the following:
-
-```php
-// File: /my_project/config/apitizer.php
+```
+// File: /project_root/config/apitizer.php
 return [
     'query_builders' => [
-        \App\QueryBuilders\UserBuilder::class
-    ],
+        'classes' => [
+            // Register individual classes here, for example:
+            \App\Api\UserBuilder::class,
+        ],
+        'namespaces' => [
+            // Register entire namespaces here (non recursive)
+            'App\Api'
+        ]
+    ]
 ];
 ```
-
-Now when you start the webserver (`./artisan serve`) and navigate to
-`localhost:8000/apidoc`, you will see the generated documentation, including the
-documentation for the user builder.

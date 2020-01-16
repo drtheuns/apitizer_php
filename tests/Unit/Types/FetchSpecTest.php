@@ -6,7 +6,7 @@ use Apitizer\Types\FetchSpec;
 use Apitizer\Types\Field;
 use Apitizer\Types\Filter;
 use Apitizer\Types\Sort;
-use Tests\Feature\Builders\EmptyBuilder;
+use Tests\Support\Builders\EmptyBuilder;
 use Tests\Unit\TestCase;
 
 class FetchSpecTest extends TestCase
