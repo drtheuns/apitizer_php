@@ -118,4 +118,21 @@ class FilterTest extends TestCase
 
         $this->assertEquals([$expectedUser->only('id')], $result);
     }
+
+    /** @test */
+    public function it_allows_custom_formats_for_date_filters()
+    {
+        $users = factory(User::class, 2)->create();
+        $expectedUser = $users->first();
+        $expectedUser->updated_at = '2021-01-02 13:00:00';
+        $expectedUser->save();
+
+        $request = $this->request()
+                        ->filter('updated_at', '01-01-2021')
+                        ->fields('id')
+                        ->make();
+        $result = UserBuilder::make($request)->all();
+
+        $this->assertEquals([$expectedUser->only('id')], $result);
+    }
 }

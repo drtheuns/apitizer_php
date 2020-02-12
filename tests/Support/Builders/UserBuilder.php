@@ -23,9 +23,10 @@ class UserBuilder extends QueryBuilder
     public function filters(): array
     {
         return [
-            'name'       => $this->filter()->byField('name')->expectMany('string'),
-            'created_at' => $this->filter()->byField('created_at', '>')->expect('datetime'),
-            'posts'      => $this->filter()->byAssociation('posts', 'id')->expectMany('string'),
+            'name'       => $this->filter()->expectMany('string')->byField('name'),
+            'created_at' => $this->filter()->expect('datetime')->byField('created_at', '>'),
+            'posts'      => $this->filter()->expectMany('string')->byAssociation('posts', 'id'),
+            'updated_at' => $this->filter()->expect('date', 'd-m-Y')->byField('updated_at', '>'),
         ];
     }
 

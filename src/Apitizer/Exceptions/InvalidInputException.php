@@ -35,8 +35,8 @@ class InvalidInputException extends ApitizerException
         $filterName = $filter->getName();
         $type = gettype($given);
         $expectedType = $filter->getInputType();
-        $message = "Expected $filterKey\[$filterName\] to receive [$expectedType]"
-                 .", got [$type]";
+        $filterParam = $filterKey . '[' . $filterName . ']';
+        $message = "Expected $filterParam to receive [$expectedType] got [$type]";
 
         $e = new static($message);
         $e->type = $filter;

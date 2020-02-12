@@ -12,6 +12,30 @@ request could be handled by the query builder below it.
 
 ```
 /users?fields=id,name,organization(id,name)&filters[search]=John&sort=id.asc&limit=30
+
+{
+  "current_page": 1,
+  "data": [
+    {
+      "id": 1,
+      "name": "John Doe",
+      "organization": {
+        "id": 29482,
+        "name": "Big Corp 2"
+      }
+    }
+  ],
+  "first_page_url": "<url_with_query_params>",
+  "from": 1,
+  "last_page": 1,
+  "last_page_url": "<url_with_query_params>",
+  "next_page_url": null,
+  "path": "<url>",
+  "per_page": 30,
+  "prev_page_url": null,
+  "to": 1,
+  "total": 1
+}
 ```
 
 ```php
@@ -186,3 +210,7 @@ return [
     ]
 ];
 ```
+
+## Next steps
+
+Head on over to the [documentation](https://github.com/drtheuns/apitizer_php/tree/master/docs).

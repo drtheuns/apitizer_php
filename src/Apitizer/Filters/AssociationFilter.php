@@ -16,11 +16,16 @@ class AssociationFilter
     protected $relation;
 
     /**
-     * @var string The column name to apply the filtering to.
+     * @var null|string The column name to apply the filtering to.
      */
     protected $column;
 
-    public function __construct(string $relation, string $column)
+    /**
+     * @param string $relation the name of the relation on the model.
+     * @param null|string the column name that should be compared. Defaults to
+     * the related model's primary key.
+     */
+    public function __construct(string $relation, ?string $column = null)
     {
         $this->relation = $relation;
         $this->column = $column;
@@ -30,6 +35,10 @@ class AssociationFilter
     {
         $values = Arr::wrap($values);
         $relation = $query->getModel()->{$this->relation}();
+
+        // Default to the primary key on the related table if no column was
+        // given.
+        $this->column = $this->column ?? $relation->getRelated()->getKeyName();
 
         if ($relation instanceof BelongsTo || $relation instanceof HasOneOrMany) {
             $this->applyFilter($query, $values, $relation);
