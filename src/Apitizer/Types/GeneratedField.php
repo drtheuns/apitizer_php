@@ -28,6 +28,6 @@ class GeneratedField extends AbstractField
 
     protected function getValue($row)
     {
-        return call_user_func($this->generator, $row);
+        return call_user_func($this->generator, $row, $this);
     }
 }
