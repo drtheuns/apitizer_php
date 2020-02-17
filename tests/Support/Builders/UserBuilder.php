@@ -14,6 +14,7 @@ class UserBuilder extends QueryBuilder
             'id'    => $this->int('id'),
             'name'  => $this->string('name'),
             'email' => $this->string('email'),
+            'should_reset_password' => $this->boolean('should_reset_password'),
             'created_at' => $this->datetime('created_at')->format(),
             'updated_at' => $this->date('updated_at')->format(),
             'posts' => $this->association('posts', PostBuilder::class),

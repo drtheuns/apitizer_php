@@ -77,7 +77,7 @@ class Apitizer
      * @see Apitizer::getFilterKey
      * @see Apitizer::getLimitKey
      */
-    public static function getQueryParams()
+    public static function getQueryParams(): array
     {
         return config('apitizer.query_parameters', []);
     }

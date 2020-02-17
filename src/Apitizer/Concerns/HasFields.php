@@ -39,6 +39,11 @@ trait HasFields
         return $this->field($key, 'float')->transform(new CastValue);
     }
 
+    protected function boolean(string $key): Field
+    {
+        return $this->field($key, 'boolean')->transform(new CastValue);
+    }
+
     protected function date(string $key, $castFormat = null): DateTimeField
     {
         return (new DateTimeField($this, $key, 'date'))
