@@ -3,9 +3,10 @@
 namespace Apitizer\Support;
 
 use Apitizer\QueryBuilder;
-use Apitizer\Types\Field;
+use Apitizer\Types\AbstractField;
 use Apitizer\Types\Association;
 use Apitizer\Exceptions\DefinitionException;
+use Apitizer\Types\Field;
 use Apitizer\Types\Filter;
 use Apitizer\Types\Sort;
 use Illuminate\Database\Eloquent\Relations\Relation as EloquentRelation;
@@ -53,7 +54,7 @@ class DefinitionHelper
             $field = new Field($queryBuilder, $field, 'any');
         }
 
-        if (!$field instanceof Field) {
+        if (!$field instanceof AbstractField) {
             throw DefinitionException::fieldDefinitionExpected($queryBuilder, $name, $field);
         }
 

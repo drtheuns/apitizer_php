@@ -3,7 +3,6 @@
 namespace Apitizer\Transformers;
 
 use DateTimeInterface;
-use Apitizer\Types\Field;
 
 class DateTimeFormat
 {
@@ -14,7 +13,7 @@ class DateTimeFormat
         $this->format = $format;
     }
 
-    public function __invoke(DateTimeInterface $value, Field $field)
+    public function __invoke(DateTimeInterface $value)
     {
         return $value->format($this->format);
     }

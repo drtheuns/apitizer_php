@@ -17,7 +17,7 @@ use Apitizer\Support\DefinitionHelper;
 use Apitizer\Types\Apidoc;
 use Apitizer\Types\Association;
 use Apitizer\Types\FetchSpec;
-use Apitizer\Types\Field;
+use Apitizer\Types\AbstractField;
 use Apitizer\Types\Filter;
 use Apitizer\Types\Sort;
 use Illuminate\Database\Eloquent\Builder;
@@ -65,7 +65,7 @@ abstract class QueryBuilder
     /**
      * The result of the fields() callback.
      *
-     * @var Field[]|Association[]
+     * @var AbstractField[]|Association[]
      */
     protected $availableFields;
 
@@ -412,7 +412,7 @@ abstract class QueryBuilder
     /**
      * Validate the fields that were requested by the client.
      *
-     * @return [string => Field|Association]
+     * @return [string => AbstractField|Association]
      */
     protected function getValidatedFields(array $unvalidatedFields, array $availableFields): array
     {
@@ -528,7 +528,7 @@ abstract class QueryBuilder
     public function getOnlyFields(): array
     {
         return array_filter($this->getFields(), function ($field) {
-            return $field instanceof Field;
+            return $field instanceof AbstractField;
         });
     }
 

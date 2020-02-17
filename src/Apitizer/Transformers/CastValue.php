@@ -2,7 +2,7 @@
 
 namespace Apitizer\Transformers;
 
-use Apitizer\Types\Field;
+use Apitizer\Types\AbstractField;
 use Apitizer\Support\TypeCaster;
 
 class CastValue
@@ -14,7 +14,7 @@ class CastValue
         $this->$format = $format;
     }
 
-    public function __invoke($value, Field $field)
+    public function __invoke($value, $row, AbstractField $field)
     {
         return TypeCaster::cast($value, $field->getType(), $this->format);
     }

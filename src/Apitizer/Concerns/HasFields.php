@@ -6,6 +6,7 @@ use Apitizer\Types\Field;
 use Apitizer\Types\EnumField;
 use Apitizer\Types\DateTimeField;
 use Apitizer\Transformers\CastValue;
+use Apitizer\Types\GeneratedField;
 
 trait HasFields
 {
@@ -60,5 +61,10 @@ trait HasFields
     {
         return (new EnumField($this, $key, $enum, $type))
             ->transform(new CastValue);
+    }
+
+    protected function generatedField(string $type, callable $generator): GeneratedField
+    {
+        return new GeneratedField($this, $type, $generator);
     }
 }

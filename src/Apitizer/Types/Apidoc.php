@@ -53,7 +53,7 @@ class Apidoc
         $this->setName($this->guessQueryBuilderResourceName());
 
         foreach ($queryBuilder->getFields() as $field) {
-            if ($field instanceof Field) {
+            if ($field instanceof AbstractField) {
                 $this->fields[] = $field;
             }
 

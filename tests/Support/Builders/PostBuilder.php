@@ -19,6 +19,9 @@ class PostBuilder extends QueryBuilder
             'title'    => $this->string('title'),
             'body'     => $this->any('body')->nullable(),
             'status'   => $this->enum('status', ['published', 'draft', 'scrapped', 'another-status']),
+            'total'    => $this->generatedField('string', function ($row) {
+                return \strlen($row->title);
+            }),
             'author'   => $this->association('author', UserBuilder::class),
             'comments' => $this->association('comments', CommentBuilder::class),
             'tags'     => $this->association('tags', TagBuilder::class),

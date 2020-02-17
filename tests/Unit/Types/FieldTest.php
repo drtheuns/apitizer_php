@@ -4,6 +4,7 @@ namespace Tests\Unit\Types;
 
 use Apitizer\Exceptions\InvalidOutputException;
 use Apitizer\Types\Field;
+use Apitizer\Types\GeneratedField;
 use ArrayAccess;
 use Tests\Unit\TestCase;
 use Tests\Support\Builders\UserBuilder;
@@ -34,6 +35,18 @@ class FieldTest extends TestCase
         $rendered = $this->field()->nullable()->render(['key' => null]);
 
         $this->assertEquals(null, $rendered);
+    }
+
+    /** @test */
+    public function generated_fields_render_data_from_a_callback()
+    {
+        $field = new GeneratedField(new UserBuilder(), 'string', function () {
+            return 'hello';
+        });
+
+        $rendered = $field->render([]);
+
+        $this->assertEquals('hello', $rendered);
     }
 
     private function field(string $key = 'key', string $type = 'string')
