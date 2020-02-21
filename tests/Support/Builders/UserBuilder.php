@@ -2,11 +2,10 @@
 
 namespace Tests\Support\Builders;
 
-use Apitizer\QueryBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Tests\Feature\Models\User;
 
-class UserBuilder extends QueryBuilder
+class UserBuilder extends EmptyBuilder
 {
     public function fields(): array
     {

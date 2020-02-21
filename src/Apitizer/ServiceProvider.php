@@ -45,6 +45,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
         }
 
         $this->loadViewsFrom($root . '/resources/views', 'apitizer');
+        $this->loadTranslationsFrom($root . '/resources/lang', 'apitizer');
 
         if ($this->app->runningInConsole()) {
             $this->commands([

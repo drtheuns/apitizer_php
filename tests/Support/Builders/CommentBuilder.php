@@ -2,11 +2,10 @@
 
 namespace Tests\Support\Builders;
 
-use Apitizer\QueryBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Tests\Feature\Models\Comment;
 
-class CommentBuilder extends QueryBuilder
+class CommentBuilder extends EmptyBuilder
 {
     public function fields(): array
     {

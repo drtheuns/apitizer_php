@@ -2,12 +2,11 @@
 
 namespace Tests\Support\Builders;
 
-use Apitizer\QueryBuilder;
 use Apitizer\Types\Apidoc;
 use Illuminate\Database\Eloquent\Model;
 use Tests\Feature\Models\Post;
 
-class PostBuilder extends QueryBuilder
+class PostBuilder extends EmptyBuilder
 {
     const DESCRIPTION = 'A blog post';
 

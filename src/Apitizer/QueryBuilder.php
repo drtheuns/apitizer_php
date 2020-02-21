@@ -20,6 +20,7 @@ use Apitizer\Types\FetchSpec;
 use Apitizer\Types\AbstractField;
 use Apitizer\Types\Filter;
 use Apitizer\Types\Sort;
+use Apitizer\Validation\Rules;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -116,6 +117,11 @@ abstract class QueryBuilder
     protected $exceptionStrategy;
 
     /**
+     * @var Rules
+     */
+    protected $rules;
+
+    /**
      * A function that returns the fields that are available to the client.
      *
      * If the value is a string, it will be implicitly cast to `$this->any`
@@ -158,6 +164,15 @@ abstract class QueryBuilder
      * Get the source that will be used by the query interpreter.
      */
     abstract public function model(): Model;
+
+    /**
+     * Build the validation rules for the various route actions.
+     *
+     * @param Rules $rules
+     *
+     * @return void
+     */
+    abstract public function rules(Rules $rules);
 
     /**
      * Overridable function to adjust the API documentation for this query
@@ -223,11 +238,12 @@ abstract class QueryBuilder
     }
 
     /**
-     * @param array the specification of data that should be used for this
-     * builder. This array may contain three keys: `fields`, `filters`, and
-     * `sorts`. The value for these should be the same as what you would send in
-     * a request; in other words, fields may be a comma separated string of
-     * fields (or an array), etc.
+     * @param array{fields: string|string[], sorts: string|string[], filters: array<string, mixed>}
+     * array the specification of data that should be used for this builder.
+     * This array may contain three keys: `fields`, `filters`, and `sorts`. The
+     * value for these should be the same as what you would send in a request;
+     * in other words, fields may be a comma separated string of fields (or an
+     * array), etc.
      */
     public function fromSpecification(array $specification)
     {
@@ -378,6 +394,16 @@ abstract class QueryBuilder
     {
         return $this->getQueryInterpreter()
                     ->build($this, $this->makeFetchSpecification());
+    }
+
+    /**
+     * Get the validation rules for the current request.
+     */
+    public function validationRules(): array
+    {
+        return $this->getRules()
+                    ->rules($this->request->route()->getActionMethod())
+                    ->toValidationRules();
     }
 
     /**
@@ -669,5 +695,15 @@ abstract class QueryBuilder
     public function getAlwaysLoadColumns(): array
     {
         return $this->alwaysLoadColumns;
+    }
+
+    public function getRules(): Rules
+    {
+        if (! $this->rules) {
+            $this->rules = new Rules();
+            $this->rules($this->rules);
+        }
+
+        return $this->rules;
     }
 }
