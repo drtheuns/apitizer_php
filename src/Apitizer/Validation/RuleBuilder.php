@@ -48,7 +48,7 @@ class RuleBuilder
 
     public function integer(string $name): NumberRuleBuilder
     {
-        return $this->field(new IntegerRuleBuilder($name, true));
+        return $this->field(new IntegerRuleBuilder($name));
     }
 
     public function file(string $name): FileRuleBuilder
@@ -89,9 +89,20 @@ class RuleBuilder
         $rules = new Collection();
 
         foreach ($this->fields as $field) {
-            $field->addValidationRules($rules);
+            $field->addValidationRulesTo($rules);
         }
 
         return $rules->all();
+    }
+
+    public function getDocumentedFields(): array
+    {
+        $fields = new Collection();
+
+        foreach ($this->fields as $field) {
+            $field->addDocumentationTo($fields);
+        }
+
+        return $fields->all();
     }
 }

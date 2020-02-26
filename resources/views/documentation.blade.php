@@ -221,6 +221,12 @@
      .topic-content > .topic-section ~ .topic-section {
        margin-top: 40px;
      }
+     .endpoints-title {
+       font-size: 22px;
+     }
+     .endpoint-name {
+       font-size: 18px;
+     }
      .menu {
        position: fixed;
        top: 0;

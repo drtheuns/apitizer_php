@@ -10,7 +10,7 @@ class InRule extends In implements DocumentableRule
     public function getDescription(): ?string
     {
         return trans('apitizer::validation.in', [
-            'values' => implode(' or ', $this->values)
+            'values' => implode(', ', $this->values)
         ]);
     }
 }

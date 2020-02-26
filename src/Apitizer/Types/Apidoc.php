@@ -109,6 +109,11 @@ class Apidoc
         return $this->queryBuilder->getFilters();
     }
 
+    public function getRules(): array
+    {
+        return $this->queryBuilder->getRules()->rules();
+    }
+
     public function getQueryBuilder(): QueryBuilder
     {
         return $this->queryBuilder;
@@ -138,6 +143,11 @@ class Apidoc
     public function hasSorts(): bool
     {
         return ! empty($this->getSorts());
+    }
+
+    public function hasRules(): bool
+    {
+        return $this->getQueryBuilder()->getRules()->hasRules();
     }
 
     public function hasAssociations(): bool
@@ -174,5 +184,26 @@ class Apidoc
         $this->metadata = $data;
 
         return $this;
+    }
+
+    public function humanizeActionName(string $actionName)
+    {
+        switch ($actionName) {
+            case 'store':
+                return 'Create';
+            case 'destroy':
+                return 'Delete';
+            default:
+                return Str::title($actionName);
+        }
+    }
+
+    public function wrapCodeTags(string $text)
+    {
+        $index = 0;
+
+        return preg_replace_callback('/`/', function ($match) use (&$index) {
+            return $index++ % 2 == 0 ? '<code>' : '</code>';
+        }, $text);
     }
 }

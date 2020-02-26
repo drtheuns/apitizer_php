@@ -140,7 +140,7 @@ abstract class TypedRuleBuilder
     {
         return $this->addSimpleRule(
             'max', [$max],
-            $this->trans('max', ['max' => $max])
+            $this->trans('max', ['max' => $this->sizeSuffix($max)])
         );
     }
 
@@ -449,11 +449,10 @@ abstract class TypedRuleBuilder
     /**
      * @internal
      */
-    public function addValidationRules(Collection $rules)
+    public function addValidationRulesTo(Collection $rules): Collection
     {
         if ($this->rawRules) {
-            $rules->merge($this->rawRules);
-            return;
+            return $rules->merge($this->rawRules);
         }
 
         $validationRules = [$this->getTypeRule()];
@@ -473,7 +472,12 @@ abstract class TypedRuleBuilder
             }
         }
 
-        $rules->put($this->getName(), $validationRules);
+        return $rules->put($this->getName(), $validationRules);
+    }
+
+    public function addDocumentationTo(Collection $collection): Collection
+    {
+        return $collection->push($this);
     }
 
     /**
@@ -492,6 +496,13 @@ abstract class TypedRuleBuilder
         return $documentationLines;
     }
 
+    public function hasRules(): bool
+    {
+        return collect($this->rules)->filter(function ($rule) {
+            return $rule instanceof DocumentableRule;
+        })->isNotEmpty();
+    }
+
     protected function getTypeRule()
     {
         return $this->getType();
@@ -500,5 +511,30 @@ abstract class TypedRuleBuilder
     protected function trans(string $name, $replace = [], $locale = null)
     {
         return trans("apitizer::validation.$name", $replace, $locale);
+    }
+
+    /**
+     * Suffix the variable with the right unit according to the size rule.
+     *
+     * For example, string('name')->max(100) should be "100 characters".
+     *
+     * @param TypedRuleBuilder|string $type
+     */
+    protected function sizeSuffix($value)
+    {
+        $suffix = '';
+
+        switch ($this->getType()) {
+            case 'string':
+                $suffix = $value === 1 ? 'character' : 'characters';
+                break;
+            case 'file':
+                $suffix = $value === 1 ? 'byte' : 'bytes';
+                break;
+        }
+
+        $value = (string) $value;
+
+        return empty($suffix) ? $value : "$value $suffix";
     }
 }

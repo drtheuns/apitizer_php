@@ -64,7 +64,7 @@ class Rules
 
         return collect($this->rules)->map(function ($rules, $actionMethod) {
             return $this->resolveRulesFor($actionMethod);
-        });
+        })->all();
     }
 
     /**
@@ -73,6 +73,14 @@ class Rules
     public function hasRulesFor(string $actionMethod): bool
     {
         return isset($this->rules[$actionMethod]);
+    }
+
+    /**
+     * Check if any rules have been defined.
+     */
+    public function hasRules(): bool
+    {
+        return ! empty($this->rules);
     }
 
     /**

@@ -26,7 +26,7 @@ return [
     'gte'                  => 'The value must be greater than or equal to the value in :field',
     'lt'                   => 'The value must be less than the value in :field',
     'lte'                  => 'The value must be less than or equal to the value in :field',
-    'in'                   => 'The value must be one of: :values',
+    'in'                   => 'The value must be one of: `[:values]`',
     'in_array'             => 'The value must be in the array of field :field',
     'ip'                   => 'The value must be a valid IP address',
     'ipv4'                 => 'The value must be a valid IPv4 address',

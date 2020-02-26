@@ -21,6 +21,8 @@ use Apitizer\Types\AbstractField;
 use Apitizer\Types\Filter;
 use Apitizer\Types\Sort;
 use Apitizer\Validation\Rules;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Support\Facades\Validator as ValidatorFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -404,6 +406,24 @@ abstract class QueryBuilder
         return $this->getRules()
                     ->rules($this->request->route()->getActionMethod())
                     ->toValidationRules();
+    }
+
+    /**
+     * Get an instantiated validator object with the rules for the current
+     * action method.
+     */
+    public function validator(): Validator
+    {
+        return ValidatorFactory::make($this->getRequest()->all(), $this->validationRules());
+    }
+
+    /**
+     * Return the validated data for the current request, based on the request's
+     * action method.
+     */
+    public function validated(): array
+    {
+        return $this->validator()->validate();
     }
 
     /**
