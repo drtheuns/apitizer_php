@@ -3,6 +3,7 @@
 namespace Tests\Unit\Validation;
 
 use Apitizer\Validation\RuleBuilder;
+use Apitizer\Validation\Rules\RequiredIfRule;
 
 class TypedRuleBuilderTest extends TestCase
 {
@@ -74,5 +75,41 @@ class TypedRuleBuilderTest extends TestCase
                 'e1' => ['string', 'regex:/[a-z]+/'],
                 'e2' => ['string', 'not_regex:/[a-z]+/'],
             ]);
+    }
+
+    /** @test */
+    public function it_validates_the_required_rules(): void
+    {
+        $this->builder()
+             ->rules(function (RuleBuilder $builder) {
+                 $builder->string('e1')->required();
+                 $builder->string('e2')->requiredWith(['e1']);
+                 $builder->string('e3')->requiredWithAll(['e2']);
+                 $builder->string('e4')->requiredWithout(['e3']);
+                 $builder->string('e5')->requiredWithoutAll(['e4']);
+                 $builder->string('e6')->requiredUnless('e5', 'wow');
+             })
+             ->assertRules([
+                 'e1' => ['string', 'required'],
+                 'e2' => ['string', 'required_with:e1'],
+                 'e3' => ['string', 'required_with_all:e2'],
+                 'e4' => ['string', 'required_without:e3'],
+                 'e5' => ['string', 'required_without_all:e4'],
+                 'e6' => ['string', 'required_unless:e5,wow'],
+             ]);
+    }
+
+    /** @test */
+    public function it_validates_nullables(): void
+    {
+        $this->builder()
+             ->rules(function (RuleBuilder $builder) {
+                 $builder->string('e1')->nullable();
+                 $builder->string('e2')->nullable()->required();
+             })
+             ->assertRules([
+                 'e1' => ['string', 'nullable'],
+                 'e2' => ['string', 'required', 'nullable'],
+             ]);
     }
 }

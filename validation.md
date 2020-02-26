@@ -4,9 +4,9 @@ General rules:
 - [T] in (in array)
 - [T] in_array
 - [T] not_in
-- filled
-- nullable
-- present
+- [T] filled
+- [T] nullable
+- [ ] present
 - [ ] required
 - [ ] required_if
 - [ ] required_unless
