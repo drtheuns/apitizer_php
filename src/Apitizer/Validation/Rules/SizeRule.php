@@ -61,6 +61,8 @@ class SizeRule implements ValidationRule
             case 'file':
                 $suffix = $value === 1 ? 'byte' : 'bytes';
                 break;
+            case 'array':
+                $suffix = $value === 1 ? 'element' : 'elements';
         }
 
         $value = (string) $value;
