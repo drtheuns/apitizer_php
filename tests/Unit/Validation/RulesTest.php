@@ -46,4 +46,42 @@ class RulesTest extends TestCase
             'update' => []
         ], $rules);
     }
+
+    /** @test */
+    public function it_resolves_a_single_builder_when_only_one_is_requested()
+    {
+        $rules = new Rules();
+        $rules->storeRules(function (ObjectRules $builder) {});
+        $rules->updateRules(function (ObjectRules $builder) {
+            $this->fail("The update rules should not be resolved");
+        });
+
+        $rules->rules('store');
+
+        // Pass the test, since "fail" was never called.
+        // We cant use "expectNotToPerformAssertions" because those tests are
+        // removed from coverage.
+        $this->addToAssertionCount(1);
+    }
+
+    /** @test */
+    public function it_only_resolves_rules_once_for_each_action()
+    {
+        $count = 0;
+        $rules = new Rules();
+        $rules->storeRules(function (ObjectRules $builder) use (&$count) {
+            if ($count++ > 1) {
+                $this->fail();
+            }
+        });
+
+        // Call it twice.
+        $rules->rules('store');
+        $rules->rules('store');
+
+        // Pass the test, since "fail" was never called.
+        // We cant use "expectNotToPerformAssertions" because those tests are
+        // removed from coverage.
+        $this->addToAssertionCount(1);
+    }
 }
