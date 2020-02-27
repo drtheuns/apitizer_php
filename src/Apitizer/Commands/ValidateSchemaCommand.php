@@ -88,7 +88,7 @@ class ValidateSchemaCommand extends Command
                 }
 
                 $this->comment($this->listItem(Str::title($namespace)));
-                /** @var DefinitionException */
+                /** @var DefinitionException $e */
                 foreach ($errors[$namespace] as $e) {
                     $this->line($this->listItem($e->getMessage(), 2));
                 }

@@ -2,37 +2,37 @@
 
 namespace Apitizer\Validation\Rules;
 
-use Apitizer\Validation\DocumentableRule;
 use Apitizer\Validation\ValidationRule;
 use Illuminate\Validation\Rules\Dimensions;
 
-class DimensionsRule extends Dimensions implements DocumentableRule, ValidationRule
+class DimensionsRule extends Dimensions implements ValidationRule
 {
-    public function toValidationRule()
-    {
-        return $this->__toString();
-    }
-
-    public function getRule(): string
+    public function getName(): string
     {
         return 'dimensions';
     }
 
-    public function getParameters()
+    public function getParameters(): array
     {
         return $this->constraints;
     }
 
-    public function getDescription(): ?string
+    public function getDocumentation(): ?string
     {
-        $constraints = [];
+        return trans('apitizer::validation.dimensions');
+    }
 
-        foreach ($this->constraints as $key => $constraint) {
-            $constraints[] = "$key: $constraint";
-        }
+    public function toValidationRule()
+    {
+        return $this;
+    }
 
-        $constraint = implode(', ', $constraints);
+    public function toHtml()
+    {
+        $list = collect($this->constraints)->map(function ($constraint, $key) {
+            return "<li>$key: $constraint</li>";
+        })->implode("\n");
 
-        return trans('apitizer::validation.dimensions', ['constraints' => $constraints]);
+        return trans('apitizer::validation.dimensions') . "<ul>$list</ul>";
     }
 }

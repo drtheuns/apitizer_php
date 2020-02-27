@@ -29,6 +29,11 @@ class InvalidInputException extends ApitizerException
      */
     public $origin;
 
+    /**
+     * @param Filter|Sort
+     */
+    public $type;
+
     public static function filterTypeError(Filter $filter, $given)
     {
         $filterKey = Apitizer::getFilterKey();

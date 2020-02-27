@@ -7,7 +7,7 @@ use Closure;
 class Rules
 {
     /**
-     * @var (Closure|RuleBuilder)[]
+     * @var (Closure|TypedRuleBuilder)[]
      */
     protected $rules;
 
@@ -50,13 +50,13 @@ class Rules
     }
 
     /**
-     * Get all rules or those for a specific action method.
+     * Get all the builders or those for a specific action method.
      *
      * @param null|string $actionMethod
      *
-     * @return RuleBuilder[]|RuleBuilder
+     * @return array<string, TypedRuleBuilder>|TypedRuleBuilder
      */
-    public function rules(string $actionMethod = null)
+    public function builders(string $actionMethod = null)
     {
         if ($actionMethod) {
             return $this->resolveRulesFor($actionMethod);
@@ -68,11 +68,23 @@ class Rules
     }
 
     /**
-     * Check if any rules have been defined for the given action method.
+     * Get all rules or those for a specific action method.
+     *
+     * @param null|string $actionMethod
+     *
+     * @return array
      */
-    public function hasRulesFor(string $actionMethod): bool
+    public function rules(string $actionMethod = null): array
     {
-        return isset($this->rules[$actionMethod]);
+        $builders = $this->builders($actionMethod);
+
+        if (is_array($builders)) {
+            return collect($builders)->map(function ($builder) {
+                return RuleInterpreter::rulesFrom($builder);
+            })->all();
+        }
+
+        return RuleInterpreter::rulesFrom($builders);
     }
 
     /**
@@ -80,7 +92,15 @@ class Rules
      */
     public function hasRules(): bool
     {
-        return ! empty($this->rules);
+        return !empty($this->rules);
+    }
+
+    /**
+     * Check if any rules have been defined for the given action method.
+     */
+    public function hasRulesFor(string $actionMethod): bool
+    {
+        return isset($this->rules[$actionMethod]);
     }
 
     /**
@@ -90,31 +110,21 @@ class Rules
      * Resolving is only done on an as-needed basis to prevent needless objects
      * from being created.
      */
-    protected function resolveRulesFor(string $actionMethod): RuleBuilder
+    protected function resolveRulesFor(string $actionMethod)
     {
         if (! $this->hasRulesFor($actionMethod)) {
-            return new RuleBuilder;
+            return new ObjectRules(null, function () {});
         }
 
         if ($this->isAlreadyResolved($actionMethod)) {
             return $this->rules[$actionMethod];
         }
 
-        $callback = $this->rules[$actionMethod];
-
-        $this->rules[$actionMethod] = $this->resolveCallback($callback);
+        $object = (new ObjectRules(null, $this->rules[$actionMethod]));
+        $object->resolve();
+        $this->rules[$actionMethod] = $object;
 
         return $this->rules[$actionMethod];
-    }
-
-    protected function resolveCallback(Closure $callback): RuleBuilder
-    {
-        $ruleBuilder = new RuleBuilder();
-
-        // The callback does not return anything.
-        $callback($ruleBuilder);
-
-        return $ruleBuilder;
     }
 
     /**
@@ -122,6 +132,6 @@ class Rules
      */
     protected function isAlreadyResolved($actionMethod)
     {
-        return is_array($this->rules[$actionMethod]);
+        return ! $this->rules[$actionMethod] instanceof Closure;
     }
 }

@@ -1,0 +1,11 @@
+includes:
+  - ./vendor/nunomaduro/larastan/extension.neon
+parameters:
+  paths:
+    - src
+  # We can only starts increasing this number once we support only PHP 7.4+ due
+  # to the type hints on the return types in several builders:
+  # https://www.php.net/manual/en/language.oop5.variance.php
+  level: 2
+  ignoreErrors:
+    - '#Unsafe usage of new static#'

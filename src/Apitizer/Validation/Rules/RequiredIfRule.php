@@ -2,11 +2,10 @@
 
 namespace Apitizer\Validation\Rules;
 
-use Apitizer\Validation\DocumentableRule;
 use Apitizer\Validation\ValidationRule;
 use Illuminate\Validation\Rules\RequiredIf;
 
-class RequiredIfRule extends RequiredIf implements DocumentableRule
+class RequiredIfRule extends RequiredIf implements ValidationRule
 {
     /**
      * @var string a short explanation of when this field is required.
@@ -19,8 +18,28 @@ class RequiredIfRule extends RequiredIf implements DocumentableRule
         $this->explanation = $explanation;
     }
 
-    public function getDescription(): ?string
+    public function getName(): string
     {
-        return trans('apitizer::validation.required_if', ['reason' => $explanation]);
+        return 'required_if';
+    }
+
+    public function getParameters(): array
+    {
+        return [];
+    }
+
+    public function getDocumentation(): ?string
+    {
+        return trans('apitizer::validation.required_if', ['reason' => $this->explanation]);
+    }
+
+    public function toValidationRule()
+    {
+        return $this;
+    }
+
+    public function toHtml()
+    {
+        return $this->getDocumentation();
     }
 }

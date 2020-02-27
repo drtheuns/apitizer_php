@@ -90,28 +90,12 @@
     @endif
     @if ($doc->hasRules())
       <section class="topic-section">
-        <h2 class="endpoints-title">Endpoints</h2>
-        @foreach ($doc->getRules() as $actionName => $rules)
+        <h2 class="endpoints-title">Validation</h2>
+        @foreach ($doc->getValidationBuilders() as $actionName => $builder)
           <header>
             <h3 class="endpoint-name">{{ $doc->humanizeActionName($actionName) }}</h3>
           </header>
-          <section class="topic-section">
-            <ul>
-              @foreach ($rules->fields() as $name => $field)
-                <li class="attribute">
-                  <span class="attribute-name">{{ $name }}:</span>
-                  <span class="attribute-type">{{ $field->getType() }}</span>
-                  @if ($field->hasRules())
-                    <ul class="attribute-description">
-                      @foreach ($field->rulesToDocumentation() as $docs)
-                        <li>{!! $doc->wrapCodeTags($docs) !!}</li>
-                      @endforeach
-                    </ul>
-                  @endif
-                </li>
-              @endforeach
-            </ul>
-          </section>
+          @include('apitizer::validation_rules', ['builder' => $builder])
         @endforeach
       </section>
     @endif

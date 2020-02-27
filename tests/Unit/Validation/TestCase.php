@@ -2,23 +2,23 @@
 
 namespace Tests\Unit\Validation;
 
-use Apitizer\Validation\RuleBuilder;
-use Illuminate\Support\Str;
-use Tests\Support\TestValidationRules;
+use PHPUnit\Framework\Assert as PHPUnit;
+use Apitizer\Validation\ObjectRules;
+use Apitizer\Validation\RuleInterpreter;
+use Closure;
 
 class TestCase extends \Tests\Unit\TestCase
 {
-    public function builder(): TestValidationRules
+    public function assertRules(array $expected, Closure $builder)
     {
-        return new TestValidationRules();
-    }
+        $object = new ObjectRules(null, $builder);
+        $object->resolve();
+        $rules = RuleInterpreter::rulesFrom($object);
 
-    protected function assertSimpleRule(string $type, string $rule)
-    {
-        $this->builder()
-             ->rules(function (RuleBuilder $builder) use ($type, $rule) {
-                 $builder->$type('name')->$rule();
-             })
-             ->assertRulesFor('name', [$type, Str::snake($rule)]);
+        PHPUnit::assertEquals(
+            $expected,
+            $rules,
+            "The generated rules did not match the expected rules"
+        );
     }
 }

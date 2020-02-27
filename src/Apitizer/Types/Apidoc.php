@@ -109,9 +109,9 @@ class Apidoc
         return $this->queryBuilder->getFilters();
     }
 
-    public function getRules(): array
+    public function getValidationBuilders(): array
     {
-        return $this->queryBuilder->getRules()->rules();
+        return $this->queryBuilder->getRules()->builders();
     }
 
     public function getQueryBuilder(): QueryBuilder

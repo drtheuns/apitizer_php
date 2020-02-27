@@ -403,9 +403,7 @@ abstract class QueryBuilder
      */
     public function validationRules(): array
     {
-        return $this->getRules()
-                    ->rules($this->request->route()->getActionMethod())
-                    ->toValidationRules();
+        return $this->getRules()->rules($this->request->route()->getActionMethod());
     }
 
     /**

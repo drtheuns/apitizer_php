@@ -193,10 +193,10 @@
      .attributes-title, assoc-title {
        font-size: 18px;
      }
-     .attribute-name, .assoc-name {
+     .attribute-name, .assoc-name, .object-field-name {
        font-weight: 700;
      }
-     .attribute-type, .attribute-name {
+     .attribute-type, .attribute-name, .object-field-name, .object-field-type {
        font-family: monospace;
      }
      .attribute {
@@ -293,6 +293,26 @@
      .dark-mode-toggle:hover {
        cursor: pointer;
        background-color: var(--lighten-lg);
+     }
+     .object-rules {
+       border-radius: 5px;
+     }
+     .object-rules .object-rules {
+       border: 1px solid black;
+       padding: 10px;
+     }
+     .object-rules .object-meta {
+       display: inline-block;
+       padding: 10px 0;
+       font-size: 14px;
+     }
+     .object-field-name.required::after {
+       content: '*';
+       color: red;
+     }
+     .validation-rules {
+       list-style: inside;
+       margin-left: 20px;
      }
 
      @media (min-width: 768px) {

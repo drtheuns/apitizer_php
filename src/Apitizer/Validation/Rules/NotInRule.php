@@ -2,15 +2,10 @@
 
 namespace Apitizer\Validation\Rules;
 
-use Apitizer\Validation\DocumentableRule;
-use Illuminate\Validation\Rules\NotIn;
-
-class NotInRule extends NotIn implements DocumentableRule
+class NotInRule extends InRule
 {
-    public function getDescription(): ?string
+    public function getName(): string
     {
-        return trans('apitizer::validation.not_in', [
-            'values' => implode(' or ', $this->values)
-        ]);
+        return 'not_in';
     }
 }
