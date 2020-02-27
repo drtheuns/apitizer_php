@@ -1,9 +1,9 @@
 <?php
 
-namespace Apitizer\Validation;
+namespace Tests\Unit\Validation;
 
-use Tests\Unit\TestCase;
 use Apitizer\Validation\Rules;
+use Apitizer\Validation\ObjectRules;
 
 class RulesTest extends TestCase
 {
