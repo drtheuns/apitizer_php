@@ -44,6 +44,11 @@ class ArrayRules extends FieldRuleBuilder implements ContainerType
             : 'array';
     }
 
+    public function getValidatableType()
+    {
+        return 'array';
+    }
+
     public function getChildren(): array
     {
         return $this->elementType ? [$this->elementType] : [];

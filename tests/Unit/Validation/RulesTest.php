@@ -70,7 +70,7 @@ class RulesTest extends TestCase
         $count = 0;
         $rules = new Rules();
         $rules->storeRules(function (ObjectRules $builder) use (&$count) {
-            if ($count++ > 1) {
+            if (++$count > 1) {
                 $this->fail();
             }
         });
