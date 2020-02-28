@@ -11,6 +11,9 @@ class MimesRule implements ValidationRule
      */
     protected $mimes;
 
+    /**
+     * @param string[] $mimes
+     */
     public function __construct(array $mimes)
     {
         $this->mimes = $mimes;
@@ -36,7 +39,7 @@ class MimesRule implements ValidationRule
         return $this->getName() . ':' . implode(',', $this->mimes);
     }
 
-    public function toHtml()
+    public function toHtml(): string
     {
         $values = collect($this->mimes)->map(function ($value) {
             return '<code>' . $value . '</code>';

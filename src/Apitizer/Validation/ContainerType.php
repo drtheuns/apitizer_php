@@ -12,5 +12,5 @@ interface ContainerType
     /**
      * Resolve the current builder.
      */
-    public function resolve();
+    public function resolve(): void;
 }

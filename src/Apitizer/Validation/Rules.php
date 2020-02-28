@@ -2,12 +2,13 @@
 
 namespace Apitizer\Validation;
 
+use Illuminate\Contracts\Validation\Rule;
 use Closure;
 
 class Rules
 {
     /**
-     * @var (Closure|TypedRuleBuilder)[]
+     * @var (Closure|ObjectRules)[]
      */
     protected $rules;
 
@@ -50,41 +51,47 @@ class Rules
     }
 
     /**
-     * Get all the builders or those for a specific action method.
+     * Get all the validation rule builders.
      *
-     * @param null|string $actionMethod
-     *
-     * @return array<string, TypedRuleBuilder>|TypedRuleBuilder
+     * @return array<string, ObjectRules>
      */
-    public function builders(string $actionMethod = null)
+    public function getBuilders(): array
     {
-        if ($actionMethod) {
-            return $this->resolveRulesFor($actionMethod);
-        }
-
-        return collect($this->rules)->map(function ($rules, $actionMethod) {
+        return collect($this->rules)->map(function ($rules, string $actionMethod) {
             return $this->resolveRulesFor($actionMethod);
         })->all();
     }
 
     /**
-     * Get all rules or those for a specific action method.
+     * Get the validation rule builder for a specific action method.
      *
-     * @param null|string $actionMethod
-     *
-     * @return array
+     * @return ObjectRules
      */
-    public function rules(string $actionMethod = null): array
+    public function getBuilder(string $actionMethod): ObjectRules
     {
-        $builders = $this->builders($actionMethod);
+        return $this->resolveRulesFor($actionMethod);
+    }
 
-        if (is_array($builders)) {
-            return collect($builders)->map(function ($builder) {
-                return RuleInterpreter::rulesFrom($builder);
-            })->all();
-        }
+    /**
+     * Get the validation rules for all the action methods.
+     *
+     * @return array<string, array<string, string|Rule>>
+     */
+    public function getValidationRules(): array
+    {
+        return collect($this->getBuilders())->map(function (ObjectRules $builder) {
+            return RuleInterpreter::rulesFrom($builder);
+        })->all();
+    }
 
-        return RuleInterpreter::rulesFrom($builders);
+    /**
+     * Get the validation rules for a specific action.
+     *
+     * @return array<string, string|Rule>
+     */
+    public function getValidationRulesForAction(string $actionMethod): array
+    {
+        return RuleInterpreter::rulesFrom($this->getBuilder($actionMethod));
     }
 
     /**
@@ -110,28 +117,23 @@ class Rules
      * Resolving is only done on an as-needed basis to prevent needless objects
      * from being created.
      */
-    protected function resolveRulesFor(string $actionMethod)
+    protected function resolveRulesFor(string $actionMethod): ObjectRules
     {
         if (! $this->hasRulesFor($actionMethod)) {
             return new ObjectRules(null, function () {});
         }
 
-        if ($this->isAlreadyResolved($actionMethod)) {
-            return $this->rules[$actionMethod];
+        $object = $this->rules[$actionMethod];
+
+        if ($object instanceof ObjectRules) {
+            return $object;
         }
 
-        $object = (new ObjectRules(null, $this->rules[$actionMethod]));
+        // Resolve the closure and cache the results.
+        $object = (new ObjectRules(null, $object));
         $object->resolve();
         $this->rules[$actionMethod] = $object;
 
-        return $this->rules[$actionMethod];
-    }
-
-    /**
-     * Check if the rules have already been resolved for some action method.
-     */
-    protected function isAlreadyResolved($actionMethod)
-    {
-        return ! $this->rules[$actionMethod] instanceof Closure;
+        return $object;
     }
 }

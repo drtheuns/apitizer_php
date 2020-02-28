@@ -6,6 +6,10 @@ parameters:
   # We can only starts increasing this number once we support only PHP 7.4+ due
   # to the type hints on the return types in several builders:
   # https://www.php.net/manual/en/language.oop5.variance.php
-  level: 2
+  level: 8
   ignoreErrors:
     - '#Unsafe usage of new static#'
+  excludes_analyse:
+    # This class does string-building with class-strings, which is more hassle
+    # to type-hint and annotate than it's worth.
+    - src/Apitizer/Support/ClassFilter.php

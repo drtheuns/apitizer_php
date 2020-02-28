@@ -21,7 +21,7 @@ class MaxRule extends SizeRule
         ]);
     }
 
-    public function toHtml()
+    public function toHtml(): string
     {
         return trans('apitizer::validation.max', [
             'max' => "<code>{$this->suffixUnit($this->size)}</code>"

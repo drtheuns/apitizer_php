@@ -18,7 +18,11 @@ class ArrayTypePicker
 
     public function string(): StringRules
     {
-        return $this->setElementType(new StringRules(null));
+        $type = new StringRules(null);
+
+        $this->setElementType($type);
+
+        return $type;
     }
 
     public function uuid(): StringRules
@@ -28,32 +32,56 @@ class ArrayTypePicker
 
     public function boolean(): BooleanRules
     {
-        return $this->setElementType(new BooleanRules(null));
+        $type = new BooleanRules(null);
+
+        $this->setElementType($type);
+
+        return $type;
     }
 
     public function date(string $format = null): DateRules
     {
-        return $this->setElementType(DateRules::date(null, $format));
+        $type = DateRules::date(null, $format);
+
+        $this->setElementType($type);
+
+        return $type;
     }
 
     public function datetime(string $format = null): DateRules
     {
-        return $this->setElementType(DateRules::datetime(null, $format));
+        $type = DateRules::datetime(null, $format);
+
+        $this->setElementType($type);
+
+        return $type;
     }
 
     public function number(): NumberRules
     {
-        return $this->setElementType(new NumberRules(null));
+        $type = new NumberRules(null);
+
+        $this->setElementType($type);
+
+        return $type;
     }
 
     public function integer(): NumberRules
     {
-        return $this->setElementType(new IntegerRules(null));
+        $type = new IntegerRules(null);
+
+        $this->setElementType($type);
+
+        return $type;
     }
 
     public function file(): FileRules
     {
-        return $this->setElementType(new FileRules(null));
+        $type = new FileRules(null);
+
+        $this->setElementType($type);
+
+        return $type;
     }
 
     public function image(): FileRules
@@ -61,20 +89,26 @@ class ArrayTypePicker
         return $this->file()->image();
     }
 
-    public function array()
+    public function array(): ArrayRules
     {
-        return $this->setElementType(new ArrayRules(null));
-    }
+        $type = new ArrayRules(null);
 
-    public function object(Closure $callback)
-    {
-        return $this->setElementType(new ObjectRules(null, $callback));
-    }
-
-    private function setElementType(TypedRuleBuilder $type): TypedRuleBuilder
-    {
-        $this->origin->setElementType($type);
+        $this->setElementType($type);
 
         return $type;
+    }
+
+    public function object(Closure $callback): ObjectRules
+    {
+        $type = new ObjectRules(null, $callback);
+
+        $this->setElementType($type);
+
+        return $type;
+    }
+
+    private function setElementType(TypedRuleBuilder $type): void
+    {
+        $this->origin->setElementType($type);
     }
 }

@@ -2,7 +2,6 @@
 
 namespace Apitizer;
 
-use Apitizer\Exceptions\ClassFinderException;
 use Apitizer\QueryBuilder;
 use Apitizer\Support\ComposerNamespaceClassFinder;
 
@@ -14,7 +13,7 @@ use Apitizer\Support\ComposerNamespaceClassFinder;
 class QueryBuilderLoader
 {
     /**
-     * @var string[]
+     * @var string[]|null
      */
     protected $queryBuilders;
 
@@ -77,6 +76,6 @@ class QueryBuilderLoader
             $this->loadFromConfig();
         }
 
-        return $this->queryBuilders;
+        return $this->queryBuilders ?? [];
     }
 }

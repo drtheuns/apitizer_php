@@ -45,7 +45,7 @@ class DigitsBetweenRule implements ValidationRule
         return $this->getName() . ':' . $this->min . ',' . $this->max;
     }
 
-    public function toHtml()
+    public function toHtml(): string
     {
         return trans('apitizer::validation.digits_between', [
             'min' => "<code>{$this->min}</code>",

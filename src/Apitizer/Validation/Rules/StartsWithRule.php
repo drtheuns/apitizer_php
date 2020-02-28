@@ -6,8 +6,14 @@ use Apitizer\Validation\ValidationRule;
 
 class StartsWithRule implements ValidationRule
 {
+    /**
+     * @var string[] $values
+     */
     protected $values;
 
+    /**
+     * @param string[] $values
+     */
     public function __construct(array $values)
     {
         $this->values = $values;
@@ -35,7 +41,7 @@ class StartsWithRule implements ValidationRule
         return $this->getName() . ':' . implode(',', $this->values);
     }
 
-    public function toHtml()
+    public function toHtml(): string
     {
         $values = collect($this->values)->map(function ($value) {
             return '<code>' . $value . '</code>';

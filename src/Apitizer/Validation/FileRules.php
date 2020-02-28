@@ -29,7 +29,7 @@ class FileRules extends FieldRuleBuilder
     }
 
     /**
-     * @pararm string[] $mimes
+     * @param string[] $mimes
      */
     public function mimes(array $mimes): self
     {

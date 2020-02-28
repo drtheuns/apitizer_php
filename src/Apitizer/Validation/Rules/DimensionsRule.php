@@ -27,7 +27,7 @@ class DimensionsRule extends Dimensions implements ValidationRule
         return $this;
     }
 
-    public function toHtml()
+    public function toHtml(): string
     {
         $list = collect($this->constraints)->map(function ($constraint, $key) {
             return "<li>$key: $constraint</li>";

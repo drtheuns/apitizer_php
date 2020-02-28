@@ -7,7 +7,7 @@ class ArrayRules extends FieldRuleBuilder implements ContainerType
     use Concerns\SharedRules;
 
     /**
-     * @var null|FieldRuleBuilder
+     * @var null|TypedRuleBuilder
      */
     protected $elementType;
 
@@ -30,7 +30,7 @@ class ArrayRules extends FieldRuleBuilder implements ContainerType
     /**
      * @internal
      */
-    public function setElementType(TypedRuleBuilder $elementType)
+    public function setElementType(TypedRuleBuilder $elementType): void
     {
         $elementType->setPrefix($this->getRulePrefix());
 
@@ -64,7 +64,7 @@ class ArrayRules extends FieldRuleBuilder implements ContainerType
         return $this->getValidationRuleName() . '.*';
     }
 
-    public function resolve()
+    public function resolve(): void
     {
         if ($this->elementType instanceof ContainerType) {
             $this->elementType->resolve();

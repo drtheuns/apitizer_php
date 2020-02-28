@@ -24,11 +24,16 @@ class ClassFilter extends FilterIterator
     protected $class;
 
     /**
-     * @var string the namespace to the current file we're handling. This will
+     * @var class-string the namespace to the current file we're handling. This will
      * be the return value of it passes the accept function.
      */
     protected $current;
 
+    /**
+     * @param string $namespace
+     * @param string $class
+     * @param Iterator<string> $iterator
+     */
     public function __construct(string $namespace, string $class, Iterator $iterator)
     {
         parent::__construct($iterator);
@@ -36,11 +41,17 @@ class ClassFilter extends FilterIterator
         $this->class = $class;
     }
 
+    /**
+     * @return string
+     */
     public function current()
     {
         return $this->current;
     }
 
+    /**
+     * @return bool
+     */
     public function accept()
     {
         $fileInfo = $this->getInnerIterator()->current();

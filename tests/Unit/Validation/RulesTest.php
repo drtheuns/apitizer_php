@@ -15,7 +15,7 @@ class RulesTest extends TestCase
             $rules->string('name');
         });
 
-        $storeRules = $rules->builders('store');
+        $storeRules = $rules->getBuilder('store');
 
         $this->assertInstanceOf(ObjectRules::class, $storeRules);
         $this->assertCount(1, $storeRules->getChildren());
@@ -25,7 +25,7 @@ class RulesTest extends TestCase
     public function it_returns_an_empty_object_when_none_is_defined()
     {
         $rules = new Rules();
-        $object = $rules->builders('store');
+        $object = $rules->getBuilder('store');
 
         $this->assertInstanceOf(ObjectRules::class, $object);
         $this->assertEmpty($object->getChildren());
@@ -38,7 +38,7 @@ class RulesTest extends TestCase
         $rules->storeRules(function (ObjectRules $builder) {});
         $rules->updateRules(function (ObjectRules $builder) {});
 
-        $rules = $rules->rules();
+        $rules = $rules->getValidationRules();
 
         $this->assertCount(2, $rules);
         $this->assertEquals([
@@ -56,7 +56,7 @@ class RulesTest extends TestCase
             $this->fail("The update rules should not be resolved");
         });
 
-        $rules->rules('store');
+        $rules->getValidationRulesForAction('store');
 
         // Pass the test, since "fail" was never called.
         // We cant use "expectNotToPerformAssertions" because those tests are
@@ -76,8 +76,8 @@ class RulesTest extends TestCase
         });
 
         // Call it twice.
-        $rules->rules('store');
-        $rules->rules('store');
+        $rules->getValidationRulesForAction('store');
+        $rules->getValidationRulesForAction('store');
 
         // Pass the test, since "fail" was never called.
         // We cant use "expectNotToPerformAssertions" because those tests are

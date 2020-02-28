@@ -45,7 +45,7 @@ trait HasFields
         return $this->field($key, 'boolean')->transform(new CastValue);
     }
 
-    protected function date(string $key, $castFormat = null): DateTimeField
+    protected function date(string $key, string $castFormat = null): DateTimeField
     {
         return (new DateTimeField($this, $key, 'date'))
             ->transform(new CastValue($castFormat));
@@ -57,6 +57,11 @@ trait HasFields
             ->transform(new CastValue($castFormat));
     }
 
+    /**
+     * @param string $key
+     * @param array<mixed> $enum
+     * @param string $type
+     */
     protected function enum(string $key, array $enum, string $type = 'string'): EnumField
     {
         return (new EnumField($this, $key, $enum, $type))

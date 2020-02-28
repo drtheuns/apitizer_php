@@ -2,6 +2,8 @@
 
 namespace Apitizer\Validation;
 
+use Illuminate\Contracts\Validation\Rule;
+
 interface TypedRuleBuilder
 {
     /**
@@ -11,13 +13,15 @@ interface TypedRuleBuilder
 
     /**
      * Get a validatable type for the current rule builder.
+     *
+     * @return string|Rule|null
      */
     public function getValidatableType();
 
     /**
      * Get all the rules that have been defined on this builder.
      *
-     * @return (ValidationRule|Rule)[]
+     * @return (ValidationRule|Rule|string)[]
      */
     public function getRules(): array;
 
@@ -45,5 +49,5 @@ interface TypedRuleBuilder
     /**
      * Set the validation name prefix.
      */
-    public function setPrefix(string $prefix);
+    public function setPrefix(string $prefix): void;
 }

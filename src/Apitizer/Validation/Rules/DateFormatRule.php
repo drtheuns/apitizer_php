@@ -36,7 +36,7 @@ class DateFormatRule implements ValidationRule
         return $this->getName() . ":{$this->format}";
     }
 
-    public function toHtml()
+    public function toHtml(): string
     {
         return trans('apitizer::validation.date_format', [
             'format' => "<code>{$this->format}</code>"

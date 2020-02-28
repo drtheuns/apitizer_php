@@ -11,6 +11,9 @@ class MimetypesRule implements ValidationRule
      */
     protected $mimetypes;
 
+    /**
+     * @param string[] $mimetypes
+     */
     public function __construct(array $mimetypes)
     {
         $this->mimetypes = $mimetypes;
@@ -36,7 +39,7 @@ class MimetypesRule implements ValidationRule
         return $this->getName() . ':' . implode(',', $this->mimetypes);
     }
 
-    public function toHtml()
+    public function toHtml(): string
     {
         $values = collect($this->mimetypes)->map(function ($value) {
             return '<code>' . $value . '</code>';

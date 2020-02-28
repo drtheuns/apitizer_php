@@ -17,7 +17,7 @@ class ColumnSort
         $this->column = $column;
     }
 
-    public function __invoke(Builder $query, Sort $sort)
+    public function __invoke(Builder $query, Sort $sort): void
     {
         $query->orderBy($this->column, $sort->getOrder());
     }

@@ -7,6 +7,7 @@ use Apitizer\Exceptions\InvalidInputException;
 use Apitizer\Exceptions\InvalidOutputException;
 use Apitizer\Policies\PolicyFailed;
 use Apitizer\QueryBuilder;
+use Apitizer\Rendering\Renderer;
 use ArrayAccess;
 
 abstract class AbstractField extends Factory
@@ -40,7 +41,7 @@ abstract class AbstractField extends Factory
      * rendering process. For fields that use the Eloquent model, this function
      * would get the value at some key from the model.
      *
-     * @param ArrayAccess|array|object $row
+     * @param ArrayAccess|array<mixed>|object $row
      *
      * @return mixed the value that should be rendered.
      */
@@ -82,7 +83,7 @@ abstract class AbstractField extends Factory
     /**
      * Render a row of data.
      *
-     * @param ArrayAccess|array|object $row
+     * @param ArrayAccess|array<mixed>|object $row
      *
      * @throws InvalidOutputException if the value does not adhere to the
      *         requirements set by the field. For example, if the field is not
@@ -91,7 +92,7 @@ abstract class AbstractField extends Factory
      *
      * @return mixed the transformed value.
      */
-    public function render($row)
+    public function render($row, Renderer $renderer = null)
     {
         $value = $this->validateValue($this->getValue($row), $row);
 
@@ -106,6 +107,7 @@ abstract class AbstractField extends Factory
      * Apply all the transformers in insertion order.
      *
      * @param mixed $value the value to transform.
+     * @param ArrayAccess|array<mixed>|object $row
      *
      * @return mixed the transformed value
      */

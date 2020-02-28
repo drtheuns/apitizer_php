@@ -4,6 +4,8 @@ namespace Apitizer\Rendering;
 
 use Apitizer\Policies\PolicyFailed;
 use Apitizer\QueryBuilder;
+use Apitizer\Types\AbstractField;
+use Apitizer\Types\Association;
 use Illuminate\Support\Arr;
 
 class BasicRenderer implements Renderer
@@ -28,6 +30,12 @@ class BasicRenderer implements Renderer
         return $result;
     }
 
+    /**
+     * @param mixed $row
+     * @param (AbstractField|Association)[] $selectedFields
+     *
+     * @return array<string, mixed>
+     */
     protected function renderOne($row, array $selectedFields): array
     {
         $acc = [];
@@ -49,6 +57,8 @@ class BasicRenderer implements Renderer
 
     /**
      * Check if we're dealing with a single row of data or a collection of rows.
+     *
+     * @param array<mixed>|object|iterable<mixed>|mixed $data
      */
     protected function isSingleRowOfData($data): bool
     {

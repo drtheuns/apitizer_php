@@ -29,7 +29,7 @@ class InRule extends In implements ValidationRule
         return (string) $this;
     }
 
-    public function toHtml()
+    public function toHtml(): string
     {
         $values = collect($this->values)->map(function ($value) {
             return '<code>' . $value . '</code>';

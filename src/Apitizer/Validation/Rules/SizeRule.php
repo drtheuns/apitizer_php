@@ -6,6 +6,9 @@ use Apitizer\Validation\ValidationRule;
 
 class SizeRule implements ValidationRule
 {
+    /**
+     * @var int|float
+     */
     protected $size;
 
     /**
@@ -13,6 +16,10 @@ class SizeRule implements ValidationRule
      */
     protected $type;
 
+    /**
+     * @param int|float $size
+     * @param string $type
+     */
     public function __construct($size, $type)
     {
         $this->size = $size;
@@ -43,14 +50,17 @@ class SizeRule implements ValidationRule
         return $this->getName() . ':' . $this->size;
     }
 
-    public function toHtml()
+    public function toHtml(): string
     {
         return trans('apitizer::validation.size', [
             'size' => "<code>{$this->suffixUnit($this->size)}</code>"
         ]);
     }
 
-    protected function suffixUnit($value)
+    /**
+     * @param int|float $value
+     */
+    protected function suffixUnit($value): string
     {
         $suffix = '';
 

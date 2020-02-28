@@ -21,7 +21,7 @@ class MinRule extends SizeRule
         ]);
     }
 
-    public function toHtml()
+    public function toHtml(): string
     {
         return trans('apitizer::validation.min', [
             'min' => "<code>{$this->suffixUnit($this->size)}</code>"

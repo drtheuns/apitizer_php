@@ -31,7 +31,7 @@ class Sort
     }
 
     /**
-     * @return 'asc'|'desc'
+     * @return string 'asc' | 'desc'
      */
     public function getOrder(): string
     {

@@ -38,10 +38,10 @@ class Constraint implements ValidationRule
 
     public function __toString()
     {
-        return $this->getDocumentation();
+        return $this->getDocumentation() ?? '';
     }
 
-    public function toHtml()
+    public function toHtml(): string
     {
         return (string) $this;
     }

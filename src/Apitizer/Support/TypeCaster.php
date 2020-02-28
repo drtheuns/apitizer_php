@@ -10,6 +10,15 @@ use Ramsey\Uuid\Uuid;
 
 class TypeCaster
 {
+    /**
+     * @param mixed $value
+     * @param string $type
+     * @param string|null $format
+     *
+     * @throws CastException
+     *
+     * @return bool|int|float|string|DateTimeInterface|mixed|null
+     */
     public static function cast($value, string $type, ?string $format = null)
     {
         try {
@@ -22,6 +31,15 @@ class TypeCaster
         }
     }
 
+    /**
+     * @param mixed $value
+     * @param string $type
+     * @param string|null $format
+     *
+     * @throws CastException
+     *
+     * @return bool|int|float|string|DateTimeInterface|mixed|null
+     */
     private static function doCast($value, $type, $format)
     {
         // Null values should evaluate to "false" in the boolean cast,
@@ -54,7 +72,16 @@ class TypeCaster
         }
     }
 
-    private static function castToDate($value, $type, $format): ?DateTimeInterface
+    /**
+     * @param mixed $value
+     * @param string $type
+     * @param string $format
+     *
+     * @throws CastException
+     *
+     * @return DateTimeInterface
+     */
+    private static function castToDate($value, $type, string $format): DateTimeInterface
     {
         if ($value instanceof DateTimeInterface) {
             return $value;
@@ -69,7 +96,16 @@ class TypeCaster
         throw new CastException($value, $type, $format);
     }
 
-    private static function castUuid($value, $type, $format)
+    /**
+     * @param mixed $value
+     * @param string $type
+     * @param string|null $format
+     *
+     * @throws CastException
+     *
+     * @return string
+     */
+    private static function castUuid($value, $type, $format): string
     {
         if ($value instanceof Uuid) {
             return $value;

@@ -11,27 +11,32 @@ use Apitizer\Validation\TypedRuleBuilder;
  */
 class TsViewHelper
 {
-    public static function printableType(TypedRuleBuilder $field, int $depth)
+    /**
+     * @return string
+     */
+    public static function printableType(TypedRuleBuilder $field, int $depth): string
     {
         if ($field instanceof ArrayRules) {
             $elementType = $field->getElementType();
 
-            return static::printableType($elementType, $depth) . '[]';
+            if ($elementType) {
+                return static::printableType($elementType, $depth) . '[]';
+            }
+
+            return 'any[]';
         }
 
-        $type = $field->getType();
-
-        return $type === 'object'
+        return $field instanceof ObjectRules
             ? static::printObject($field, $depth + 1)
-            : static::toTsType($type);
+            : static::toTsType($field->getType());
     }
 
-    public static function printObject(ObjectRules $object, $depth)
+    public static function printObject(ObjectRules $object, int $depth): string
     {
         return view('apitizer::ts_object', ['builder' => $object, 'depth' => $depth]);
     }
 
-    public static function toTsType(?string $type)
+    public static function toTsType(?string $type): string
     {
         if (! $type) {
             return 'any';

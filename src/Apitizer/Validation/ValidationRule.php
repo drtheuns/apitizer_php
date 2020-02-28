@@ -28,6 +28,8 @@ interface ValidationRule
      * Get the parameters for this rule.
      *
      * The keys of this array should be appropriately named.
+     *
+     * @return array<string, mixed>
      */
     public function getParameters(): array;
 
@@ -46,5 +48,5 @@ interface ValidationRule
      * custom rendered documentation pages. It should therefore not contain
      * anything other than plain inline-tags without additional attributes.
      */
-    public function toHtml();
+    public function toHtml(): string;
 }

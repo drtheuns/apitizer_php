@@ -43,7 +43,7 @@ class BetweenRule extends SizeRule
         return $this->getName() . ':' . $this->min . ',' . $this->max;
     }
 
-    public function toHtml()
+    public function toHtml(): string
     {
         return trans('apitizer::validation.between', [
             'min' => "<code>{$this->min}</code>",

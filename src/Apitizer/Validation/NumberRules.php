@@ -21,11 +21,17 @@ class NumberRules extends FieldRuleBuilder
         return $this->addRule(new DigitsBetweenRule($min, $max));
     }
 
+    /**
+     * @param string[] $values
+     */
     public function endsWith(array $values): self
     {
         return $this->addRule(new EndsWithRule($values));
     }
 
+    /**
+     * @param string[] $values
+     */
     public function startsWith(array $values): self
     {
         return $this->addRule(new StartsWithRule($values));
@@ -36,6 +42,9 @@ class NumberRules extends FieldRuleBuilder
         return 'number';
     }
 
+    /**
+     * @return string
+     */
     public function getValidatableType()
     {
         return 'numeric';

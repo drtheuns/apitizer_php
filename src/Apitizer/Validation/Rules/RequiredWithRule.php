@@ -11,6 +11,9 @@ class RequiredWithRule implements ValidationRule
      */
     protected $fields;
 
+    /**
+     * @param string[] $fields
+     */
     public function __construct(array $fields)
     {
         $this->fields = $fields;
@@ -36,7 +39,7 @@ class RequiredWithRule implements ValidationRule
         return $this->getName() . ':' . implode(',', $this->fields);
     }
 
-    public function toHtml()
+    public function toHtml(): string
     {
         $values = collect($this->fields)->map(function ($field) {
             return "<code>$field</code>";

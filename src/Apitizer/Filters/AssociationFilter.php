@@ -22,7 +22,7 @@ class AssociationFilter
 
     /**
      * @param string $relation the name of the relation on the model.
-     * @param null|string the column name that should be compared. Defaults to
+     * @param null|string $column the column name that should be compared. Defaults to
      * the related model's primary key.
      */
     public function __construct(string $relation, ?string $column = null)
@@ -31,25 +31,36 @@ class AssociationFilter
         $this->column = $column;
     }
 
-    public function __invoke(Builder $query, $values)
+    /**
+     * @param Builder $query
+     * @param string|string[] $values
+     */
+    public function __invoke(Builder $query, $values): void
     {
         $values = Arr::wrap($values);
         $relation = $query->getModel()->{$this->relation}();
 
         // Default to the primary key on the related table if no column was
         // given.
-        $this->column = $this->column ?? $relation->getRelated()->getKeyName();
+        $column = $this->column ?? $relation->getRelated()->getKeyName();
 
         if ($relation instanceof BelongsTo || $relation instanceof HasOneOrMany) {
-            $this->applyFilter($query, $values, $relation);
+            $this->applyFilter($query, $values, $relation, $column);
         } else {
-            $this->inefficientFilter($query, $values);
+            $this->inefficientFilter($query, $values, $column);
         }
     }
 
-    protected function applyFilter(Builder $query, array $values, Relation $relation)
+    /**
+     * @param Builder $query
+     * @param string[] $values
+     * @param BelongsTo|HasOneOrMany $relation
+     */
+    protected function applyFilter(Builder $query, array $values, Relation $relation, string $column): void
     {
-        $table = $relation->getQuery()->getModel()->getTable();
+        /** @var \Illuminate\Database\Eloquent\Model */
+        $model = $relation->getQuery()->getModel();
+        $table = $model->getTable();
         $localJoinKey = $this->getLocalJoinKey($relation);
         $foreignJoinKey = $this->getForeignJoinKey($relation);
 
@@ -59,15 +70,15 @@ class AssociationFilter
         // use the posts.author_id directly.
         // From: select * from posts where author_id in (select id from users where id in (VALUES))
         // To  : select * from posts where author_id in (VALUES)
-        if ($relation instanceof BelongsTo && $foreignJoinKey === $this->column) {
+        if ($relation instanceof BelongsTo && $foreignJoinKey === $column) {
             $query->whereIn($localJoinKey, $values);
             return;
         }
 
-        $query->whereIn($localJoinKey, function ($query) use ($values, $table, $foreignJoinKey) {
+        $query->whereIn($localJoinKey, function ($query) use ($values, $table, $foreignJoinKey, $column) {
             $query->from($table)
                 ->select($foreignJoinKey)
-                ->whereIn($this->column, $values);
+                ->whereIn($column, $values);
         });
     }
 
@@ -91,12 +102,16 @@ class AssociationFilter
             : $relation->getForeignKeyName();
     }
 
-    protected function inefficientFilter(Builder $query, array $values)
+    /**
+     * @param Builder $query
+     * @param string[] $values
+     */
+    protected function inefficientFilter(Builder $query, array $values, string $column): void
     {
         // whereHas translates to a WHERE EXISTS which often results in a full
         // table scan (at least on MySQL).
-        return $query->whereHas($this->relation, function (Builder $query) use ($values) {
-            $query->whereIn($this->column, $values);
+        $query->whereHas($this->relation, function (Builder $query) use ($values, $column) {
+            $query->whereIn($column, $values);
         });
     }
 }

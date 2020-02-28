@@ -7,11 +7,26 @@ use Illuminate\Http\Request;
 
 class RawInput
 {
-    // No types are given since this is user input and could therefore be anything.
+    /**
+     * @var mixed
+     */
     protected $fields;
+
+    /**
+     * @var mixed
+     */
     protected $filters;
+
+    /**
+     * @var mixed
+     */
     protected $sorts;
 
+    /**
+     * @param mixed $fields
+     * @param mixed $filters
+     * @param mixed $sorts
+     */
     public function __construct($fields, $filters, $sorts)
     {
         $this->fields = $fields;
@@ -28,6 +43,9 @@ class RawInput
         );
     }
 
+    /**
+     * @param array{fields: string|string[], filters: array<string, mixed>, sorts: string|string[]} $input
+     */
     public static function fromArray(array $input): self
     {
         return new static(
@@ -37,16 +55,25 @@ class RawInput
         );
     }
 
+    /**
+     * @return mixed
+     */
     public function getFields()
     {
         return $this->fields;
     }
 
+    /**
+     * @return mixed
+     */
     public function getFilters()
     {
         return $this->filters;
     }
 
+    /**
+     * @return mixed
+     */
     public function getSorts()
     {
         return $this->sorts;

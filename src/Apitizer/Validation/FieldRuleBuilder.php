@@ -2,7 +2,6 @@
 
 namespace Apitizer\Validation;
 
-use Apitizer\Validation\Rules\Constraint;
 use Illuminate\Contracts\Validation\Rule;
 
 abstract class FieldRuleBuilder implements TypedRuleBuilder
@@ -13,7 +12,7 @@ abstract class FieldRuleBuilder implements TypedRuleBuilder
     protected $fieldName;
 
     /**
-     * @var (ValidationRule|Rule)[] the validation rules that should apply to
+     * @var (ValidationRule|Rule|string)[] the validation rules that should apply to
      * this field.
      */
     protected $rules = [];
@@ -43,18 +42,6 @@ abstract class FieldRuleBuilder implements TypedRuleBuilder
      */
     abstract public function getType(): string;
 
-    public function addRule($rule): self
-    {
-        $this->rules[] = $rule;
-
-        return $this;
-    }
-
-    protected function addConstraint(string $name): self
-    {
-        return $this->addRule(new Constraint($name));
-    }
-
     /**
      * Get the name of the current field.
      */
@@ -80,6 +67,8 @@ abstract class FieldRuleBuilder implements TypedRuleBuilder
 
     /**
      * @internal
+     *
+     * @return string|null|Rule
      */
     public function getValidatableType()
     {
@@ -89,11 +78,9 @@ abstract class FieldRuleBuilder implements TypedRuleBuilder
     /**
      * @internal
      */
-    public function setPrefix(string $prefix)
+    public function setPrefix(string $prefix): void
     {
         $this->prefix = $prefix;
-
-        return $this;
     }
 
     public function getValidationRuleName(): string

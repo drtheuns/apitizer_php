@@ -48,7 +48,7 @@ class PostBuilder extends EmptyBuilder
         return new Post();
     }
 
-    public function apidoc(Apidoc $apidoc)
+    public function apidoc(Apidoc $apidoc): void
     {
         $apidoc->setDescription(self::DESCRIPTION);
     }

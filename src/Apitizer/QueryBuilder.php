@@ -7,7 +7,6 @@ use Apitizer\Exceptions\DefinitionException;
 use Apitizer\Exceptions\InvalidInputException;
 use Apitizer\ExceptionStrategy\Strategy;
 use Apitizer\Interpreter\QueryInterpreter;
-use Apitizer\Parser\InputParser;
 use Apitizer\Parser\ParsedInput;
 use Apitizer\Parser\Parser;
 use Apitizer\Parser\RawInput;
@@ -47,49 +46,52 @@ abstract class QueryBuilder
      *
      * This can be especially helpful when you have policies or other checks
      * that depend on certain data being present.
+     *
+     * @var string[]
      */
     protected $alwaysLoadColumns = [];
 
     /**
-     * @var InputParser
+     * @var Parser|null
      */
     protected $parser;
 
     /**
-     * @var Renderer
+     * @var Renderer|null
      */
     protected $renderer;
 
     /**
-     * @var QueryInterpreter
+     * @var QueryInterpreter|null
      */
     protected $queryInterpreter;
 
     /**
      * The result of the fields() callback.
      *
-     * @var AbstractField[]|Association[]
+     * @var (AbstractField|Association)[]|null
      */
     protected $availableFields;
 
     /**
      * The results of the sorts() function.
      *
-     * @var Sort[]
+     * @var array<string, Sort>|null
      */
     protected $availableSorts;
 
     /**
      * The results of the filters() function.
      *
-     * @var Filter[]
+     * @var array<string, Filter>|null
      */
     protected $availableFilters;
 
     /**
-     * @var array|null the specification that should be used when fetching or
-     * rendering data. This is an alternative to the input from the Request
-     * object; therefore, it this is null, the request's input will be used.
+     * @var array{fields: string|string[], sorts: string|string[], filters: array<string, mixed>}|null
+     * the specification that should be used when fetching or rendering data.
+     * This is an alternative to the input from the Request object; therefore,
+     * it this is null, the request's input will be used.
      */
     protected $specification;
 
@@ -107,19 +109,19 @@ abstract class QueryBuilder
     /**
      * The maximum number of rows that the client is able to request.
      *
-     * @param int
+     * @var int
      */
     protected $maximumLimit = 50;
 
     /**
      * The strategy to use when an exception is raised.
      *
-     * @var Strategy
+     * @var Strategy|null
      */
     protected $exceptionStrategy;
 
     /**
-     * @var Rules
+     * @var Rules|null
      */
     protected $rules;
 
@@ -131,6 +133,8 @@ abstract class QueryBuilder
      * Each type (e.g. `$this->string`) expects at least a key string. This key
      * is used to fetch the data from the Eloquent model, so it usually
      * corresponds to the column name in the database.
+     *
+     * @return array<string, AbstractField|Association>
      */
     abstract public function fields(): array;
 
@@ -148,6 +152,8 @@ abstract class QueryBuilder
      *
      * @see $this->sort()
      * @see \Apitizer\Types\Sort
+     *
+     * @return array<string, Sort>
      */
     abstract public function sorts(): array;
 
@@ -159,6 +165,8 @@ abstract class QueryBuilder
      *
      * @see $this->filter()
      * @see \Apitizer\Types\Filter
+     *
+     * @return array<string, Filter>
      */
     abstract public function filters(): array;
 
@@ -182,7 +190,7 @@ abstract class QueryBuilder
      *
      * @see Apidoc
      */
-    public function apidoc(Apidoc $apidoc)
+    public function apidoc(Apidoc $apidoc): void
     {
         //
     }
@@ -224,7 +232,7 @@ abstract class QueryBuilder
     /**
      * Static alias for the constructor.
      */
-    public static function make(Request $request = null)
+    public static function make(Request $request = null): QueryBuilder
     {
         return (new static($request));
     }
@@ -240,14 +248,14 @@ abstract class QueryBuilder
     }
 
     /**
-     * @param array{fields: string|string[], sorts: string|string[], filters: array<string, mixed>}
+     * @param array{fields: string|string[], sorts: string|string[], filters: array<string, mixed>} $specification
      * array the specification of data that should be used for this builder.
      * This array may contain three keys: `fields`, `filters`, and `sorts`. The
      * value for these should be the same as what you would send in a request;
      * in other words, fields may be a comma separated string of fields (or an
      * array), etc.
      */
-    public function fromSpecification(array $specification)
+    public function fromSpecification(array $specification): self
     {
         $this->specification = $specification;
 
@@ -267,7 +275,7 @@ abstract class QueryBuilder
      *   $this->association('comments', CommentBuilder::class)
      *
      * @param string $key
-     * @param string $builder
+     * @param string $builderClass
      *
      * @return Association
      */
@@ -315,7 +323,7 @@ abstract class QueryBuilder
      *
      * @param mixed $data
      *
-     * @return array
+     * @return array<int, array<string, mixed>>|array<string, mixed>
      */
     public function render($data): array
     {
@@ -327,7 +335,7 @@ abstract class QueryBuilder
     /**
      * Fetch and render all the data.
      *
-     * @return array
+     * @return array<mixed>
      */
     public function all(): array
     {
@@ -343,15 +351,19 @@ abstract class QueryBuilder
     /**
      * Fetch and return paginated data.
      *
-     * @return LengthAwarePaginator
+     * @param int $perPage
+     * @param string  $pageName
+     * @param int|null  $page
+     *
+     * @return LengthAwarePaginator<array>
      */
-    public function paginate(int $perPage = null, ...$rest): LengthAwarePaginator
+    public function paginate(int $perPage = null, $pageName = 'page', $page = null): LengthAwarePaginator
     {
         $fetchSpec = $this->makeFetchSpecification();
         $perPage = $this->getPerPage($perPage);
         $paginator = $this->getQueryInterpreter()
                           ->build($this, $fetchSpec)
-                          ->paginate($perPage, ...$rest);
+                          ->paginate($perPage, [], $pageName, $page);
 
         return tap($paginator, function (AbstractPaginator $paginator) use ($fetchSpec) {
             $renderedData = $this->getRenderer()->render(
@@ -360,17 +372,20 @@ abstract class QueryBuilder
 
             $paginator->setCollection(collect($renderedData));
 
+            /** @var array<string, mixed> $queryParameters */
+            $queryParameters = $this->getRequest()->query();
+
             // Ensure the all the supported query parameters that were passed in are
             // also present in the pagination links.
             $queryParameters = Arr::only(
-                $this->getRequest()->query(),
+                $queryParameters,
                 array_values(Apitizer::getQueryParams())
             );
             $paginator->appends($queryParameters);
         });
     }
 
-    protected function getPerPage(int $perPage = null)
+    protected function getPerPage(int $perPage = null): ?int
     {
         $limitKey = Apitizer::getLimitKey();
         $request = $this->getRequest();
@@ -400,10 +415,16 @@ abstract class QueryBuilder
 
     /**
      * Get the validation rules for the current request.
+     *
+     * @return array<string, string|\Illuminate\Contracts\Validation\Rule>
      */
     public function validationRules(): array
     {
-        return $this->getRules()->rules($this->request->route()->getActionMethod());
+        /** @var \Illuminate\Routing\Route $route */
+        $route = $this->getRequest()->route();
+        $actionMethod = $route->getActionMethod();
+
+        return $this->getRules()->getValidationRulesForAction($actionMethod);
     }
 
     /**
@@ -418,6 +439,8 @@ abstract class QueryBuilder
     /**
      * Return the validated data for the current request, based on the request's
      * action method.
+     *
+     * @return array<string, mixed>
      */
     public function validated(): array
     {
@@ -456,7 +479,10 @@ abstract class QueryBuilder
     /**
      * Validate the fields that were requested by the client.
      *
-     * @return [string => AbstractField|Association]
+     * @param (string|Relation)[] $unvalidatedFields
+     * @param array<string, AbstractField|Association> $availableFields
+     *
+     * @return array<string, AbstractField|Association>
      */
     protected function getValidatedFields(array $unvalidatedFields, array $availableFields): array
     {
@@ -505,6 +531,12 @@ abstract class QueryBuilder
         return $validatedFields;
     }
 
+    /**
+     * @param \Apitizer\Parser\Sort[] $selectedSorts
+     * @param Sort[] $availableSorts
+     *
+     * @return Sort[]
+     */
     protected function getValidatedSorting(array $selectedSorts, array $availableSorts): array
     {
         $validatedSorts = [];
@@ -520,6 +552,12 @@ abstract class QueryBuilder
         return $validatedSorts;
     }
 
+    /**
+     * @param array<string, mixed> $selectedFilters
+     * @param array<string, Filter> $availableFilters
+     *
+     * @return array<string, Filter>
+     */
     protected function getValidatedFilters(array $selectedFilters, array $availableFilters): array
     {
         $validatedFilters = [];
@@ -539,6 +577,9 @@ abstract class QueryBuilder
         return $validatedFilters;
     }
 
+    /**
+     * @return array<string, AbstractField|Association>
+     */
     public function getFields(): array
     {
         if (is_null($this->availableFields)) {
@@ -548,6 +589,9 @@ abstract class QueryBuilder
         return $this->availableFields;
     }
 
+    /**
+     * @return array<string, Sort>
+     */
     public function getSorts(): array
     {
         if (is_null($this->availableSorts)) {
@@ -557,6 +601,9 @@ abstract class QueryBuilder
         return $this->availableSorts;
     }
 
+    /**
+     * @return array<string, Filter>
+     */
     public function getFilters(): array
     {
         if (is_null($this->availableFilters)) {
@@ -567,7 +614,7 @@ abstract class QueryBuilder
     }
 
     /**
-     * @return Field[]
+     * @return AbstractField[]
      */
     public function getOnlyFields(): array
     {
@@ -677,9 +724,9 @@ abstract class QueryBuilder
         return $this;
     }
 
-    public function handleException(ApitizerException $e)
+    public function handleException(ApitizerException $e): void
     {
-        return $this->getExceptionStrategy()->handle($this, $e);
+        $this->getExceptionStrategy()->handle($this, $e);
     }
 
     public function getParent(): ?QueryBuilder
@@ -710,6 +757,9 @@ abstract class QueryBuilder
         return $this;
     }
 
+    /**
+     * @return string[]
+     */
     public function getAlwaysLoadColumns(): array
     {
         return $this->alwaysLoadColumns;
@@ -717,11 +767,14 @@ abstract class QueryBuilder
 
     public function getRules(): Rules
     {
-        if (! $this->rules) {
-            $this->rules = new Rules();
-            $this->rules($this->rules);
+        $rules = $this->rules;
+
+        if (! $rules) {
+            $rules = new Rules();
+            $this->rules($rules);
+            $this->rules = $rules;
         }
 
-        return $this->rules;
+        return $rules;
     }
 }

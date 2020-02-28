@@ -12,6 +12,10 @@ class RequiredIfRule extends RequiredIf implements ValidationRule
      */
     protected $explanation;
 
+    /**
+     * @param callable|bool $condition
+     * @param string $explanation
+     */
     public function __construct($condition, string $explanation)
     {
         $this->condition = $condition;
@@ -38,8 +42,8 @@ class RequiredIfRule extends RequiredIf implements ValidationRule
         return $this;
     }
 
-    public function toHtml()
+    public function toHtml(): string
     {
-        return $this->getDocumentation();
+        return $this->getDocumentation() ?? '';
     }
 }

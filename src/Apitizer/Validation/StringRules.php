@@ -66,7 +66,7 @@ class StringRules extends FieldRuleBuilder
      * Validate that the string is a valid email according to the
      * egulias/email-validator package.
      *
-     * @param array $validationStyle the validation styles to apply. One of:
+     * @param string[] $validationStyle the validation styles to apply. One of:
      *
      * - rfc: RFCValidation
      * - strict: NoRFCWarningsValidation

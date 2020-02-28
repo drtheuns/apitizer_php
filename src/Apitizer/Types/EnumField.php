@@ -14,10 +14,16 @@ use Apitizer\QueryBuilder;
 class EnumField extends Field
 {
     /**
-     * @var array
+     * @var array<mixed>
      */
     protected $enum = [];
 
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @param string $key
+     * @param array<mixed> $enum
+     * @param string $type
+     */
     public function __construct(
         QueryBuilder $queryBuilder,
         string $key,
@@ -44,6 +50,9 @@ class EnumField extends Field
         return $this->typeOrNull("enum of {$this->type}");
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function getEnum(): array
     {
         return $this->enum;

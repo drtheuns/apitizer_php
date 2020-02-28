@@ -30,8 +30,8 @@ class UniqueRule extends Unique implements ValidationRule
         return $this;
     }
 
-    public function toHtml()
+    public function toHtml(): string
     {
-        return $this->getDocumentation();
+        return $this->getDocumentation() ?? '';
     }
 }

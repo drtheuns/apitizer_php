@@ -49,7 +49,7 @@ abstract class DateRule implements ValidationRule
         return $this->getName() . ':' . $this->formatted;
     }
 
-    public function toHtml()
+    public function toHtml(): string
     {
         return trans("apitizer::validation.{$this->getName()}", [
             'date' => "<code>{$this->formatted}</code>",

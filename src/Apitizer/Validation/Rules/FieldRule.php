@@ -34,7 +34,7 @@ abstract class FieldRule implements ValidationRule
         return $this->getName() . ':' . $this->field;
     }
 
-    public function toHtml()
+    public function toHtml(): string
     {
         return trans("apitizer::validation.{$this->field}", [
             'field' => "<code>{$this->field}</code>",

@@ -54,7 +54,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
         }
     }
 
-    protected function registerRoutes()
+    protected function registerRoutes(): void
     {
         $routeConfig = [
             'namespace' => 'Apitizer\Controllers',

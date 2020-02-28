@@ -7,10 +7,13 @@ use Apitizer\Validation\ValidationRule;
 class EmailRule implements ValidationRule
 {
     /**
-     * @var array
+     * @var string[]
      */
     protected $styles = [];
 
+    /**
+     * @param string[] $styles
+     */
     public function __construct(array $styles)
     {
         $this->styles = $styles;
@@ -36,8 +39,8 @@ class EmailRule implements ValidationRule
         return $this->getName() . ':' . implode(',', $this->styles);
     }
 
-    public function toHtml()
+    public function toHtml(): string
     {
-        return $this->getDocumentation();
+        return $this->getDocumentation() ?? '';
     }
 }

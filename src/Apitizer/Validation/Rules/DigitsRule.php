@@ -36,8 +36,8 @@ class DigitsRule implements ValidationRule
         return $this->getName() . ':' . $this->digits;
     }
 
-    public function toHtml()
+    public function toHtml(): string
     {
-        return $this->getDocumentation();
+        return $this->getDocumentation() ?? '';
     }
 }

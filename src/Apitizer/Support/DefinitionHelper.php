@@ -19,7 +19,10 @@ class DefinitionHelper
      * Validate that each field has a correct type, possibly assigning the any
      * type.
      *
-     * @return (Field|Association)[]
+     * @param QueryBuilder $queryBuilder
+     * @param array<string, AbstractField|Association|mixed> $fields
+     *
+     * @return (AbstractField|Association)[]
      */
     static function validateFields(QueryBuilder $queryBuilder, array $fields): array
     {
@@ -35,8 +38,11 @@ class DefinitionHelper
     /**
      * @param QueryBuilder $queryBuilder
      * @param string $name
-     * @param Field|Association $field
+     * @param AbstractField|Association|mixed $field
+     *
      * @throws DefinitionException
+     *
+     * @return AbstractField|Association
      */
     static function validateField(QueryBuilder $queryBuilder, string $name, $field)
     {
@@ -76,6 +82,11 @@ class DefinitionHelper
 
     /**
      * Validate that each sort has the correct type.
+     *
+     * @param QueryBuilder $queryBuilder
+     * @param array<string, Sort|mixed> $sorts
+     *
+     * @return array<string, Sort>
      */
     static function validateSorts(QueryBuilder $queryBuilder, array $sorts): array
     {
@@ -86,10 +97,19 @@ class DefinitionHelper
         return $sorts;
     }
 
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @param string $name
+     * @param Sort|mixed $sort
+     */
     static function validateSort(QueryBuilder $queryBuilder, string $name, $sort): void
     {
         if (! $sort instanceof Sort) {
             throw DefinitionException::sortDefinitionExpected($queryBuilder, $name, $sort);
+        }
+
+        if (! $sort->getHandler()) {
+            throw DefinitionException::sortHandlerNotDefined($queryBuilder, $name);
         }
 
         $sort->setName($name);
@@ -97,6 +117,11 @@ class DefinitionHelper
 
     /**
      * Validate that each filter has the correct type.
+     *
+     * @param QueryBuilder $queryBuilder
+     * @param array<string, Filter|mixed> $filters
+     *
+     * @return array<string, Filter>
      */
     static function validateFilters(QueryBuilder $queryBuilder, array $filters): array
     {
@@ -107,6 +132,13 @@ class DefinitionHelper
         return $filters;
     }
 
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @param string $name
+     * @param Filter|mixed $filter
+     *
+     * @throws DefinitionException
+     */
     static function validateFilter(QueryBuilder $queryBuilder, string $name, $filter): void
     {
         if (! $filter instanceof Filter) {

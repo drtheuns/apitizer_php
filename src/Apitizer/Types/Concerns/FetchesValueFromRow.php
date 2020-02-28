@@ -3,9 +3,16 @@
 namespace Apitizer\Types\Concerns;
 
 use ArrayAccess;
+use Illuminate\Database\Eloquent\Model;
 
 trait FetchesValueFromRow
 {
+    /**
+     * @param array|Model|mixed $row
+     * @param string $key
+     *
+     * @return mixed
+     */
     protected function valueFromRow($row, string $key)
     {
         $value = null;

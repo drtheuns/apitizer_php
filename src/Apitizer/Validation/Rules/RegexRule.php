@@ -36,7 +36,7 @@ class RegexRule implements ValidationRule
         return $this->getName() . ':' . "/{$this->regex}/";
     }
 
-    public function toHtml()
+    public function toHtml(): string
     {
         return trans("apitizer::validation.{$this->getName()}", [
             'regex' => "<code>{$this->regex}</code>",

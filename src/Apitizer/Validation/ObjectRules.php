@@ -2,6 +2,7 @@
 
 namespace Apitizer\Validation;
 
+use Illuminate\Contracts\Validation\Rule;
 use Closure;
 
 class ObjectRules extends FieldRuleBuilder implements ContainerType
@@ -31,7 +32,11 @@ class ObjectRules extends FieldRuleBuilder implements ContainerType
 
     public function string(string $name): StringRules
     {
-        return $this->field(new StringRules($name));
+        $stringRules = new StringRules($name);
+
+        $this->addField($stringRules);
+
+        return $stringRules;
     }
 
     public function uuid(string $name): StringRules
@@ -41,32 +46,56 @@ class ObjectRules extends FieldRuleBuilder implements ContainerType
 
     public function boolean(string $name): BooleanRules
     {
-        return $this->field(new BooleanRules($name));
+        $booleanRules = new BooleanRules($name);
+
+        $this->addField($booleanRules);
+
+        return $booleanRules;
     }
 
     public function date(string $name, string $format = null): DateRules
     {
-        return $this->field(DateRules::date($name, $format));
+        $dateRules = DateRules::date($name, $format);
+
+        $this->addField($dateRules);
+
+        return $dateRules;
     }
 
     public function datetime(string $name, string $format = null): DateRules
     {
-        return $this->field(DateRules::datetime($name, $format));
+        $dateRules = DateRules::datetime($name, $format);
+
+        $this->addField($dateRules);
+
+        return $dateRules;
     }
 
     public function number(string $name): NumberRules
     {
-        return $this->field(new NumberRules($name));
+        $numberRules = new NumberRules($name);
+
+        $this->addField($numberRules);
+
+        return $numberRules;
     }
 
     public function integer(string $name): IntegerRules
     {
-        return $this->field(new IntegerRules($name));
+        $integerRules = new IntegerRules($name);
+
+        $this->addField($integerRules);
+
+        return $integerRules;
     }
 
     public function file(string $name): FileRules
     {
-        return $this->field(new FileRules($name));
+        $fileRules = new FileRules($name);
+
+        $this->addField($fileRules);
+
+        return $fileRules;
     }
 
     public function image(string $name): FileRules
@@ -76,22 +105,28 @@ class ObjectRules extends FieldRuleBuilder implements ContainerType
 
     public function object(string $name, Closure $callback): ObjectRules
     {
-        return $this->field(new ObjectRules($name, $callback));
+        $objectRules = new ObjectRules($name, $callback);
+
+        $this->addField($objectRules);
+
+        return $objectRules;
     }
 
     public function array(string $name): ArrayRules
     {
-        return $this->field(new ArrayRules($name));
+        $arrayRules = new ArrayRules($name);
+
+        $this->addField($arrayRules);
+
+        return $arrayRules;
     }
 
-    public function field(TypedRuleBuilder $type): TypedRuleBuilder
+    private function addField(TypedRuleBuilder $type): void
     {
         $type->setPrefix($this->getRulePrefix());
 
         // TODO Add exception when redefining the same field.
         $this->fields[$type->getFieldName()] = $type;
-
-        return $type;
     }
 
     public function getFieldName(): ?string
@@ -104,6 +139,9 @@ class ObjectRules extends FieldRuleBuilder implements ContainerType
         return 'object';
     }
 
+    /**
+     * @return null
+     */
     public function getValidatableType()
     {
         return null;
@@ -126,7 +164,7 @@ class ObjectRules extends FieldRuleBuilder implements ContainerType
         return $this->getValidationRuleName() . '.';
     }
 
-    public function resolve()
+    public function resolve(): void
     {
         ($this->callback)($this);
 

@@ -5,6 +5,7 @@ namespace Apitizer\Exceptions;
 use Apitizer\QueryBuilder;
 use Apitizer\Types\Association;
 use Apitizer\Types\Filter;
+use Apitizer\Types\Sort;
 
 /**
  * This exception occurs when the programmer gives an unexpected definition in
@@ -25,7 +26,7 @@ class DefinitionException extends ApitizerException
     const NAMESPACES = ['association', 'field', 'filter', 'sort'];
 
     /**
-     * @var string The field/sort/filter name where this exception occured.
+     * @var string|null The field/sort/filter name where this exception occured.
      */
     protected $name;
 
@@ -41,6 +42,11 @@ class DefinitionException extends ApitizerException
         $this->name = $name;
     }
 
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @param string $key
+     * @param mixed $given
+     */
     static function builderClassExpected(QueryBuilder $queryBuilder, string $key, $given): self
     {
         $class = get_class($queryBuilder);
@@ -63,6 +69,11 @@ class DefinitionException extends ApitizerException
         return new static($message, $queryBuilder, 'association', $associaton->getName());
     }
 
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @param string $name
+     * @param mixed $given
+     */
     static function fieldDefinitionExpected(QueryBuilder $queryBuilder, string $name, $given): self
     {
         $class = get_class($queryBuilder);
@@ -73,6 +84,11 @@ class DefinitionException extends ApitizerException
         return new static($message, $queryBuilder, 'field', $name);
     }
 
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @param string $name
+     * @param mixed $given
+     */
     static function filterDefinitionExpected(QueryBuilder $queryBuilder, string $name, $given): self
     {
         $class = get_class($queryBuilder);
@@ -92,12 +108,25 @@ class DefinitionException extends ApitizerException
         return new static($message, $queryBuilder, 'filter', $filter->getName());
     }
 
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @param string $name
+     * @param mixed $given
+     */
     static function sortDefinitionExpected(QueryBuilder $queryBuilder, string $name, $given): self
     {
         $class = get_class($queryBuilder);
         $type = is_object($given) ? get_class($given) : gettype($given);
         $message = "Expected [$name] on [$class] to be a sort definition, but got"
             . " a [$type]";
+
+        return new static($message, $queryBuilder, 'sort', $name);
+    }
+
+    static function sortHandlerNotDefined(QueryBuilder $queryBuilder, string $name): self
+    {
+        $class = get_class($queryBuilder);
+        $message = "Expected a callable handler to be defined for sort [$name] on [$class]";
 
         return new static($message, $queryBuilder, 'sort', $name);
     }
@@ -112,7 +141,7 @@ class DefinitionException extends ApitizerException
         return $this->namespace;
     }
 
-    public function getName(): string
+    public function getName(): ?string
     {
         return $this->name;
     }
