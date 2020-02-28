@@ -79,6 +79,9 @@ class InputParser implements Parser
                 // Add remainder to the current stack.
                 $context->stack[] = $context->accumulator;
 
+                // For phpstan to understand that parent is filled at this point.
+                assert($context->parent !== null);
+
                 // The parent's accumulator currently holds anything up until
                 // the (, which should be the relationship name
                 $context->parent->stack[] = new Relation($context->parent->accumulator, $context->stack);
