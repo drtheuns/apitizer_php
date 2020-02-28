@@ -4,7 +4,7 @@ namespace Apitizer\Interpreter;
 
 use Apitizer\Types\FetchSpec;
 use Apitizer\QueryBuilder;
-use Apitizer\Types\AbstractField;
+use Apitizer\Types\Field;
 use Apitizer\Types\Association;
 use Apitizer\Types\Filter;
 use Apitizer\Types\Sort;
@@ -52,7 +52,7 @@ class QueryInterpreter
         $selectKeys = array_merge([$model->getKeyName()], $additionalSelects);
 
         foreach ($fields as $fieldOrAssoc) {
-            if ($fieldOrAssoc instanceof AbstractField) {
+            if ($fieldOrAssoc instanceof Field) {
                 // Also load any of the selected keys.
                 $selectKeys[] = $fieldOrAssoc->getKey();
             } else if ($fieldOrAssoc instanceof Association) {
