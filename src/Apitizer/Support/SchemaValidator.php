@@ -20,7 +20,8 @@ class SchemaValidator
      *
      * Requires the query builders to be defined in the config.
      *
-     * @param null|(string|QueryBuilder)[] the list of query builders to validate.
+     * @param null|(string|QueryBuilder)[] $queryBuilders the list of query
+     * builders to validate.
      */
     public function validateAll(array $queryBuilders = null): self
     {

@@ -6,6 +6,9 @@ use DateTimeInterface;
 
 class DateTimeFormat
 {
+    /**
+     * @var string
+     */
     protected $format;
 
     public function __construct(string $format = 'Y-m-d H:i:s')
@@ -13,7 +16,7 @@ class DateTimeFormat
         $this->format = $format;
     }
 
-    public function __invoke(DateTimeInterface $value)
+    public function __invoke(DateTimeInterface $value): string
     {
         return $value->format($this->format);
     }

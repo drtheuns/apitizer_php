@@ -16,8 +16,7 @@ class ParsedInput
     public $sorts = [];
 
     /**
-     * @var array an associative array where the key is the name of the filter,
-     * and the value is just the value of that filter.
+     * @var array<string, mixed>
      */
     public $filters = [];
 }

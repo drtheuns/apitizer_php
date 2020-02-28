@@ -8,6 +8,7 @@ use DirectoryIterator;
 use IteratorAggregate;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Iterator;
 use RecursiveDirectoryIterator;
 use RegexIterator;
 
@@ -43,6 +44,9 @@ class ComposerNamespaceClassFinder implements IteratorAggregate
         $this->instanceofClass = $class;
     }
 
+    /**
+     * @return ComposerNamespaceClassFinder<string>
+     */
     public static function make(string $namespace, string $class)
     {
         return new static($namespace, $class);
@@ -50,6 +54,8 @@ class ComposerNamespaceClassFinder implements IteratorAggregate
 
     /**
      * Set the project root where the composer.json should be.
+     *
+     * @return ComposerNamespaceClassFinder<string>
      */
     public function startingFrom(?string $projectRoot): self
     {
@@ -61,6 +67,8 @@ class ComposerNamespaceClassFinder implements IteratorAggregate
     /**
      * Whether or not the search process should be done recursively over all
      * subdirectories.
+     *
+     * @return ComposerNamespaceClassFinder<string>
      */
     public function recursively(bool $recursively): self
     {
@@ -73,6 +81,8 @@ class ComposerNamespaceClassFinder implements IteratorAggregate
      * Get all the classes that satisfy the constraints.
      *
      * @throws ClassFinderException
+     *
+     * @return array<string>
      */
     public function all(): array
     {
@@ -81,8 +91,10 @@ class ComposerNamespaceClassFinder implements IteratorAggregate
 
     /**
      * @throws ClassFinderException
+     *
+     * @return Iterator<string>
      */
-    public function getIterator()
+    public function getIterator(): Iterator
     {
         $projectRoot = $this->projectRoot ?? $this->findProjectRoot();
         $composerFile = "$projectRoot/composer.json";
@@ -91,7 +103,11 @@ class ComposerNamespaceClassFinder implements IteratorAggregate
             throw ClassFinderException::composerFileNotFound($composerFile);
         }
 
-        $composerContent = json_decode(file_get_contents($composerFile), true);
+        if (! $content = file_get_contents($composerFile)) {
+            throw ClassFinderException::composerFileNotFound($composerFile);
+        }
+
+        $composerContent = json_decode($content, true);
         if (! $psr4 = Arr::get($composerContent, 'autoload.psr-4')) {
             throw ClassFinderException::psr4NotFound($composerFile);
         }
@@ -120,7 +136,10 @@ class ComposerNamespaceClassFinder implements IteratorAggregate
         return new ArrayIterator([]);
     }
 
-    private function iteratorForPath(string $path)
+    /**
+     * @return Iterator<string>
+     */
+    private function iteratorForPath(string $path): Iterator
     {
         $directoryIterator = $this->recursive
                            ? new RecursiveDirectoryIterator($path)
@@ -146,6 +165,10 @@ class ComposerNamespaceClassFinder implements IteratorAggregate
 
         // Start at this project's parent directory.
         $directory = realpath(__DIR__ . str_repeat(DIRECTORY_SEPARATOR . '..', 4));
+
+        if (! $directory) {
+            return null;
+        }
 
         // Check if this project is contained within a vendor directory.
         if (basename($directory) === 'vendor') {

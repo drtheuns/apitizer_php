@@ -24,6 +24,11 @@ class Field extends AbstractField
         $this->type = $type;
     }
 
+    /**
+     * @param mixed $row
+     *
+     * @return mixed
+     */
     protected function getValue($row)
     {
         return $this->valueFromRow($row, $this->getKey());

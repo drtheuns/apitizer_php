@@ -88,5 +88,34 @@
         </ul>
       </section>
     @endif
+    @if ($doc->hasRules())
+      <section class="topic-section">
+        <h2 class="endpoints-title">Validation</h2>
+        @foreach ($doc->getValidationBuilders() as $actionName => $builder)
+          <header>
+            <h3 class="endpoint-name">{{ $doc->humanizeActionName($actionName) }}</h3>
+          </header>
+          <?php $id = \Illuminate\Support\Str::random(); ?>
+          <div class="tabs">
+            <div class="tab-headings">
+              <label for="{{ $id }}-1" class="tab-toggle">Text</label>
+              <label for="{{ $id }}-2" class="tab-toggle">Typescript</label>
+            </div>
+            <div class="tab">
+              <input name="{{ $id }}" id="{{ $id }}-1" type="radio" checked />
+              <div class="tab-content">
+                @include('apitizer::validation_rules', ['builder' => $builder])
+              </div>
+            </div>
+            <div class="tab">
+              <input name="{{ $id }}" id="{{ $id }}-2" type="radio" />
+              <div class="tab-content">
+                @include('apitizer::ts_interface', ['resourceName' => $doc->getName(), 'actionName' => $doc->humanizeActionName($actionName), 'builder' => $builder, 'depth' => 1])
+              </div>
+            </div>
+          </div>
+        @endforeach
+      </section>
+    @endif
   </div>
 </section>

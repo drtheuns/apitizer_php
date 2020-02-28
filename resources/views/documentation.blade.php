@@ -37,6 +37,7 @@
        --separator-color: #dedede;
        --link-color: #1f5688;
        --link-hover-background-color: var(--darken);
+       --button-hover-color: var(--darken);
 
        --sidebar-width: 300px;
        --sidebar-background-color: var(--primary-color);
@@ -193,10 +194,10 @@
      .attributes-title, assoc-title {
        font-size: 18px;
      }
-     .attribute-name, .assoc-name {
+     .attribute-name, .assoc-name, .object-field-name {
        font-weight: 700;
      }
-     .attribute-type, .attribute-name {
+     .attribute-type, .attribute-name, .object-field-name, .object-field-type {
        font-family: monospace;
      }
      .attribute {
@@ -220,6 +221,12 @@
      }
      .topic-content > .topic-section ~ .topic-section {
        margin-top: 40px;
+     }
+     .endpoints-title {
+       font-size: 22px;
+     }
+     .endpoint-name {
+       font-size: 18px;
      }
      .menu {
        position: fixed;
@@ -287,6 +294,54 @@
      .dark-mode-toggle:hover {
        cursor: pointer;
        background-color: var(--lighten-lg);
+     }
+     .object-rules {
+       border-radius: 5px;
+       margin-top: 10px;
+     }
+     .object-rules .object-rules {
+       border: 1px solid black;
+       padding: 10px;
+     }
+     .object-rules .object-meta {
+       display: inline-block;
+       padding: 10px 0;
+       font-size: 14px;
+     }
+     .object-field-name.required::after {
+       content: '*';
+       color: red;
+     }
+     .validation-rules {
+       list-style: inside;
+       margin-left: 20px;
+     }
+     .tabs .tab-content {
+       display: none;
+     }
+     .tabs .tab [type="radio"]:checked ~ .tab-content {
+       display: initial;
+     }
+     .tabs [type="radio"] {
+       display: none;
+     }
+     .tabs .tab-toggle {
+       padding: 10px;
+       border: 1px solid var(--separator-color);
+       margin: 0;
+       flex-grow: 1;
+     }
+     .tabs .tab-toggle:hover {
+       background-color: var(--button-hover-color);
+       cursor: pointer;
+     }
+     .tabs .tab-toggle ~ .tab-toggle {
+       margin-left: -1px;
+     }
+     .tab-headings {
+       display: flex;
+       flex-direction: row;
+       align-content: center;
      }
 
      @media (min-width: 768px) {

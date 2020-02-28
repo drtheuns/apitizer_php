@@ -19,7 +19,7 @@ class Filter extends Factory
     protected $type = 'string';
 
     /**
-     * @var string the format for date(time) types.
+     * @var string|null the format for date(time) types.
      */
     protected $format = null;
 
@@ -147,7 +147,7 @@ class Filter extends Factory
      * When this is method is used, expectMany cannot be used and a string will
      * automatically be expected.
      *
-     * @param array|string $fields
+     * @param string[]|string $fields
      *
      * @return self
      */
@@ -163,10 +163,12 @@ class Filter extends Factory
     /**
      * Get the validated, type casted input.
      *
+     * @param mixed $input
+     *
      * @throws InvalidInputException
      * @throws CastException
      *
-     * @return array|mixed
+     * @return array<string|int|float|\DateTimeInterface|bool|mixed>|string|int|float|\DateTimeInterface|bool|mixed
      */
     protected function validateInput($input)
     {
@@ -192,11 +194,17 @@ class Filter extends Factory
         return $this->handler;
     }
 
+    /**
+     * @return mixed
+     */
     public function getValue()
     {
         return $this->value;
     }
 
+    /**
+     * @param mixed $value
+     */
     public function setValue($value): self
     {
         try {

@@ -13,7 +13,7 @@ class Sort extends Factory
     protected $order = 'asc';
 
     /**
-     * @var callable
+     * @var callable|null
      */
     protected $handler;
 
@@ -29,7 +29,7 @@ class Sort extends Factory
         return $this;
     }
 
-    public function getOrder()
+    public function getOrder(): string
     {
         return $this->order;
     }
@@ -41,7 +41,7 @@ class Sort extends Factory
         return $this;
     }
 
-    public function getHandler()
+    public function getHandler(): ?callable
     {
         return $this->handler;
     }

@@ -27,12 +27,12 @@ class Apidoc
     protected $name;
 
     /**
-     * @var Field[]
+     * @var AbstractField[]
      */
     protected $fields = [];
 
     /**
-     * @var Assocation[]
+     * @var Association[]
      */
     protected $associations = [];
 
@@ -89,24 +89,44 @@ class Apidoc
         return $this;
     }
 
+    /**
+     * @return AbstractField[]
+     */
     public function getFields(): array
     {
         return $this->fields;
     }
 
+    /**
+     * @return Association[]
+     */
     public function getAssociations(): array
     {
         return $this->associations;
     }
 
+    /**
+     * @return Sort[]
+     */
     public function getSorts(): array
     {
         return $this->queryBuilder->getSorts();
     }
 
+    /**
+     * @return Filter[]
+     */
     public function getFilters(): array
     {
         return $this->queryBuilder->getFilters();
+    }
+
+    /**
+     * @return array<string, \Apitizer\Validation\ObjectRules>
+     */
+    public function getValidationBuilders(): array
+    {
+        return $this->queryBuilder->getRules()->getBuilders();
     }
 
     public function getQueryBuilder(): QueryBuilder
@@ -114,7 +134,7 @@ class Apidoc
         return $this->queryBuilder;
     }
 
-    protected function guessQueryBuilderResourceName()
+    protected function guessQueryBuilderResourceName(): string
     {
         // It might be better to guess based on the model's name.
         $className = (new ReflectionClass($this->queryBuilder))->getShortName();
@@ -138,6 +158,11 @@ class Apidoc
     public function hasSorts(): bool
     {
         return ! empty($this->getSorts());
+    }
+
+    public function hasRules(): bool
+    {
+        return $this->getQueryBuilder()->getRules()->hasRules();
     }
 
     public function hasAssociations(): bool
@@ -168,11 +193,25 @@ class Apidoc
      * The metadata is a free form variable that can be filled with anything. If
      * you want to extend the documentation with your own metadata, this would
      * be the first place to look.
+     *
+     * @param mixed $data
      */
     public function setMetadata($data): self
     {
         $this->metadata = $data;
 
         return $this;
+    }
+
+    public function humanizeActionName(string $actionName): string
+    {
+        switch ($actionName) {
+            case 'store':
+                return 'Create';
+            case 'destroy':
+                return 'Delete';
+            default:
+                return Str::title($actionName);
+        }
     }
 }

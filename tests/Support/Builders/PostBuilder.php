@@ -2,12 +2,11 @@
 
 namespace Tests\Support\Builders;
 
-use Apitizer\QueryBuilder;
 use Apitizer\Types\Apidoc;
 use Illuminate\Database\Eloquent\Model;
 use Tests\Feature\Models\Post;
 
-class PostBuilder extends QueryBuilder
+class PostBuilder extends EmptyBuilder
 {
     const DESCRIPTION = 'A blog post';
 
@@ -49,7 +48,7 @@ class PostBuilder extends QueryBuilder
         return new Post();
     }
 
-    public function apidoc(Apidoc $apidoc)
+    public function apidoc(Apidoc $apidoc): void
     {
         $apidoc->setDescription(self::DESCRIPTION);
     }

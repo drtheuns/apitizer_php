@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Config;
 
 class DocumentationController
 {
+    /**
+     * @return \Illuminate\View\View|\Illuminate\Contracts\View\Factory
+     */
     public function list(Request $request)
     {
         $apidoc = Apitizer::getQueryBuilderDocumentation();

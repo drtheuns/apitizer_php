@@ -5,7 +5,10 @@ namespace Apitizer\Interpreter;
 use Apitizer\Types\FetchSpec;
 use Apitizer\QueryBuilder;
 use Apitizer\Types\Field;
+use Apitizer\Types\AbstractField;
 use Apitizer\Types\Association;
+use Apitizer\Types\Filter;
+use Apitizer\Types\Sort;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOneOrMany;
@@ -35,11 +38,19 @@ class QueryInterpreter
         return $query;
     }
 
-    private function applySelect(Builder $query, array $fields, array $additionalSelects = [])
+    /**
+     * @param Builder $query
+     * @param (AbstractField|Association)[] $fields
+     * @param string[] $additionalSelects
+     */
+    private function applySelect(Builder $query, array $fields, array $additionalSelects = []): void
     {
+        /** @var \Illuminate\Database\Eloquent\Model $model */
+        $model = $query->getModel();
+
         // Always load the primary key in case there are relationships that
         // depend on it.
-        $selectKeys = array_merge([$query->getModel()->getKeyName()], $additionalSelects);
+        $selectKeys = array_merge([$model->getKeyName()], $additionalSelects);
 
         foreach ($fields as $fieldOrAssoc) {
             if ($fieldOrAssoc instanceof Field) {
@@ -48,7 +59,7 @@ class QueryInterpreter
             } else if ($fieldOrAssoc instanceof Association) {
                 // We also need to ensure that we always load the right foreign
                 // keys, otherwise we won't be able load relationships.
-                $relationship = $query->getModel()->{$fieldOrAssoc->getKey()}();
+                $relationship = $model->{$fieldOrAssoc->getKey()}();
 
                 // Perhaps we could even eager load belongsTo relationships
                 // in-line using a join and table aliases, since there's always
@@ -75,7 +86,7 @@ class QueryInterpreter
 
                         $this->applySelect(
                             $relation->getQuery(),
-                            $fieldOrAssoc->getFields(),
+                            $fieldOrAssoc->getFields() ?? [],
                             $additionalSelects
                         );
                     }]
@@ -86,7 +97,11 @@ class QueryInterpreter
         $query->select(array_unique($selectKeys));
     }
 
-    private function applySorting(Builder $query, array $sorts)
+    /**
+     * @param Builder $query
+     * @param Sort[] $sorts
+     */
+    private function applySorting(Builder $query, array $sorts): void
     {
         foreach ($sorts as $sort) {
             if ($handler = $sort->getHandler()) {
@@ -95,7 +110,11 @@ class QueryInterpreter
         }
     }
 
-    private function applyFilters(Builder $query, array $filters)
+    /**
+     * @param Builder $query
+     * @param Filter[] $filters
+     */
+    private function applyFilters(Builder $query, array $filters): void
     {
         foreach ($filters as $filter) {
             if ($handler = $filter->getHandler()) {

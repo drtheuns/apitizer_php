@@ -4,6 +4,9 @@ namespace Apitizer\Types\Concerns;
 
 use Apitizer\Policies\AnyPolicy;
 use Apitizer\Policies\Policy;
+use Apitizer\Types\AbstractField;
+use Apitizer\Types\Association;
+use Illuminate\Database\Eloquent\Model;
 
 trait HasPolicy
 {
@@ -51,6 +54,10 @@ trait HasPolicy
 
     /**
      * Check if the current field/value passes the policies.
+     *
+     * @param mixed $value
+     * @param array|Model|mixed $row
+     * @param AbstractField|Association $fieldOrAssoc
      */
     protected function passesPolicy($value, $row, $fieldOrAssoc): bool
     {

@@ -4,6 +4,7 @@ namespace Apitizer\Exceptions;
 
 use Apitizer\Apitizer;
 use Apitizer\Types\Filter;
+use Apitizer\Types\Sort;
 use Apitizer\Types\Factory;
 use Apitizer\QueryBuilder;
 
@@ -29,7 +30,16 @@ class InvalidInputException extends ApitizerException
      */
     public $origin;
 
-    public static function filterTypeError(Filter $filter, $given)
+    /**
+     * @var Filter|Sort
+     */
+    public $type;
+
+    /**
+     * @param Filter $filter
+     * @param mixed $given
+     */
+    public static function filterTypeError(Filter $filter, $given): self
     {
         $filterKey = Apitizer::getFilterKey();
         $filterName = $filter->getName();

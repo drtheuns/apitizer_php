@@ -3,6 +3,7 @@
 namespace Apitizer;
 
 use Apitizer\Types\ApidocCollection;
+use Apitizer\Types\Apidoc;
 
 class Apitizer
 {
@@ -19,7 +20,7 @@ class Apitizer
     /**
      * Get the documentation for each registered query builder.
      *
-     * @return ApidocCollection
+     * @return ApidocCollection<Apidoc>
      */
     public static function getQueryBuilderDocumentation(): ApidocCollection
     {
@@ -70,7 +71,7 @@ class Apitizer
     /**
      * Get the mapping of all query params.
      *
-     * @return array
+     * @return array<string, string>
      *
      * @see Apitizer::getFieldKey
      * @see Apitizer::getSortKey

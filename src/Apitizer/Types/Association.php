@@ -20,7 +20,8 @@ class Association extends Factory
     protected $key;
 
     /**
-     * @var null|array The fields to render on the related query builder.
+     * @var null|(AbstractField|Association)[] The fields to render
+     * on the related query builder.
      */
     protected $fields;
 
@@ -39,6 +40,12 @@ class Association extends Factory
         $this->key = $key;
     }
 
+    /**
+     * @param mixed $row
+     * @param Renderer $renderer
+     *
+     * @return mixed|PolicyFailed
+     */
     public function render($row, Renderer $renderer)
     {
         $assocData = $this->valueFromRow($row, $this->getKey());
@@ -56,15 +63,21 @@ class Association extends Factory
         }
 
         return $renderer->render(
-            $this->getRelatedQueryBuilder(), $assocData, $this->fields
+            $this->getRelatedQueryBuilder(), $assocData, $this->fields ?? []
         );
     }
 
+    /**
+     * @return (AbstractField|Association)[]
+     */
     public function getFields(): ?array
     {
         return $this->fields;
     }
 
+    /**
+     * @param (AbstractField|Association)[] $fields
+     */
     public function setFields(array $fields): self
     {
         $this->fields = $fields;

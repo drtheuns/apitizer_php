@@ -2,11 +2,10 @@
 
 namespace Tests\Support\Builders;
 
-use Apitizer\QueryBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Tests\Feature\Models\Tag;
 
-class TagBuilder extends QueryBuilder
+class TagBuilder extends EmptyBuilder
 {
     public function fields(): array
     {

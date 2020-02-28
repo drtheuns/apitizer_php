@@ -5,7 +5,8 @@ namespace Apitizer\Parser;
 class Context
 {
     /**
-     * The output buffer to which the string are appended for the current context;
+     * @var string The output buffer to which the string are appended for the
+     * current context;
      */
     public $accumulator = '';
 
@@ -13,6 +14,8 @@ class Context
      * A place to hold information regarding the current context.
      *
      * In the case of field parsing, this might be the fields up until now.
+     *
+     * @var (string|Relation)[]
      */
     public $stack = [];
 
@@ -25,6 +28,8 @@ class Context
      * "id,name,comments(id,body)"
      *
      * to have their own context for the inner braces in the "comments".
+     *
+     * @var Context|null
      */
     public $parent = null;
 
@@ -33,6 +38,8 @@ class Context
      *
      * Inside of quoted expressions, meta characters such as , and ( ) are
      * ignored until the quote is closed.
+     *
+     * @var bool
      */
     public $isQuoted = false;
 
@@ -40,7 +47,7 @@ class Context
         $this->parent = $parent;
     }
 
-    public function makeChildContext(): self
+    public function makeChildContext(): Context
     {
         return new self($this);
     }

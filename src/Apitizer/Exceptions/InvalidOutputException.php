@@ -3,7 +3,8 @@
 namespace Apitizer\Exceptions;
 
 use Apitizer\Types\EnumField;
-use Apitizer\Types\Field;
+use Apitizer\QueryBuilder;
+use Apitizer\Types\AbstractField;
 use Illuminate\Database\Eloquent\Model;
 use ArrayAccess;
 
@@ -27,11 +28,15 @@ class InvalidOutputException extends ApitizerException
     /**
      * The class from which the exception originates
      *
-     * @var Field|EnumField
+     * @var AbstractField
      */
     public $origin;
 
-    public static function fieldIsNull(Field $field, $row): self
+    /**
+     * @param AbstractField $field
+     * @param mixed $row
+     */
+    public static function fieldIsNull(AbstractField $field, $row): self
     {
         $fieldName = $field->getName();
         $queryBuilderName = get_class($field->getQueryBuilder());
@@ -46,6 +51,11 @@ class InvalidOutputException extends ApitizerException
         return $e;
     }
 
+    /**
+     * @param EnumField $field
+     * @param mixed $value
+     * @param mixed $row
+     */
     public static function invalidEnum(EnumField $field, $value, $row): self
     {
         $fieldName = $field->getName();
@@ -61,7 +71,12 @@ class InvalidOutputException extends ApitizerException
         return $e;
     }
 
-    public static function castError(Field $field, CastException $e, $row)
+    /**
+     * @param AbstractField $field
+     * @param CastException $e
+     * @param mixed $row
+     */
+    public static function castError(AbstractField $field, CastException $e, $row): self
     {
         $fieldName = $field->getName();
         $queryBuilderName = get_class($field->getQueryBuilder());
@@ -84,6 +99,8 @@ class InvalidOutputException extends ApitizerException
      *
      * The entire row of data cannot be used because there might be sensitive
      * data in it that should not be logged outside of the system.
+     *
+     * @param mixed $row
      */
     public static function rowReference($row): string
     {

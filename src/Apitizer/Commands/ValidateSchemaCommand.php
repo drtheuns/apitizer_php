@@ -26,9 +26,12 @@ class ValidateSchemaCommand extends Command
         $this->schemaValidator = $schemaValidator;
     }
 
-    public function handle()
+    public function handle(): ?int
     {
-        if ($builderClass = $this->argument('builderClass')) {
+        /** @var string $builderClass */
+        $builderClass = $this->argument('builderClass');
+
+        if ($builderClass) {
             if (! class_exists($builderClass)) {
                 $this->error("The given class [$builderClass] could not be found");
                 return 1;
@@ -55,7 +58,7 @@ class ValidateSchemaCommand extends Command
         return 0;
     }
 
-    public function printErrors(SchemaValidator $schemaValidator)
+    public function printErrors(SchemaValidator $schemaValidator): void
     {
         $errors = collect($schemaValidator->getErrors());
 
@@ -88,7 +91,7 @@ class ValidateSchemaCommand extends Command
                 }
 
                 $this->comment($this->listItem(Str::title($namespace)));
-                /** @var DefinitionException */
+                /** @var DefinitionException $e */
                 foreach ($errors[$namespace] as $e) {
                     $this->line($this->listItem($e->getMessage(), 2));
                 }
@@ -96,7 +99,7 @@ class ValidateSchemaCommand extends Command
         });
     }
 
-    private function printException(Exception $e)
+    private function printException(Exception $e): void
     {
         $file = $e->getFile();
         $line = $e->getLine();
@@ -105,13 +108,13 @@ class ValidateSchemaCommand extends Command
         $this->error($e->getTraceAsString(), 'v');
     }
 
-    private function section(string $text)
+    private function section(string $text): void
     {
         $this->comment($text);
         $this->comment(str_repeat('-', strlen($text)));
     }
 
-    private function listItem(string $text, int $depth = 0)
+    private function listItem(string $text, int $depth = 0): string
     {
         return str_repeat(' ', $depth) . '* ' . $text;
     }

@@ -24,6 +24,14 @@ return [
     'route_prefix' => 'apidoc',
 
     /*
+     * Common validation settings.
+     */
+    'validation' => [
+        'date_format' => 'Y-m-d',
+        'datetime_format' => DATE_ATOM,
+    ],
+
+    /*
      * Register the query builders of this project.
      */
     'query_builders' => [

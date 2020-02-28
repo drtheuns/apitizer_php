@@ -24,7 +24,7 @@ class InputParser implements Parser
     }
 
     /**
-     * @param string|array $fields
+     * @param string|string[]|mixed $rawFields
      * @return (string|Relation)[]
      */
     public function parseFields($rawFields): array
@@ -40,9 +40,17 @@ class InputParser implements Parser
             return $rawFields;
         }
 
+        if (! is_string($rawFields)) {
+            return [];
+        }
+
         $context = new Context();
 
-        foreach ($this->stringToArray($rawFields) as $character) {
+        if (! $characters = $this->stringToArray($rawFields)) {
+            return [];
+        }
+
+        foreach ($characters as $character) {
             if ($context->isQuoted && $character !== '"') {
                 $context->accumulator .= $character;
                 continue;
@@ -71,6 +79,9 @@ class InputParser implements Parser
                 // Add remainder to the current stack.
                 $context->stack[] = $context->accumulator;
 
+                // For phpstan to understand that parent is filled at this point.
+                assert($context->parent !== null);
+
                 // The parent's accumulator currently holds anything up until
                 // the (, which should be the relationship name
                 $context->parent->stack[] = new Relation($context->parent->accumulator, $context->stack);
@@ -94,7 +105,9 @@ class InputParser implements Parser
     }
 
     /**
-     * @param array|null $rawFilters
+     * @param mixed|array<string, mixed>|null $rawFilters
+     *
+     * @return array<string, string|array>
      */
     public function parseFilters($rawFilters): array
     {
@@ -109,7 +122,9 @@ class InputParser implements Parser
     }
 
     /**
-     * @param array|string $rawSorts
+     * @param mixed|string[]|string $rawSorts
+     *
+     * @return Sort[]
      */
     public function parseSorts($rawSorts): array
     {
@@ -155,6 +170,9 @@ class InputParser implements Parser
         return $sorts;
     }
 
+    /**
+     * @return string[]|false
+     */
     protected function stringToArray(string $raw)
     {
         return preg_split('//u', $raw, null, PREG_SPLIT_NO_EMPTY);

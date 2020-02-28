@@ -2,7 +2,7 @@
 
 namespace Apitizer\Policies;
 
-use Apitizer\Types\Field;
+use Apitizer\Types\AbstractField;
 use Apitizer\Types\Association;
 use Illuminate\Database\Eloquent\Model;
 
@@ -26,10 +26,11 @@ interface Policy
      * can be used to render just about any data. This should be taken into
      * account when writing a policy.
      *
-     * @param Field|Association $fieldOrAssoc the field or association instance
-     * that is currently being rendered. This instance also holds a reference to
-     * the current query builder if that is needed in the policy. Furthermore,
-     * the request instance can also be fetched from that query builder.
+     * @param AbstractField|Association $fieldOrAssoc the field or association
+     * instance that is currently being rendered. This instance also holds a
+     * reference to the current query builder if that is needed in the policy.
+     * Furthermore, the request instance can also be fetched from that query
+     * builder.
      */
     public function passes($value, $row, $fieldOrAssoc): bool;
 }

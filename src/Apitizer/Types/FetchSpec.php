@@ -2,7 +2,7 @@
 
 namespace Apitizer\Types;
 
-use Apitizer\Types\Field;
+use Apitizer\Types\AbstractField;
 use Apitizer\Types\Association;
 use Apitizer\Types\Sort;
 use Apitizer\Types\Filter;
@@ -17,7 +17,7 @@ class FetchSpec
     /**
      * The fields that should be fetched.
      *
-     * @var (Field|Association)[]
+     * @var (AbstractField|Association)[]
      */
     protected $fields = [];
 
@@ -35,6 +35,11 @@ class FetchSpec
      */
     protected $filters = [];
 
+    /**
+     * @param (AbstractField|Association)[] $fields
+     * @param Sort[] $sorts
+     * @param Filter[] $filters
+     */
     public function __construct(array $fields = [], array $sorts = [], array $filters = [])
     {
         $this->fields = $fields;
@@ -43,7 +48,7 @@ class FetchSpec
     }
 
     /**
-     * @return (Field|Association)[]
+     * @return (AbstractField|Association)[]
      */
     public function getFields(): array
     {

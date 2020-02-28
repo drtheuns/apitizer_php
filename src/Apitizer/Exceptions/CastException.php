@@ -22,6 +22,11 @@ class CastException extends ApitizerException
      */
     public $format;
 
+    /**
+     * @param mixed $value
+     * @param string $type
+     * @param string|null $format
+     */
     public function __construct($value, string $type, string $format = null)
     {
         parent::__construct();

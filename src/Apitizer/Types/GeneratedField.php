@@ -3,19 +3,20 @@
 namespace Apitizer\Types;
 
 use Apitizer\QueryBuilder;
+use Illuminate\Database\Eloquent\Model;
 
 class GeneratedField extends AbstractField
 {
     /**
-     * @param callable generator.
+     * @var callable generator.
      */
     protected $generator;
 
     /**
      * @param QueryBuilder $queryBuilder
      * @param string $type
-     * @param $callable the callable that will generate the return value. This
-     * callable will receive two parameters:
+     * @param callable $generator the callable that will generate the return
+     * value. This callable will receive two parameters:
      * 1. The current row that is being rendered.
      * 2. The GeneratedField instance (this object).
      */
@@ -26,6 +27,11 @@ class GeneratedField extends AbstractField
         $this->generator = $generator;
     }
 
+    /**
+     * @param array|Model|mixed $row
+     *
+     * @return mixed
+     */
     protected function getValue($row)
     {
         return call_user_func($this->generator, $row, $this);
