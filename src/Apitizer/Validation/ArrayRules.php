@@ -37,6 +37,11 @@ class ArrayRules extends FieldRuleBuilder implements ContainerType
         $this->elementType = $elementType;
     }
 
+    public function getElementType(): ?TypedRuleBuilder
+    {
+        return $this->elementType;
+    }
+
     public function getType(): string
     {
         return $this->elementType
