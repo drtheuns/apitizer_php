@@ -5,6 +5,7 @@ namespace Apitizer\Interpreter;
 use Apitizer\Types\FetchSpec;
 use Apitizer\QueryBuilder;
 use Apitizer\Types\Field;
+use Apitizer\Types\AbstractField;
 use Apitizer\Types\Association;
 use Apitizer\Types\Filter;
 use Apitizer\Types\Sort;
