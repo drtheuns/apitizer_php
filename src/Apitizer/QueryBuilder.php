@@ -382,7 +382,7 @@ abstract class QueryBuilder
 
         return tap($paginator, function (AbstractPaginator $paginator) use ($fetchSpec) {
             $renderedData = $this->getRenderer()->render(
-                $this, $paginator->getCollection(), $fetchSpec,
+                $this, $paginator->getCollection(), $fetchSpec
             );
 
             $paginator->setCollection(collect($renderedData));
