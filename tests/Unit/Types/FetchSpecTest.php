@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Types;
 
+use Apitizer\Types\Association;
 use Apitizer\Types\FetchSpec;
 use Apitizer\Types\Field;
 use Apitizer\Types\Filter;
@@ -24,7 +25,7 @@ class FetchSpecTest extends TestCase
     /** @test */
     public function the_caller_can_check_if_a_filter_was_requested()
     {
-        $fetchSpec = new FetchSpec([], [], [$this->filterWithName('name')]);
+        $fetchSpec = new FetchSpec([], [], [], [$this->filterWithName('name')]);
         $this->assertTrue($fetchSpec->filterSelected('name'));
 
         $fetchSpec = new FetchSpec();
@@ -34,11 +35,20 @@ class FetchSpecTest extends TestCase
     /** @test */
     public function the_caller_can_check_if_specific_sorting_was_requested()
     {
-        $fetchSpec = new FetchSpec([], [$this->sortWithName('name')]);
+        $fetchSpec = new FetchSpec([], [], [$this->sortWithName('name')]);
         $this->assertTrue($fetchSpec->sortSelected('name'));
 
         $fetchSpec = new FetchSpec();
         $this->assertFalse($fetchSpec->sortSelected('name'));
+    }
+    /** @test */
+    public function the_caller_can_check_if_an_association_was_selected()
+    {
+        $fetchSpec = new FetchSpec([], [$this->associationWithName('name')]);
+        $this->assertTrue($fetchSpec->associationSelected('name'));
+
+        $fetchSpec = new FetchSpec();
+        $this->assertFalse($fetchSpec->associationSelected('name'));
     }
 
     private function fieldWithName(string $name)
@@ -54,5 +64,10 @@ class FetchSpecTest extends TestCase
     private function sortWithName(string $name)
     {
         return (new Sort(new EmptyBuilder))->setName($name);
+    }
+
+    private function associationWithName(string $name)
+    {
+        return (new Association(new EmptyBuilder, new EmptyBuilder(), 'wow'))->setName($name);
     }
 }

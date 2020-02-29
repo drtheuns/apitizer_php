@@ -17,37 +17,43 @@ class InputParser implements Parser
     public function parse(RawInput $rawInput): ParsedInput
     {
         $parsedInput = new ParsedInput();
-        $parsedInput->fields = $this->parseFields($rawInput->getFields());
-        $parsedInput->filters = $this->parseFilters($rawInput->getFilters());
-        $parsedInput->sorts = $this->parseSorts($rawInput->getSorts());
+
+        $this->parseFields($parsedInput, $rawInput->getFields());
+        $this->parseFilters($parsedInput, $rawInput->getFilters());
+        $this->parseSorts($parsedInput, $rawInput->getSorts());
+
         return $parsedInput;
     }
 
     /**
+     * @param ParsedInput $parsedInput
      * @param string|string[]|mixed $rawFields
-     * @return (string|Relation)[]
      */
-    public function parseFields($rawFields): array
+    public function parseFields(ParsedInput $parsedInput, $rawFields): void
     {
         // Input examples:
         //   id,name
         //   id,"first,name",comments(id,"wo)(,-w")
         if (empty($rawFields)) {
-            return [];
+            $parsedInput->fields = [];
+            return;
         }
 
         if (\is_array($rawFields)) {
-            return $rawFields;
+            $parsedInput->fields = $rawFields;
+            return;
         }
 
         if (! is_string($rawFields)) {
-            return [];
+            $parsedInput->fields = [];
+            return;
         }
 
-        $context = new Context();
+        $context = new Context($parsedInput);
 
         if (! $characters = $this->stringToArray($rawFields)) {
-            return [];
+            $parsedInput->fields = [];
+            return;
         }
 
         foreach ($characters as $character) {
@@ -66,28 +72,39 @@ class InputParser implements Parser
                 $context->isQuoted = ! $context->isQuoted;
                 continue 2;
             case ',':
-                $context->stack[] = $context->accumulator;
-                $context->accumulator = '';
+                // This can be empty when, for example, the comma follows the
+                // ending of a relation and the accumulator has already been cleared:
+                // "id,comments(author(id),id)"
+                //                     ---^
+                if (! empty($context->accumulator)) {
+                    $context->addField($context->accumulator);
+                    $context->accumulator = '';
+                }
                 continue 2;
             case '(':
                 // We've encountered a relationship. Parse everything until ")"
                 // into a new context after which we revert the context back to
                 // the parent.
-                $context = $context->makeChildContext();
+                $relation = new Relation($context->accumulator);
+                $context = $context->makeChildContext($relation);
                 continue 2;
             case ')':
-                // Add remainder to the current stack.
-                $context->stack[] = $context->accumulator;
+                if (! empty($context->accumulator)) {
+                    // Add remainder to the current stack.
+                    $context->addField($context->accumulator);
+                }
 
-                // For phpstan to understand that parent is filled at this point.
+                // For phpstan to understand that parent is filled at this
+                // point, and the stack is a relation.
                 assert($context->parent !== null);
+                assert($context->stack instanceof Relation);
 
-                // The parent's accumulator currently holds anything up until
-                // the (, which should be the relationship name
-                $context->parent->stack[] = new Relation($context->parent->accumulator, $context->stack);
-                $context->parent->accumulator = '';
+                // Add the current stack (a relation) to the parent.
+                $context->parent->addRelation($context->stack);
 
+                // Cleanup and return context to the parent.
                 $context = $context->parent;
+                $context->accumulator = '';
                 continue 2;
             default:
                 $context->accumulator .= $character;
@@ -98,35 +115,32 @@ class InputParser implements Parser
         // a field. For example: "id,name" will still have "name" in the
         // accumulator when the string ends.
         if (! empty($context->accumulator)) {
-            $context->stack[] = $context->accumulator;
+            $context->addField($context->accumulator);
         }
-
-        return $context->stack;
     }
 
     /**
+     * @param ParsedInput $parsedInput
      * @param mixed|array<string, mixed>|null $rawFilters
-     *
-     * @return array<string, string|array>
      */
-    public function parseFilters($rawFilters): array
+    public function parseFilters(ParsedInput $parsedInput, $rawFilters): void
     {
         // We expect filters to be in the format of:
         // filters[search]=query
         // which means the filters must always be an (assoc) array.
         if (! is_array($rawFilters) || ! Arr::isAssoc($rawFilters)) {
-            return [];
+            $parsedInput->filters = [];
+            return;
         }
 
-        return $rawFilters;
+        $parsedInput->filters = $rawFilters;
     }
 
     /**
+     * @param ParsedInput $parsedInput
      * @param mixed|string[]|string $rawSorts
-     *
-     * @return Sort[]
      */
-    public function parseSorts($rawSorts): array
+    public function parseSorts(ParsedInput $parsedInput, $rawSorts): void
     {
         // Sort input examples:
         //   "name"
@@ -139,7 +153,8 @@ class InputParser implements Parser
 
         if (! is_array($rawSorts)) {
             // We cannot parse this, ignore the given sorting.
-            return [];
+            $parsedInput->sorts = [];
+            return;
         }
 
         $sorts = [];
@@ -167,7 +182,7 @@ class InputParser implements Parser
             $sorts[] = new Sort($field, $order);
         }
 
-        return $sorts;
+        $parsedInput->sorts = $sorts;
     }
 
     /**

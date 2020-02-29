@@ -17,9 +17,16 @@ class FetchSpec
     /**
      * The fields that should be fetched.
      *
-     * @var (AbstractField|Association)[]
+     * @var AbstractField[]
      */
     protected $fields = [];
+
+    /**
+     * The associations that should be fetched.
+     *
+     * @var Association[]
+     */
+    protected $associations;
 
     /**
      * The sorting methods that should be applied.
@@ -36,19 +43,25 @@ class FetchSpec
     protected $filters = [];
 
     /**
-     * @param (AbstractField|Association)[] $fields
+     * @param AbstractField[] $fields
+     * @param Association[] $associations
      * @param Sort[] $sorts
      * @param Filter[] $filters
      */
-    public function __construct(array $fields = [], array $sorts = [], array $filters = [])
-    {
+    public function __construct(
+        array $fields = [],
+        array $associations = [],
+        array $sorts = [],
+        array $filters = []
+    ) {
         $this->fields = $fields;
+        $this->associations = $associations;
         $this->sorts = $sorts;
         $this->filters = $filters;
     }
 
     /**
-     * @return (AbstractField|Association)[]
+     * @return AbstractField[]
      */
     public function getFields(): array
     {
@@ -71,9 +84,22 @@ class FetchSpec
         return $this->filters;
     }
 
+    /**
+     * @return Association[]
+     */
+    public function getAssociations(): array
+    {
+        return $this->associations;
+    }
+
     public function fieldSelected(string $name): bool
     {
         return $this->hasName($this->getFields(), $name);
+    }
+
+    public function associationSelected(string $name): bool
+    {
+        return $this->hasName($this->getAssociations(), $name);
     }
 
     public function filterSelected(string $name): bool

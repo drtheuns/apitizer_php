@@ -34,7 +34,7 @@ class EnumField extends Field
         $this->enum = $enum;
     }
 
-    protected function validateValue($value, $row)
+    public function validateValue($value, $row)
     {
         $value = parent::validateValue($value, $row);
 

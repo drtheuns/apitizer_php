@@ -42,6 +42,9 @@ class SchemaValidator
             $this->validateFields($queryBuilder);
         });
         $this->catchAll(function () use ($queryBuilder) {
+            $this->validateAssociations($queryBuilder);
+        });
+        $this->catchAll(function () use ($queryBuilder) {
             $this->validateFilters($queryBuilder);
         });
         $this->catchAll(function () use ($queryBuilder) {
@@ -57,6 +60,17 @@ class SchemaValidator
         foreach ($queryBuilder->fields() as $name => $field) {
             try {
                 DefinitionHelper::validateField($queryBuilder, $name, $field);
+            } catch (DefinitionException $e) {
+                $this->errors[] = $e;
+            }
+        }
+    }
+
+    public function validateAssociations(QueryBuilder $queryBuilder): void
+    {
+        foreach ($queryBuilder->associations() as $name => $field) {
+            try {
+                DefinitionHelper::validateAssociation($queryBuilder, $name, $field);
             } catch (DefinitionException $e) {
                 $this->errors[] = $e;
             }

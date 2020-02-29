@@ -3,8 +3,7 @@
 namespace Apitizer\Rendering;
 
 use Apitizer\QueryBuilder;
-use Apitizer\Types\Association;
-use Apitizer\Types\AbstractField;
+use Apitizer\Types\FetchSpec;
 
 /**
  * Describes a class that can render data for the query builder.
@@ -16,8 +15,8 @@ interface Renderer
      *
      * @param QueryBuilder $queryBuilder
      * @param array<mixed>|Collection|object|iterable<mixed> $data
-     * @param (AbstractField|Association)[] $selectedFields
+     * @param FetchSpec $fetchSpec
      * @return array<string, mixed>|array<int, array<string, mixed>>
      */
-    public function render(QueryBuilder $queryBuilder, $data, array $selectedFields): array;
+    public function render(QueryBuilder $queryBuilder, $data, FetchSpec $fetchSpec): array;
 }

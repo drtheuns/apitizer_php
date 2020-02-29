@@ -57,12 +57,11 @@ trait HasPolicy
      *
      * @param mixed $value
      * @param array|Model|mixed $row
-     * @param AbstractField|Association $fieldOrAssoc
      */
-    protected function passesPolicy($value, $row, $fieldOrAssoc): bool
+    public function passesPolicy($value, $row): bool
     {
         foreach ($this->policies as $policy) {
-            if (! $policy->passes($value, $row, $fieldOrAssoc)) {
+            if (! $policy->passes($value, $row, $this)) {
                 return false;
             }
         }

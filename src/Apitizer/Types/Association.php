@@ -20,10 +20,15 @@ class Association extends Factory
     protected $key;
 
     /**
-     * @var null|(AbstractField|Association)[] The fields to render
-     * on the related query builder.
+     * @var null|AbstractField[] The fields to render on the related query
+     * builder.
      */
     protected $fields;
+
+    /**
+     * @var null|Association[]
+     */
+    protected $associations;
 
     /**
      * @var QueryBuilder the query builder that renders the associated data.
@@ -41,34 +46,7 @@ class Association extends Factory
     }
 
     /**
-     * @param mixed $row
-     * @param Renderer $renderer
-     *
-     * @return mixed|PolicyFailed
-     */
-    public function render($row, Renderer $renderer)
-    {
-        $assocData = $this->valueFromRow($row, $this->getKey());
-
-        if ($this->returnsCollection()) {
-            foreach ($assocData as $key => $value) {
-                if (! $this->passesPolicy($value, $row, $this)) {
-                    $assocData[$key] = new PolicyFailed;
-                }
-            }
-        } else {
-            if (! $this->passesPolicy($assocData, $row, $this)) {
-                return new PolicyFailed;
-            }
-        }
-
-        return $renderer->render(
-            $this->getRelatedQueryBuilder(), $assocData, $this->fields ?? []
-        );
-    }
-
-    /**
-     * @return (AbstractField|Association)[]
+     * @return AbstractField[]
      */
     public function getFields(): ?array
     {
@@ -76,11 +54,29 @@ class Association extends Factory
     }
 
     /**
-     * @param (AbstractField|Association)[] $fields
+     * @param AbstractField[] $fields
      */
     public function setFields(array $fields): self
     {
         $this->fields = $fields;
+
+        return $this;
+    }
+
+    /**
+     * @return Association[]
+     */
+    public function getAssociations(): ?array
+    {
+        return $this->associations;
+    }
+
+    /**
+     * @param Association[] $associations
+     */
+    public function setAssociations(array $associations): self
+    {
+        $this->associations = $associations;
 
         return $this;
     }

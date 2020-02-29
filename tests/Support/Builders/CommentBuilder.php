@@ -12,6 +12,12 @@ class CommentBuilder extends EmptyBuilder
         return [
             'id'     => $this->int('id'),
             'body'   => $this->string('body'),
+        ];
+    }
+
+    public function associations(): array
+    {
+        return [
             'author' => $this->association('author', UserBuilder::class),
         ];
     }

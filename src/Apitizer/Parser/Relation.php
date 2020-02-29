@@ -7,15 +7,24 @@ class Relation
     /** @var string */
     public $name;
 
-    /** @var array<string|Relation> */
+    /** @var string[] */
     public $fields;
 
-    /**
-     * @param string $name
-     * @param array<string|Relation> $fields
-     */
-    public function __construct(string $name, array $fields) {
+    /** @var Relation[] */
+    public $associations = [];
+
+    public function __construct(string $name)
+    {
         $this->name = $name;
-        $this->fields = $fields;
+    }
+
+    public function addField(string $field): void
+    {
+        $this->fields[] = $field;
+    }
+
+    public function addRelation(Relation $relation): void
+    {
+        $this->associations[] = $relation;
     }
 }

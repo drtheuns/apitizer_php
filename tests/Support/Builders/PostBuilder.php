@@ -21,6 +21,12 @@ class PostBuilder extends EmptyBuilder
             'total'    => $this->generatedField('string', function ($row) {
                 return \strlen($row->title);
             }),
+        ];
+    }
+
+    public function associations(): array
+    {
+        return [
             'author'   => $this->association('author', UserBuilder::class),
             'comments' => $this->association('comments', CommentBuilder::class),
             'tags'     => $this->association('tags', TagBuilder::class),

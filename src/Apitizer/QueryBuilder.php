@@ -4,15 +4,13 @@ namespace Apitizer;
 
 use Apitizer\Exceptions\ApitizerException;
 use Apitizer\Exceptions\DefinitionException;
-use Apitizer\Exceptions\InvalidInputException;
 use Apitizer\ExceptionStrategy\Strategy;
 use Apitizer\Interpreter\QueryInterpreter;
-use Apitizer\Parser\ParsedInput;
 use Apitizer\Parser\Parser;
 use Apitizer\Parser\RawInput;
-use Apitizer\Parser\Relation;
 use Apitizer\Rendering\Renderer;
 use Apitizer\Support\DefinitionHelper;
+use Apitizer\Support\FetchSpecFactory;
 use Apitizer\Types\Apidoc;
 use Apitizer\Types\Association;
 use Apitizer\Types\FetchSpec;
@@ -69,9 +67,16 @@ abstract class QueryBuilder
     /**
      * The result of the fields() callback.
      *
-     * @var (AbstractField|Association)[]|null
+     * @var AbstractField[]|null
      */
     protected $availableFields;
+
+    /**
+     * The result of the associations() callback
+     *
+     * @var Association[]|null
+     */
+    protected $availableAssociations;
 
     /**
      * The results of the sorts() function.
@@ -134,9 +139,19 @@ abstract class QueryBuilder
      * is used to fetch the data from the Eloquent model, so it usually
      * corresponds to the column name in the database.
      *
-     * @return array<string, AbstractField|Association>
+     * @return array<string, AbstractField>
      */
     abstract public function fields(): array;
+
+    /**
+     * A callback that returns all the associations that are available to the
+     * client.
+     *
+     * @see QueryBuilder::association
+     *
+     * @return array<string, Association>
+     */
+    abstract public function associations(): array;
 
     /**
      * A function that returns the names of the sorting methods that are
@@ -329,7 +344,7 @@ abstract class QueryBuilder
     {
         $fetchSpec = $this->makeFetchSpecification();
 
-        return $this->getRenderer()->render($this, $data, $fetchSpec->getFields());
+        return $this->getRenderer()->render($this, $data, $fetchSpec);
     }
 
     /**
@@ -344,7 +359,7 @@ abstract class QueryBuilder
         return $this->getRenderer()->render(
             $this,
             $this->getQueryInterpreter()->build($this, $fetchSpec)->get(),
-            $fetchSpec->getFields()
+            $fetchSpec
         );
     }
 
@@ -367,7 +382,7 @@ abstract class QueryBuilder
 
         return tap($paginator, function (AbstractPaginator $paginator) use ($fetchSpec) {
             $renderedData = $this->getRenderer()->render(
-                $this, $paginator->getCollection(), $fetchSpec->getFields()
+                $this, $paginator->getCollection(), $fetchSpec
             );
 
             $paginator->setCollection(collect($renderedData));
@@ -458,127 +473,13 @@ abstract class QueryBuilder
                   ? RawInput::fromRequest($this->getRequest())
                   : RawInput::fromArray($this->specification);
 
-        $fetchSpec = $this->validateRequestInput(
-            $this->getParser()->parse($rawInput)
+        return FetchSpecFactory::fromRequestInput(
+            $this->getParser()->parse($rawInput), $this
         );
-
-        return $fetchSpec;
-    }
-
-    protected function validateRequestInput(ParsedInput $unvalidatedInput): FetchSpec
-    {
-        $validated = new FetchSpec(
-            $this->getValidatedFields($unvalidatedInput->fields, $this->getFields()),
-            $this->getValidatedSorting($unvalidatedInput->sorts, $this->getSorts()),
-            $this->getValidatedFilters($unvalidatedInput->filters, $this->getFilters())
-        );
-
-        return $validated;
     }
 
     /**
-     * Validate the fields that were requested by the client.
-     *
-     * @param (string|Relation)[] $unvalidatedFields
-     * @param array<string, AbstractField|Association> $availableFields
-     *
-     * @return array<string, AbstractField|Association>
-     */
-    protected function getValidatedFields(array $unvalidatedFields, array $availableFields): array
-    {
-        $validatedFields = [];
-
-        // Essentially get a subset of $availableFields with some type juggling
-        // along the way.
-        foreach ($unvalidatedFields as $field) {
-            if ($field instanceof Relation && isset($availableFields[$field->name])) {
-                // Convert the Parser\Relation to an Association object.
-                /** @var Association */
-                $association = $availableFields[$field->name];
-
-                // Validate the fields recursively
-                $queryBuilder = $association->getRelatedQueryBuilder();
-                $association->setFields(
-                    $queryBuilder->getValidatedFields(
-                        $field->fields, $queryBuilder->getFields()
-                    )
-                );
-
-                $validatedFields[] = $association;
-                continue;
-            }
-
-            if (is_string($field) && isset($availableFields[$field])) {
-                $fieldInstance = $availableFields[$field];
-
-                // An association was selected without specifying any fields, e.g.:
-                // /posts?fields=comments
-                // .. so we select everything from that query builder.
-                if ($fieldInstance instanceof Association) {
-                    $fieldInstance->setFields(
-                        $fieldInstance->getRelatedQueryBuilder()->getOnlyFields()
-                    );
-                }
-
-                $validatedFields[] = $fieldInstance;
-            }
-        }
-
-        if (empty($validatedFields)) {
-            $validatedFields = $this->getOnlyFields();
-        }
-
-        return $validatedFields;
-    }
-
-    /**
-     * @param \Apitizer\Parser\Sort[] $selectedSorts
-     * @param Sort[] $availableSorts
-     *
-     * @return Sort[]
-     */
-    protected function getValidatedSorting(array $selectedSorts, array $availableSorts): array
-    {
-        $validatedSorts = [];
-
-        foreach ($selectedSorts as $parserSort) {
-            if (isset($availableSorts[$parserSort->getField()])) {
-                $sort = $availableSorts[$parserSort->getField()];
-                $sort->setOrder($parserSort->getOrder());
-                $validatedSorts[] = $sort;
-            }
-        }
-
-        return $validatedSorts;
-    }
-
-    /**
-     * @param array<string, mixed> $selectedFilters
-     * @param array<string, Filter> $availableFilters
-     *
-     * @return array<string, Filter>
-     */
-    protected function getValidatedFilters(array $selectedFilters, array $availableFilters): array
-    {
-        $validatedFilters = [];
-
-        foreach ($selectedFilters as $name => $filterInput) {
-            try {
-                if (is_string($name) && isset($availableFilters[$name])) {
-                    $filter = $availableFilters[$name];
-                    $filter->setValue($filterInput);
-                    $validatedFilters[$name] = $filter;
-                }
-            } catch (InvalidInputException $e) {
-                $this->getExceptionStrategy()->handle($this, $e);
-            }
-        }
-
-        return $validatedFilters;
-    }
-
-    /**
-     * @return array<string, AbstractField|Association>
+     * @return array<string, AbstractField>
      */
     public function getFields(): array
     {
@@ -587,6 +488,20 @@ abstract class QueryBuilder
         }
 
         return $this->availableFields;
+    }
+
+    /**
+     * @return array<string, Association>
+     */
+    public function getAssociations(): array
+    {
+        if (is_null($this->availableAssociations)) {
+            $this->availableAssociations = DefinitionHelper::validateAssociations(
+                $this, $this->associations()
+            );
+        }
+
+        return $this->availableAssociations;
     }
 
     /**
@@ -611,16 +526,6 @@ abstract class QueryBuilder
         }
 
         return $this->availableFilters;
-    }
-
-    /**
-     * @return AbstractField[]
-     */
-    public function getOnlyFields(): array
-    {
-        return array_filter($this->getFields(), function ($field) {
-            return $field instanceof AbstractField;
-        });
     }
 
     /**

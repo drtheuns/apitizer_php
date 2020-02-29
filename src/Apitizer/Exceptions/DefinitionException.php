@@ -89,6 +89,24 @@ class DefinitionException extends ApitizerException
      * @param string $name
      * @param mixed $given
      */
+    static function associationDefinitionExpected(
+        QueryBuilder $queryBuilder,
+        string $name,
+        $given
+    ): self {
+        $class = get_class($queryBuilder);
+        $type = is_object($given) ? get_class($given) : gettype($given);
+        $message = "Expected [$name] on [$class] to be an \Apitizer\Types\Association, "
+                 . "but got a [$type]";
+
+        return new static($message, $queryBuilder, 'association', $name);
+    }
+
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @param string $name
+     * @param mixed $given
+     */
     static function filterDefinitionExpected(QueryBuilder $queryBuilder, string $name, $given): self
     {
         $class = get_class($queryBuilder);

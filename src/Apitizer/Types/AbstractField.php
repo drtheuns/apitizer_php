@@ -96,7 +96,7 @@ abstract class AbstractField extends Factory
     {
         $value = $this->validateValue($this->getValue($row), $row);
 
-        if (! $this->passesPolicy($value, $row, $this)) {
+        if (! $this->passesPolicy($value, $row)) {
             return new PolicyFailed;
         }
 
@@ -141,7 +141,7 @@ abstract class AbstractField extends Factory
      *
      * @return mixed the value if it was valid.
      */
-    protected function validateValue($value, $row)
+    public function validateValue($value, $row)
     {
         if (is_null($value) && !$this->isNullable()) {
             throw InvalidOutputException::fieldIsNull($this, $row);

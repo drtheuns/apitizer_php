@@ -94,6 +94,21 @@ class InvalidOutputException extends ApitizerException
     }
 
     /**
+     * @param QueryBuilder $queryBuilder
+     * @param mixed $row
+     */
+    public static function noJsonApiIdentifier(QueryBuilder $queryBuilder, $row): self
+    {
+        $class = get_class($queryBuilder);
+        $obj = is_array($row) ? json_encode($row) : gettype($row);
+        $message = "Failed to get a JSON-API id reference for [$class] from [$obj]";
+
+        $e = new static($message);
+        $e->queryBuilder = $queryBuilder;
+        return $e;
+    }
+
+    /**
      * Do a best attempt at getting a reference to the object that caused an
      * exception.
      *

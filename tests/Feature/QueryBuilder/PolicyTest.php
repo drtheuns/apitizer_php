@@ -120,25 +120,6 @@ class PolicyTest extends TestCase
     }
 
     /** @test */
-    public function policies_are_applied_for_each_row_in_an_association()
-    {
-        $user = factory(User::class)->state('withPosts')->create();
-        // We're going to fail the policy for the first post, all others will
-        // succeed.
-        $policy = new FailId($user->posts->first()->id);
-        $fields = [
-            'posts' => $this->association('posts', new PostBuilder())->policy($policy),
-        ];
-
-        $request = $this->request()->fields('posts(id)')->make();
-        $result = PolicyTestBuilder::new($request, $fields)->render($user);
-
-        $this->assertEquals([
-            'posts' => $user->posts->slice(1)->values()->map->only('id')->all()
-        ], $result, 'all but the first row should be filtered out');
-    }
-
-    /** @test */
     public function policies_are_applied_to_single_value_associations()
     {
         $post = factory(Post::class)->create();
@@ -252,6 +233,12 @@ class PolicyUserBuilder extends EmptyBuilder
     {
         return [
             'id' => $this->int('id'),
+        ];
+    }
+
+    public function associations(): array
+    {
+        return [
             'posts' => $this->association('posts', PolicyPostBuilder::class),
         ];
     }
@@ -264,8 +251,14 @@ class PolicyPostBuilder extends EmptyBuilder
         return [
             'id' => $this->int('id'),
             'title' => $this->string('name')->policy(new FalseP),
+        ];
+    }
+
+    public function associations(): array
+    {
+        return [
             'author' => $this->association('author', PolicyUserBuilder::class)
-                             ->policy(new FalseP),
+                ->policy(new FalseP),
         ];
     }
 
