@@ -27,16 +27,6 @@ class Apidoc
     protected $name;
 
     /**
-     * @var AbstractField[]
-     */
-    protected $fields = [];
-
-    /**
-     * @var Association[]
-     */
-    protected $associations = [];
-
-    /**
      * @var string A description of this resource.
      */
     protected $description;
@@ -51,16 +41,6 @@ class Apidoc
     {
         $this->queryBuilder = $queryBuilder;
         $this->setName($this->guessQueryBuilderResourceName());
-
-        foreach ($queryBuilder->getFields() as $field) {
-            if ($field instanceof AbstractField) {
-                $this->fields[] = $field;
-            }
-
-            if ($field instanceof Association) {
-                $this->associations[] = $field;
-            }
-        }
 
         $queryBuilder->apidoc($this);
     }
@@ -94,7 +74,7 @@ class Apidoc
      */
     public function getFields(): array
     {
-        return $this->fields;
+        return $this->queryBuilder->getFields();
     }
 
     /**
@@ -102,7 +82,7 @@ class Apidoc
      */
     public function getAssociations(): array
     {
-        return $this->associations;
+        return $this->queryBuilder->getAssociations();
     }
 
     /**

@@ -26,7 +26,8 @@ class InputParserTest extends TestCase
         $input = (new InputParser())->parse(RawInput::fromRequest($request));
 
         $this->assertInstanceOf(ParsedInput::class, $input);
-        $this->assertEquals(3, count($input->fields));
+        $this->assertEquals(2, count($input->fields));
+        $this->assertEquals(1, count($input->associations));
         $this->assertEquals(['name' => 'Hornstock'], $input->filters);
         $this->assertEquals(2, count($input->sorts));
     }

@@ -14,6 +14,11 @@ class EmptyBuilder extends QueryBuilder
         return [];
     }
 
+    public function associations(): array
+    {
+        return [];
+    }
+
     public function filters(): array
     {
         return [];

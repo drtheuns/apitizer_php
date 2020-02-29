@@ -3,6 +3,7 @@
 namespace Tests\Unit\Parser;
 
 use Apitizer\Parser\InputParser;
+use Apitizer\Parser\ParsedInput;
 use Tests\Unit\TestCase;
 
 class FilterParserTest extends TestCase
@@ -20,6 +21,8 @@ class FilterParserTest extends TestCase
 
     private function parse($data)
     {
-        return (new InputParser)->parseFilters($data);
+        $parsedInput = new ParsedInput();
+        (new InputParser)->parseFilters($parsedInput, $data);
+        return $parsedInput->filters;
     }
 }

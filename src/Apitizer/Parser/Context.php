@@ -15,9 +15,9 @@ class Context
      *
      * In the case of field parsing, this might be the fields up until now.
      *
-     * @var (string|Relation)[]
+     * @var Relation|ParsedInput
      */
-    public $stack = [];
+    public $stack;
 
     /**
      * The parent context.
@@ -43,12 +43,26 @@ class Context
      */
     public $isQuoted = false;
 
-    public function __construct(Context $parent = null) {
+    /**
+     * @param Relation|ParsedInput $stack
+     */
+    public function __construct($stack, Context $parent = null) {
+        $this->stack = $stack;
         $this->parent = $parent;
     }
 
-    public function makeChildContext(): Context
+    public function makeChildContext(Relation $relation): Context
     {
-        return new self($this);
+        return new self($relation, $this);
+    }
+
+    public function addField(string $field): void
+    {
+        $this->stack->addField($field);
+    }
+
+    public function addRelation(Relation $relation): void
+    {
+        $this->stack->addRelation($relation);
     }
 }

@@ -16,6 +16,12 @@ class UserBuilder extends EmptyBuilder
             'should_reset_password' => $this->boolean('should_reset_password'),
             'created_at' => $this->datetime('created_at')->format(),
             'updated_at' => $this->date('updated_at')->format(),
+        ];
+    }
+
+    public function associations(): array
+    {
+        return [
             'posts' => $this->association('posts', PostBuilder::class),
         ];
     }

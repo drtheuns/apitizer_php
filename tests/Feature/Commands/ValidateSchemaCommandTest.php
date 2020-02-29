@@ -101,7 +101,7 @@ class ValidateSchemaCommandTest extends TestCase
 class NotABuilder{}
 class AssociationDoesNotExist extends EmptyBuilder
 {
-    public function fields(): array
+    public function associations(): array
     {
         return [
             'geckos' => $this->association('geckos', UserBuilder::class),

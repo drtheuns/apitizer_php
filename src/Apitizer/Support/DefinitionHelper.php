@@ -22,7 +22,7 @@ class DefinitionHelper
      * @param QueryBuilder $queryBuilder
      * @param array<string, AbstractField|Association|mixed> $fields
      *
-     * @return (AbstractField|Association)[]
+     * @return array<string, AbstractField>
      */
     static function validateFields(QueryBuilder $queryBuilder, array $fields): array
     {
@@ -38,24 +38,14 @@ class DefinitionHelper
     /**
      * @param QueryBuilder $queryBuilder
      * @param string $name
-     * @param AbstractField|Association|mixed $field
+     * @param AbstractField|mixed $field
      *
      * @throws DefinitionException
      *
-     * @return AbstractField|Association
+     * @return AbstractField
      */
     static function validateField(QueryBuilder $queryBuilder, string $name, $field)
     {
-        if ($field instanceof Association) {
-            $field->setName($name);
-
-            if (! static::isValidAssociation($queryBuilder, $field)) {
-                throw DefinitionException::associationDoesNotExist($queryBuilder, $field);
-            }
-
-            return $field;
-        }
-
         if (is_string($field)) {
             $field = new Field($queryBuilder, $field, 'any');
         }
@@ -67,6 +57,48 @@ class DefinitionHelper
         $field->setName($name);
 
         return $field;
+    }
+
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @param array<string, Association|mixed> $associations
+     *
+     * @return array<string, Association>
+     */
+    static function validateAssociations(QueryBuilder $queryBuilder, array $associations): array
+    {
+        $castFields = [];
+
+        foreach ($associations as $name => $association) {
+            $castFields[$name] = static::validateAssociation($queryBuilder, $name, $association);
+        }
+
+        return $castFields;
+    }
+
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @param string $name
+     * @param Association|mixed $association
+     */
+    static function validateAssociation(
+        QueryBuilder $queryBuilder,
+        string $name,
+        $association
+    ): Association {
+        if (! $association instanceof Association) {
+            throw DefinitionException::associationDefinitionExpected(
+                $queryBuilder, $name, $association
+            );
+        }
+
+        $association->setName($name);
+
+        if (!static::isValidAssociation($queryBuilder, $association)) {
+            throw DefinitionException::associationDoesNotExist($queryBuilder, $association);
+        }
+
+        return $association;
     }
 
     private static function isValidAssociation(

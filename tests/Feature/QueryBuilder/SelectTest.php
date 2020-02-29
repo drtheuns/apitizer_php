@@ -87,8 +87,7 @@ class SelectTest extends TestCase
     public function if_no_valid_fields_are_selected_in_an_association_all_fields_are_returned()
     {
         $post = factory(Post::class)->state('withComments')->create();
-        // comments doesn't have an 'authors' assoc/field.
-        $request = $this->request()->fields('id,comments(authors)')->make();
+        $request = $this->request()->fields('id,comments(unknown)')->make();
         $result = PostBuilder::make($request)->render($post);
 
         $this->assertEquals([
@@ -193,6 +192,12 @@ class LoadColumn extends EmptyBuilder
     {
         return [
             'id' => $this->int('id'),
+        ];
+    }
+
+    public function associations(): array
+    {
+        return [
             'posts' => $this->association('posts', LoadRelatedColumn::class),
         ];
     }

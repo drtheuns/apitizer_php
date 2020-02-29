@@ -28,7 +28,10 @@ class QueryInterpreter
         $query = $queryBuilder->beforeQuery($query, $fetchSpec);
 
         $this->applySelect(
-            $query, $fetchSpec->getFields(), $queryBuilder->getAlwaysLoadColumns()
+            $query,
+            $fetchSpec->getFields(),
+            $fetchSpec->getAssociations(),
+            $queryBuilder->getAlwaysLoadColumns()
         );
         $this->applySorting($query, $fetchSpec->getSorts());
         $this->applyFilters($query, $fetchSpec->getFilters());
@@ -40,11 +43,16 @@ class QueryInterpreter
 
     /**
      * @param Builder $query
-     * @param (AbstractField|Association)[] $fields
+     * @param AbstractField[] $fields
+     * @param Association[] $associations
      * @param string[] $additionalSelects
      */
-    private function applySelect(Builder $query, array $fields, array $additionalSelects = []): void
-    {
+    private function applySelect(
+        Builder $query,
+        array $fields,
+        array $associations,
+        array $additionalSelects = []
+    ): void {
         /** @var \Illuminate\Database\Eloquent\Model $model */
         $model = $query->getModel();
 
@@ -52,46 +60,46 @@ class QueryInterpreter
         // depend on it.
         $selectKeys = array_merge([$model->getKeyName()], $additionalSelects);
 
-        foreach ($fields as $fieldOrAssoc) {
-            if ($fieldOrAssoc instanceof Field) {
-                // Also load any of the selected keys.
-                $selectKeys[] = $fieldOrAssoc->getKey();
-            } else if ($fieldOrAssoc instanceof Association) {
-                // We also need to ensure that we always load the right foreign
-                // keys, otherwise we won't be able load relationships.
-                $relationship = $model->{$fieldOrAssoc->getKey()}();
-
-                // Perhaps we could even eager load belongsTo relationships
-                // in-line using a join and table aliases, since there's always
-                // only one related row in a belongsTo.
-                if ($relationship instanceof BelongsTo) {
-                    $selectKeys[] = $relationship->getForeignKeyName();
-                }
-
-                // Finally, we'll recursively eager load relationships with
-                // efficient selects on those models as well.
-                $query->with([
-                    $fieldOrAssoc->getKey() => function ($relation) use ($fieldOrAssoc) {
-                        // Similar to the BelongsTo above, we need to select the
-                        // foreign key on the related model, otherwise Eloquent
-                        // won't be able to piece things back together again.
-                        $additionalSelects = $relation instanceof HasOneOrMany
-                                           ? [$relation->getForeignKeyName()]
-                                           : [];
-
-                        $additionalSelects = array_merge(
-                            $additionalSelects,
-                            $fieldOrAssoc->getRelatedQueryBuilder()->getAlwaysLoadColumns()
-                        );
-
-                        $this->applySelect(
-                            $relation->getQuery(),
-                            $fieldOrAssoc->getFields() ?? [],
-                            $additionalSelects
-                        );
-                    }]
-                );
+        foreach ($fields as $field) {
+            // Generated fields don't select anything.
+            if ($field instanceof Field) {
+                $selectKeys[] = $field->getKey();
             }
+        }
+
+        foreach ($associations as $association) {
+            $relationship = $model->{$association->getKey()}();
+
+            // Ensure that we always load the correct foreign key, otherwise
+            // Eloquent won't be able to load relationships.
+            if ($relationship instanceof BelongsTo) {
+                $selectKeys[] = $relationship->getForeignKeyName();
+            }
+
+            // Finally, recursively eager load relationships with efficient
+            // selects on those queries as well.
+            $query->with([
+                $association->getKey() => function ($relation) use ($association) {
+                    // Similar to the BelongsTo above, we need to select the
+                    // foreign key on the related model, otherwise Eloquent
+                    // won't be able to piece things back together again.
+                    $additionalSelects = $relation instanceof HasOneOrMany
+                                       ? [$relation->getForeignKeyName()]
+                                       : [];
+
+                    $additionalSelects = array_merge(
+                        $additionalSelects,
+                        $association->getRelatedQueryBuilder()->getAlwaysLoadColumns()
+                    );
+
+                    $this->applySelect(
+                        $relation->getQuery(),
+                        $association->getFields() ?? [],
+                        $association->getAssociations() ?? [],
+                        $additionalSelects
+                    );
+                }
+            ]);
         }
 
         $query->select(array_unique($selectKeys));

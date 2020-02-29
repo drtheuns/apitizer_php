@@ -97,7 +97,7 @@ class RequestBuilder
         }
 
         if (! is_null($this->limit)) {
-            $queryParams['limit'] = $this->limit;
+            $queryParams[Apitizer::getLimitKey()] = $this->limit;
         }
 
         $request = Request::create($this->url, $this->method);

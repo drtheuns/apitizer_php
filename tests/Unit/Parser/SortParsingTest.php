@@ -4,6 +4,7 @@ namespace Tests\Unit\Parser;
 
 use Apitizer\Exceptions\InvalidInputException;
 use Apitizer\Parser\InputParser;
+use Apitizer\Parser\ParsedInput;
 use Apitizer\Parser\Sort;
 use Tests\Unit\TestCase;
 
@@ -89,6 +90,8 @@ class SortParsingTest extends TestCase
 
     private function parse($sort)
     {
-        return (new InputParser())->parseSorts($sort);
+        $parsedInput = new ParsedInput;
+        (new InputParser())->parseSorts($parsedInput, $sort);
+        return $parsedInput->sorts;
     }
 }

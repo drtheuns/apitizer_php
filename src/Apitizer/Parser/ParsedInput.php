@@ -5,10 +5,14 @@ namespace Apitizer\Parser;
 class ParsedInput
 {
     /**
-     * @var (string|Relation)[] an array of either strings (plain columns) or
-     * Relation objects which denote associations.
+     * @var string[]
      */
     public $fields = [];
+
+    /**
+     * @var Relation[]
+     */
+    public $associations = [];
 
     /**
      * @var Sort[]
@@ -19,4 +23,14 @@ class ParsedInput
      * @var array<string, mixed>
      */
     public $filters = [];
+
+    public function addField(string $field): void
+    {
+        $this->fields[] = $field;
+    }
+
+    public function addRelation(Relation $relation): void
+    {
+        $this->associations[] = $relation;
+    }
 }
