@@ -35,8 +35,10 @@ class RulesTest extends TestCase
     public function it_resolves_all_builders_when_all_rules_are_requested()
     {
         $rules = new Rules();
-        $rules->storeRules(function (ObjectRules $builder) {});
-        $rules->updateRules(function (ObjectRules $builder) {});
+        $rules->storeRules(function (ObjectRules $builder) {
+        });
+        $rules->updateRules(function (ObjectRules $builder) {
+        });
 
         $rules = $rules->getValidationRules();
 
@@ -51,7 +53,8 @@ class RulesTest extends TestCase
     public function it_resolves_a_single_builder_when_only_one_is_requested()
     {
         $rules = new Rules();
-        $rules->storeRules(function (ObjectRules $builder) {});
+        $rules->storeRules(function (ObjectRules $builder) {
+        });
         $rules->updateRules(function (ObjectRules $builder) {
             $this->fail("The update rules should not be resolved");
         });

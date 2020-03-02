@@ -92,7 +92,7 @@ abstract class AbstractField extends Factory
      *
      * @return mixed the transformed value.
      */
-    public function render($row, Renderer $renderer = null)
+    public function render($row)
     {
         $value = $this->validateValue($this->getValue($row), $row);
 

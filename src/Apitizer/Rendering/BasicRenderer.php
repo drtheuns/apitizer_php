@@ -11,13 +11,61 @@ use Apitizer\Types\FetchSpec;
 
 class BasicRenderer extends AbstractRenderer implements Renderer
 {
+
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @param mixed $data
+     * @param FetchSpec $fetchSpec
+     * @return array
+     */
     public function render(QueryBuilder $queryBuilder, $data, FetchSpec $fetchSpec): array
     {
         return $this->doRender(
-            $queryBuilder, $data,
+            $queryBuilder,
+            $data,
             $fetchSpec->getFields(),
             $fetchSpec->getAssociations()
         );
+    }
+
+    /**
+      * @param QueryBuilder $queryBuilder
+      * @param mixed $data
+      * @param AbstractField[] $fields
+      * @param Association[] $associations
+      *
+      * @return array<string, mixed>|array<int, array<string, mixed>>
+      */
+    public function doRender(
+        QueryBuilder $queryBuilder,
+        $data,
+        array $fields,
+        array $associations
+    ): array {
+        if ($this->isSingleRowOfData($data)) {
+            return $this->renderSingleRow($data, $queryBuilder, $fields, $associations);
+        } else {
+            return $this->renderMany($data, $queryBuilder, $fields, $associations);
+        }
+    }
+
+    /**
+     * @param mixed $data
+     * @param QueryBuilder $queryBuilder
+     * @param AbstractField[] $fields
+     * @param Association[] $associations
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function renderMany(
+        $data,
+        QueryBuilder $queryBuilder,
+        array $fields,
+        array $associations
+    ): array {
+        return collect($data)->map(function ($row) use ($queryBuilder, $fields, $associations) {
+            return $this->renderSingleRow($row, $queryBuilder, $fields, $associations);
+        })->all();
     }
 
     /**
@@ -56,7 +104,7 @@ class BasicRenderer extends AbstractRenderer implements Renderer
         $row,
         Association $association,
         array &$renderedData
-    ): void{
+    ): void {
         $associationData = $this->valueFromRow($row, $association->getKey());
 
         if (! $association->passesPolicy($associationData, $row)) {
@@ -64,8 +112,10 @@ class BasicRenderer extends AbstractRenderer implements Renderer
         }
 
         $renderedData[$association->getName()] = $this->doRender(
-            $association->getRelatedQueryBuilder(), $associationData,
-            $association->getFields() ?? [], $association->getAssociations() ?? []
+            $association->getRelatedQueryBuilder(),
+            $associationData,
+            $association->getFields() ?? [],
+            $association->getAssociations() ?? []
         );
     }
 }

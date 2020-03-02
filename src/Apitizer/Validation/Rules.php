@@ -120,7 +120,8 @@ class Rules
     protected function resolveRulesFor(string $actionMethod): ObjectRules
     {
         if (! $this->hasRulesFor($actionMethod)) {
-            return new ObjectRules(null, function () {});
+            return new ObjectRules(null, function () {
+            });
         }
 
         $object = $this->rules[$actionMethod];

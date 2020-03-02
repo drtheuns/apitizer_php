@@ -18,3 +18,4 @@ Homestead.json
 /.vagrant
 .phpunit.result.cache
 coverage/
+/.php_cs.cache

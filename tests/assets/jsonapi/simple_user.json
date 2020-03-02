@@ -1,0 +1,12 @@
+{
+    "data": [
+        {
+            "type": "users",
+            "id": "1",
+            "attributes": {
+                "name": "Daan Hage",
+                "email": "daan@atabix.nl"
+            }
+        }
+    ]
+}

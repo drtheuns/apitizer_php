@@ -1,0 +1,20 @@
+{
+    "data": [
+        {
+            "type": "users",
+            "id": "1",
+            "attributes": {
+                "name": "Daan Hage",
+                "email": "daan@atabix.nl"
+            }
+        },
+        {
+            "type": "users",
+            "id": "2",
+            "attributes": {
+                "name": "Randall Theuns",
+                "email": "randall@atabix.nl"
+            }
+        }
+    ]
+}

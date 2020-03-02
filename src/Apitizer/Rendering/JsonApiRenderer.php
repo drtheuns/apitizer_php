@@ -3,9 +3,10 @@
 namespace Apitizer\Rendering;
 
 use Apitizer\Exceptions\InvalidOutputException;
+use Apitizer\JsonApi\Document;
 use Apitizer\JsonApi\Resource;
-use Apitizer\QueryBuilder;
 use Apitizer\Policies\PolicyFailed;
+use Apitizer\QueryBuilder;
 use Apitizer\Types\AbstractField;
 use Apitizer\Types\Association;
 use Apitizer\Types\FetchSpec;
@@ -16,42 +17,48 @@ use ReflectionClass;
 
 class JsonApiRenderer extends AbstractRenderer implements Renderer
 {
-    public function render(QueryBuilder $queryBuilder, $data, FetchSpec $fetchSpec): array
+    /** @var Document */
+    protected $document;
+
+    public function __construct()
     {
-        return $this->doRender(
-            $queryBuilder, $data,
-            $fetchSpec->getFields(),
-            $fetchSpec->getAssociations()
-        );
+        $this->document = new Document();
     }
 
     /**
-     * @param mixed $row
-     * @param QueryBuilder $queryBuilder
-     * @param AbstractField[] $fields
-     * @param Association[] $associations
-     *
-     * @return array<string, mixed>
-     */
-    public function renderSingleRow(
-        $row,
-        QueryBuilder $queryBuilder,
-        array $fields,
-        array $associations
-    ): array {
+      * @param QueryBuilder $queryBuilder
+      * @param mixed $data
+      * @param FetchSpec $fetchSpec
+      * @return array
+      */
+    public function render(QueryBuilder $queryBuilder, $data, FetchSpec $fetchSpec): array
+    {
         $attributes = [];
-        foreach ($fields as $field) {
-            $this->addRenderedField($row, $field, $attributes);
+        if ($this->isSingleRowOfData($data)) {
+            $data = collect([$data]);
         }
 
-        return [
-            'id'         => $this->getResourceId($queryBuilder, $row),
-            'type'       => $this->getResourceType($queryBuilder, $row),
-            'attributes' => $attributes,
-        ];
+        foreach ($data as $row) {
+            foreach ($fetchSpec->getFields() as $field) {
+                $this->addRenderedField($row, $field, $attributes);
+            }
+
+            $this->document->addResource(
+                $this->getResourceType($queryBuilder, $row),
+                $this->getResourceId($queryBuilder, $row),
+                $attributes,
+            );
+        }
+
+        return $this->document->toArray();
     }
 
-    protected function getResourceType(QueryBuilder $queryBuilder, $row)
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @param mixed $row
+     * @return string
+     */
+    protected function getResourceType(QueryBuilder $queryBuilder, $row): string
     {
         if ($row instanceof Resource) {
             return $row->getResourceType();
@@ -59,9 +66,15 @@ class JsonApiRenderer extends AbstractRenderer implements Renderer
 
         $className = (new ReflectionClass($queryBuilder->model()))->getShortName();
 
-        return Str::snake($className);
+        return Str::snake(Str::plural($className));
     }
 
+    /**
+     * @throws InvalidOutputException
+     * @param QueryBuilder $queryBuilder
+     * @param mixed $row
+     * @return string
+     */
     protected function getResourceId(QueryBuilder $queryBuilder, $row): string
     {
         if ($row instanceof Resource) {

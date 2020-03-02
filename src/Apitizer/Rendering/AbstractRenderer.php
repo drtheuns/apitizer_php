@@ -2,11 +2,13 @@
 
 namespace Apitizer\Rendering;
 
+use Apitizer\Exceptions\InvalidOutputException;
+use Apitizer\Policies\PolicyFailed;
 use Apitizer\QueryBuilder;
 use Apitizer\Types\AbstractField;
 use Apitizer\Types\Association;
 use Apitizer\Types\Concerns\FetchesValueFromRow;
-use Apitizer\Policies\PolicyFailed;
+use Apitizer\Types\FetchSpec;
 use Illuminate\Support\Arr;
 
 abstract class AbstractRenderer
@@ -16,42 +18,10 @@ abstract class AbstractRenderer
     /**
      * @param QueryBuilder $queryBuilder
      * @param mixed $data
-     * @param AbstractField[] $fields
-     * @param Association[] $associations
-     *
-     * @return array<string, mixed>|array<int, array<string, mixed>>
+     * @param FetchSpec $fetchSpec
+     * @return array
      */
-    public function doRender(
-        QueryBuilder $queryBuilder,
-        $data,
-        array $fields,
-        array $associations
-    ): array {
-        if ($this->isSingleRowOfData($data)) {
-            return $this->renderSingleRow($data, $queryBuilder, $fields, $associations);
-        } else {
-            return $this->renderMany($data, $queryBuilder, $fields, $associations);
-        }
-    }
-
-    /**
-     * @param mixed $data
-     * @param QueryBuilder $queryBuilder
-     * @param AbstractField[] $fields
-     * @param Association[] $associations
-     *
-     * @return array<int, array<string, mixed>>
-     */
-    public function renderMany(
-        $data,
-        QueryBuilder $queryBuilder,
-        array $fields,
-        array $associations
-    ): array {
-        return collect($data)->map(function ($row) use ($queryBuilder, $fields, $associations) {
-            return $this->renderSingleRow($row, $queryBuilder, $fields, $associations);
-        })->all();
-    }
+    abstract public function render(QueryBuilder $queryBuilder, $data, FetchSpec $fetchSpec): array;
 
     /**
      * @param mixed $row
@@ -68,7 +38,7 @@ abstract class AbstractRenderer
         AbstractField $field,
         array &$renderedData
     ): void {
-        $value = $field->render($row, $this);
+        $value = $field->render($row);
 
         if ($value instanceof PolicyFailed) {
             return;
