@@ -14,7 +14,8 @@ class BasicRenderer extends AbstractRenderer implements Renderer
     public function render(QueryBuilder $queryBuilder, $data, FetchSpec $fetchSpec): array
     {
         return $this->doRender(
-            $queryBuilder, $data,
+            $queryBuilder,
+            $data,
             $fetchSpec->getFields(),
             $fetchSpec->getAssociations()
         );
@@ -120,7 +121,7 @@ class BasicRenderer extends AbstractRenderer implements Renderer
         $row,
         Association $association,
         array &$renderedData
-    ): void{
+    ): void {
         $associationData = $this->valueFromRow($row, $association->getKey());
 
         if (! $association->passesPolicy($associationData, $row)) {
@@ -128,8 +129,10 @@ class BasicRenderer extends AbstractRenderer implements Renderer
         }
 
         $renderedData[$association->getName()] = $this->doRender(
-            $association->getRelatedQueryBuilder(), $associationData,
-            $association->getFields() ?? [], $association->getAssociations() ?? []
+            $association->getRelatedQueryBuilder(),
+            $associationData,
+            $association->getFields() ?? [],
+            $association->getAssociations() ?? []
         );
     }
 }

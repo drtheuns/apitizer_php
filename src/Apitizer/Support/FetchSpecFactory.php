@@ -44,7 +44,9 @@ class FetchSpecFactory
     {
         $fields = $this->selectedFields($this->queryBuilder, $this->input->fields);
         $associations = $this->selectedAssociations(
-            $this->queryBuilder, $this->input->associations, $this->input->fields
+            $this->queryBuilder,
+            $this->input->associations,
+            $this->input->fields
         );
 
         // If nothing was (correct) was selected, return all the default fields
@@ -107,7 +109,9 @@ class FetchSpecFactory
                 );
                 $association->setAssociations(
                     $this->selectedAssociations(
-                        $relatedBuilder, $relation->associations, $relation->fields
+                        $relatedBuilder,
+                        $relation->associations,
+                        $relation->fields
                     )
                 );
 
@@ -168,7 +172,8 @@ class FetchSpecFactory
                 }
             } catch (InvalidInputException $e) {
                 $this->queryBuilder->getExceptionStrategy()->handle(
-                    $this->queryBuilder, $e
+                    $this->queryBuilder,
+                    $e
                 );
             }
         }

@@ -12,7 +12,7 @@ use Tests\Feature\Models\Comment;
 
 class SelectTest extends TestCase
 {
-        /** @test */
+    /** @test */
     public function it_can_select_the_specified_fields()
     {
         $post = factory(Post::class)->create();
