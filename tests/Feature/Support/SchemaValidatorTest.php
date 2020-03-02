@@ -64,7 +64,9 @@ class SchemaValidatorTest extends TestCase
     }
 }
 
-class NotABuilder {}
+class NotABuilder
+{
+}
 class BuilderClassExpected extends EmptyBuilder
 {
     public function fields(): array

@@ -45,5 +45,9 @@ class ApidocTest extends TestCase
 }
 
 // Used as examples for name guessing.
-class UserQueryBuilder extends EmptyBuilder {}
-class NonBuilderName extends EmptyBuilder {}
+class UserQueryBuilder extends EmptyBuilder
+{
+}
+class NonBuilderName extends EmptyBuilder
+{
+}

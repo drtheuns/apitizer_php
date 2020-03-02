@@ -42,7 +42,8 @@ class PaginationTest extends TestCase
         $this->paginatorLinkContainsString($paginator, 'limit=1');
     }
 
-    private function paginatorLinkContainsString(LengthAwarePaginator $paginator, string $string) {
+    private function paginatorLinkContainsString(LengthAwarePaginator $paginator, string $string)
+    {
         $this->assertStringContainsStringIgnoringCase($string, urldecode($paginator->nextPageUrl()));
         $this->assertStringContainsStringIgnoringCase($string, urldecode($paginator->url(1)));
     }

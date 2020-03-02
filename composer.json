@@ -38,6 +38,7 @@
         }
     },
     "scripts": {
+      "fix": "php-cs-fixer fix ./src && php-cs-fixer fix ./tests",
       "test": "./vendor/bin/phpunit",
       "coverage": "./vendor/bin/phpunit --coverage-html coverage",
       "analyse": "./vendor/bin/phpstan analyse"

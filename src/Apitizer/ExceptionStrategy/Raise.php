@@ -10,8 +10,7 @@ class Raise implements Strategy
     public function handle(
         QueryBuilder $queryBuilder,
         ApitizerException $apitizerException
-    ): void
-    {
+    ): void {
         throw $apitizerException;
     }
 }
