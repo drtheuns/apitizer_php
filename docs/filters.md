@@ -18,19 +18,19 @@ public function filters(): array
     // but we'll get to that in the next section.
     return [
         // Expect a single string value. This is the default.
-        'name' => $this->filter()->expect('string'),
+        'name' => $this->filter()->expect()->string(),
 
         // Expect a single date.
-        'created_after' => $this->filter()->expect('date'),
+        'created_after' => $this->filter()->expect()->date(),
 
         // Expect a single date with a custom format.
-        'created_before' => $this->filter()->expect('date', 'd-m-Y')
+        'created_before' => $this->filter()->expect()->date('d-m-Y'),
 
         // Expects an array of UUIDs
-        'groups' => $this->filter()->expectMany('uuid'),
+        'groups' => $this->filter()->expectMany()->uuid(),
 
         // Expect a single boolean value
-        'is_active' => $this->filter()->expect('boolean'),
+        'is_active' => $this->filter()->expect()->boolean(),
     ];
 }
 ```
