@@ -8,6 +8,8 @@ use Apitizer\Parser\InputParser;
 use Apitizer\Parser\Parser;
 use Apitizer\Rendering\BasicRenderer;
 use Apitizer\Rendering\Renderer;
+use Apitizer\Routing\PendingSchemaRegistration;
+use Illuminate\Routing\Router;
 
 class ServiceProvider extends \Illuminate\Support\ServiceProvider
 {
@@ -27,6 +29,8 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
         $this->app->singleton(QueryBuilderLoader::class, function () {
             return new QueryBuilderLoader();
         });
+
+        $this->registerRouteMacros();
     }
 
     /**
@@ -66,6 +70,14 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
                 'uses' => 'DocumentationController@list',
                 'as' => 'apitizer.apidoc',
             ]);
+        });
+    }
+
+    protected function registerRouteMacros(): void
+    {
+        Router::macro('schema', function (string $schema) {
+            /** @var class-string<\Apitizer\QueryBuilder> $schema */
+            return new PendingSchemaRegistration($schema);
         });
     }
 
