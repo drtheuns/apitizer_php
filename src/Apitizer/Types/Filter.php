@@ -169,7 +169,7 @@ class Filter extends Factory
             }
 
             return array_map(function ($value) {
-                return TypeCaster::cast($value, $this->type);
+                return TypeCaster::cast($value, $this->type, $this->format);
             }, $input);
         }
 
