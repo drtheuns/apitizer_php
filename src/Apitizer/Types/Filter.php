@@ -24,6 +24,11 @@ class Filter extends Factory
     protected $format = null;
 
     /**
+     * @var array<string> the format for date(time) types.
+     */
+    protected $enums = null;
+
+    /**
      * If we expect an array of values or just one.
      *
      * @var bool
@@ -164,14 +169,13 @@ class Filter extends Factory
             }
 
             return array_map(function ($value) {
-                return TypeCaster::cast($value, $this->type, $this->format);
+                return TypeCaster::cast($value, $this->type);
             }, $input);
         }
 
         if (\is_array($input)) {
             throw InvalidInputException::filterTypeError($this, $input);
         }
-
         return TypeCaster::cast($input, $this->type, $this->format);
     }
 
@@ -205,6 +209,12 @@ class Filter extends Factory
     public function setType(string $type): self
     {
         $this->type = $type;
+        return $this;
+    }
+
+    public function setFormatting(string $format): self
+    {
+        $this->format = $format;
         return $this;
     }
 

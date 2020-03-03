@@ -8,8 +8,13 @@ class FilterTypePicker
     /** @var Filter $filter */
     protected $filter;
 
-    /** @var string $format */
+    /** @var null|string $format */
     protected $format;
+
+    /**
+     * @var array<string> the format for date(time) types.
+     */
+    protected $enums = null;
 
     public function __construct(Filter $filter)
     {
@@ -68,36 +73,47 @@ class FilterTypePicker
 
     /**
      * Set the filter type
-     * @param string $format formatting date
+     *
+     * @param null|string $format the format for date(time) value. Defaults to
+     * 'Y-m-d' for dates, and 'Y-m-d H:i:s' for datetimes.
+     *
      * @return Filter
      */
     public function date(string $format = null): Filter
     {
-        $this->filter->setType('string');
-        $this->format = $format;
+        $this->filter->setType('date');
+        if ($format != null) {
+            $this->filter->setFormatting($format);
+        }
         return $this->filter;
     }
 
     /**
      * Set the filter type
-     * @param string $format formatting datetime
+     *
+     * @param null|string $format the format for date(time) value. Defaults to
+     * 'Y-m-d' for dates, and 'Y-m-d H:i:s' for datetimes.
+     *
      * @return Filter
      */
     public function datetime(string $format = null): Filter
     {
-        $this->filter->setType('date');
-        $this->format = $format;
+        $this->filter->setType('datetime');
+        if ($format != null) {
+            $this->filter->setFormatting($format);
+        }
         return $this->filter;
     }
 
     /**
      * Set the filter type
-     * @param array<string> $values 
+     * @param array<string> $enums
      * @return Filter
      */
-    public function enum(array $values): Filter
+    public function enum(array $enums): Filter
     {
         $this->filter->setType('enum');
+        $this->enums = $enums;
         return $this->filter;
     }
 
@@ -106,5 +122,4 @@ class FilterTypePicker
         $this->filter->setType('array');
         return $this->filter;
     }
-    
 }

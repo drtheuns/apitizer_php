@@ -29,10 +29,10 @@ class UserBuilder extends EmptyBuilder
     public function filters(): array
     {
         return [
-            'name'       => $this->filter()->expectMany('string')->byField('name'),
-            'created_at' => $this->filter()->expect('datetime')->byField('created_at', '>'),
-            'posts'      => $this->filter()->expectMany('string')->byAssociation('posts', 'id'),
-            'updated_at' => $this->filter()->expect('date', 'd-m-Y')->byField('updated_at', '>'),
+            'name'       => $this->filter()->expectMany('string')->string()->byField('name'),
+            'created_at' => $this->filter()->expect()->datetime()->byField('created_at', '>'),
+            'posts'      => $this->filter()->expectMany('string')->string()->byAssociation('posts', 'id'),
+            'updated_at' => $this->filter()->expect()->datetime('d-m-Y')->byField('updated_at', '>'),
         ];
     }
 
