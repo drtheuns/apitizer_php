@@ -94,7 +94,6 @@ class TypeCaster
         }
 
         if (is_string($value)) {
-            //dd(date_create_from_format($format, $value));
             if ($datetime = DateTime::createFromFormat($format, $value)) {
                 return $datetime;
             }

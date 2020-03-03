@@ -55,9 +55,9 @@ class FilterTypePicker
      * Set the filter type
      * @return Filter
      */
-    public function number(): Filter
+    public function float(): Filter
     {
-        $this->filter->setType('number');
+        $this->filter->setType('float');
         return $this->filter;
     }
 
@@ -106,14 +106,16 @@ class FilterTypePicker
     }
 
     /**
-     * Set the filter type
+     * Set the enum type
+     *
      * @param array<string> $enums
+     *
      * @return Filter
      */
     public function enum(array $enums): Filter
     {
         $this->filter->setType('enum');
-        $this->enums = $enums;
+        $this->filter->setEnumerators($enums);
         return $this->filter;
     }
 

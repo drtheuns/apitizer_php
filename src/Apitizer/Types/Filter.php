@@ -163,6 +163,13 @@ class Filter extends Factory
      */
     protected function validateInput($input)
     {
+        if ($this->enums) {
+            if (!in_array($input, $this->enums)) {
+                throw InvalidInputException::filterTypeError($this, $input);
+            }
+            return TypeCaster::cast($input, $this->type, $this->format);
+        }
+
         if ($this->expectArray) {
             if (! \is_array($input)) {
                 throw InvalidInputException::filterTypeError($this, $input);
@@ -215,6 +222,15 @@ class Filter extends Factory
     public function setFormatting(string $format): self
     {
         $this->format = $format;
+        return $this;
+    }
+
+    /**
+     * @param array<string> $enums, This is used to check whether the value is an available option.
+     */
+    public function setEnumerators(array $enums): self
+    {
+        $this->enums = $enums;
         return $this;
     }
 
