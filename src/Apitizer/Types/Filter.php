@@ -45,39 +45,25 @@ class Filter extends Factory
      *
      * To expect an array of types, look at `expectMany`.
      *
-     * @param string $type
-     * @param null|string $format the format for date(time) value. Defaults to
-     * 'Y-m-d' for dates, and 'Y-m-d H:i:s' for datetimes. This format is
-     * ignored for any other type.
-     *
-     * @return $this
+     * @return FilterTypePicker
      */
-    public function expect(string $type, string $format = null): self
+    public function expect(): FilterTypePicker
     {
         $this->expectArray = false;
-        $this->type = $type;
-        $this->format = $format;
 
-        return $this;
+        return new FilterTypePicker($this);
     }
 
     /**
      * Expect an array of the given type as input to the filter.
      *
-     * @param string $type
-     * @param null|string $format the format for date(time) value. Defaults to
-     * 'Y-m-d' for dates, and 'Y-m-d H:i:s' for datetimes. This format is
-     * ignored for any other type.
-     *
-     * @return $this
+     * @return FilterTypePicker
      */
-    public function expectMany(string $type, string $format = null): self
+    public function expectMany(): FilterTypePicker
     {
         $this->expectArray = true;
-        $this->type = $type;
-        $this->format = $format;
 
-        return $this;
+        return new FilterTypePicker($this);
     }
 
     /**
@@ -153,7 +139,7 @@ class Filter extends Factory
      */
     public function search($fields): self
     {
-        $this->expect('string');
+        $this->expect();
         $this->handleUsing(new LikeFilter($fields));
         $this->description('Search based on the input string');
 
@@ -213,6 +199,12 @@ class Filter extends Factory
             throw InvalidInputException::filterTypeError($this, $value);
         }
 
+        return $this;
+    }
+
+    public function setType(string $type): self
+    {
+        $this->type = $type;
         return $this;
     }
 
