@@ -24,7 +24,7 @@ class DefinitionHelper
      *
      * @return array<string, AbstractField>
      */
-    static function validateFields(QueryBuilder $queryBuilder, array $fields): array
+    public static function validateFields(QueryBuilder $queryBuilder, array $fields): array
     {
         $castFields = [];
 
@@ -44,7 +44,7 @@ class DefinitionHelper
      *
      * @return AbstractField
      */
-    static function validateField(QueryBuilder $queryBuilder, string $name, $field)
+    public static function validateField(QueryBuilder $queryBuilder, string $name, $field)
     {
         if (is_string($field)) {
             $field = new Field($queryBuilder, $field, 'any');
@@ -65,7 +65,7 @@ class DefinitionHelper
      *
      * @return array<string, Association>
      */
-    static function validateAssociations(QueryBuilder $queryBuilder, array $associations): array
+    public static function validateAssociations(QueryBuilder $queryBuilder, array $associations): array
     {
         $castFields = [];
 
@@ -81,14 +81,16 @@ class DefinitionHelper
      * @param string $name
      * @param Association|mixed $association
      */
-    static function validateAssociation(
+    public static function validateAssociation(
         QueryBuilder $queryBuilder,
         string $name,
         $association
     ): Association {
         if (! $association instanceof Association) {
             throw DefinitionException::associationDefinitionExpected(
-                $queryBuilder, $name, $association
+                $queryBuilder,
+                $name,
+                $association
             );
         }
 
@@ -104,8 +106,7 @@ class DefinitionHelper
     private static function isValidAssociation(
         QueryBuilder $queryBuilder,
         Association $association
-    ): bool
-    {
+    ): bool {
         $key = $association->getKey();
         $model = $queryBuilder->model();
 
@@ -120,7 +121,7 @@ class DefinitionHelper
      *
      * @return array<string, Sort>
      */
-    static function validateSorts(QueryBuilder $queryBuilder, array $sorts): array
+    public static function validateSorts(QueryBuilder $queryBuilder, array $sorts): array
     {
         foreach ($sorts as $name => $sort) {
             static::validateSort($queryBuilder, $name, $sort);
@@ -134,7 +135,7 @@ class DefinitionHelper
      * @param string $name
      * @param Sort|mixed $sort
      */
-    static function validateSort(QueryBuilder $queryBuilder, string $name, $sort): void
+    public static function validateSort(QueryBuilder $queryBuilder, string $name, $sort): void
     {
         if (! $sort instanceof Sort) {
             throw DefinitionException::sortDefinitionExpected($queryBuilder, $name, $sort);
@@ -155,7 +156,7 @@ class DefinitionHelper
      *
      * @return array<string, Filter>
      */
-    static function validateFilters(QueryBuilder $queryBuilder, array $filters): array
+    public static function validateFilters(QueryBuilder $queryBuilder, array $filters): array
     {
         foreach ($filters as $name => $filter) {
             static::validateFilter($queryBuilder, $name, $filter);
@@ -171,7 +172,7 @@ class DefinitionHelper
      *
      * @throws DefinitionException
      */
-    static function validateFilter(QueryBuilder $queryBuilder, string $name, $filter): void
+    public static function validateFilter(QueryBuilder $queryBuilder, string $name, $filter): void
     {
         if (! $filter instanceof Filter) {
             throw DefinitionException::filterDefinitionExpected($queryBuilder, $name, $filter);

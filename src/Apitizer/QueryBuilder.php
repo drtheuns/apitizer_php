@@ -240,7 +240,8 @@ abstract class QueryBuilder
         return $query;
     }
 
-    public function __construct(Request $request = null) {
+    public function __construct(Request $request = null)
+    {
         $this->setRequest($request);
     }
 
@@ -382,7 +383,9 @@ abstract class QueryBuilder
 
         return tap($paginator, function (AbstractPaginator $paginator) use ($fetchSpec) {
             $renderedData = $this->getRenderer()->render(
-                $this, $paginator->getCollection(), $fetchSpec
+                $this,
+                $paginator->getCollection(),
+                $fetchSpec
             );
 
             $paginator->setCollection(collect($renderedData));
@@ -474,7 +477,8 @@ abstract class QueryBuilder
                   : RawInput::fromArray($this->specification);
 
         return FetchSpecFactory::fromRequestInput(
-            $this->getParser()->parse($rawInput), $this
+            $this->getParser()->parse($rawInput),
+            $this
         );
     }
 
@@ -497,7 +501,8 @@ abstract class QueryBuilder
     {
         if (is_null($this->availableAssociations)) {
             $this->availableAssociations = DefinitionHelper::validateAssociations(
-                $this, $this->associations()
+                $this,
+                $this->associations()
             );
         }
 

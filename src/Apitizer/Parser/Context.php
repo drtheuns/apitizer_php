@@ -46,7 +46,8 @@ class Context
     /**
      * @param Relation|ParsedInput $stack
      */
-    public function __construct($stack, Context $parent = null) {
+    public function __construct($stack, Context $parent = null)
+    {
         $this->stack = $stack;
         $this->parent = $parent;
     }

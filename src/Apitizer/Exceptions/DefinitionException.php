@@ -47,7 +47,7 @@ class DefinitionException extends ApitizerException
      * @param string $key
      * @param mixed $given
      */
-    static function builderClassExpected(QueryBuilder $queryBuilder, string $key, $given): self
+    public static function builderClassExpected(QueryBuilder $queryBuilder, string $key, $given): self
     {
         $class = get_class($queryBuilder);
         $message = "Expected association by [$key] on [$class] to be a "
@@ -56,7 +56,7 @@ class DefinitionException extends ApitizerException
         return new static($message, $queryBuilder, 'association');
     }
 
-    static function associationDoesNotExist(QueryBuilder $queryBuilder, Association $associaton): self
+    public static function associationDoesNotExist(QueryBuilder $queryBuilder, Association $associaton): self
     {
         $name = $associaton->getName();
         $class = get_class($queryBuilder);
@@ -74,7 +74,7 @@ class DefinitionException extends ApitizerException
      * @param string $name
      * @param mixed $given
      */
-    static function fieldDefinitionExpected(QueryBuilder $queryBuilder, string $name, $given): self
+    public static function fieldDefinitionExpected(QueryBuilder $queryBuilder, string $name, $given): self
     {
         $class = get_class($queryBuilder);
         $type = is_object($given) ? get_class($given) : gettype($given);
@@ -89,7 +89,7 @@ class DefinitionException extends ApitizerException
      * @param string $name
      * @param mixed $given
      */
-    static function associationDefinitionExpected(
+    public static function associationDefinitionExpected(
         QueryBuilder $queryBuilder,
         string $name,
         $given
@@ -107,7 +107,7 @@ class DefinitionException extends ApitizerException
      * @param string $name
      * @param mixed $given
      */
-    static function filterDefinitionExpected(QueryBuilder $queryBuilder, string $name, $given): self
+    public static function filterDefinitionExpected(QueryBuilder $queryBuilder, string $name, $given): self
     {
         $class = get_class($queryBuilder);
         $type = is_object($given) ? get_class($given) : gettype($given);
@@ -117,7 +117,7 @@ class DefinitionException extends ApitizerException
         return new static($message, $queryBuilder, 'filter', $name);
     }
 
-    static function filterHandlerNotDefined(QueryBuilder $queryBuilder, Filter $filter): self
+    public static function filterHandlerNotDefined(QueryBuilder $queryBuilder, Filter $filter): self
     {
         $class = get_class($queryBuilder);
         $name = $filter->getName();
@@ -131,7 +131,7 @@ class DefinitionException extends ApitizerException
      * @param string $name
      * @param mixed $given
      */
-    static function sortDefinitionExpected(QueryBuilder $queryBuilder, string $name, $given): self
+    public static function sortDefinitionExpected(QueryBuilder $queryBuilder, string $name, $given): self
     {
         $class = get_class($queryBuilder);
         $type = is_object($given) ? get_class($given) : gettype($given);
@@ -141,7 +141,7 @@ class DefinitionException extends ApitizerException
         return new static($message, $queryBuilder, 'sort', $name);
     }
 
-    static function sortHandlerNotDefined(QueryBuilder $queryBuilder, string $name): self
+    public static function sortHandlerNotDefined(QueryBuilder $queryBuilder, string $name): self
     {
         $class = get_class($queryBuilder);
         $message = "Expected a callable handler to be defined for sort [$name] on [$class]";

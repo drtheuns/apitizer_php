@@ -19,7 +19,7 @@ trait FetchesValueFromRow
 
         if ($row instanceof ArrayAccess || is_array($row)) {
             $value = $row[$key];
-        } else if (is_object($row)) {
+        } elseif (is_object($row)) {
             $value = $row->{$key};
         }
 

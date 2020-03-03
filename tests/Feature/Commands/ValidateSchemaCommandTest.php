@@ -98,7 +98,9 @@ class ValidateSchemaCommandTest extends TestCase
     }
 }
 
-class NotABuilder{}
+class NotABuilder
+{
+}
 class AssociationDoesNotExist extends EmptyBuilder
 {
     public function associations(): array
