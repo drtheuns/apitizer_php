@@ -12,7 +12,7 @@ class FilterTypePicker
     protected $format;
 
     /**
-     * @var array<string> the format for date(time) types.
+     * @var array<string> array with all the available enumerators.
      */
     protected $enums = null;
 

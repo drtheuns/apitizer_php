@@ -24,7 +24,7 @@ class Filter extends Factory
     protected $format = null;
 
     /**
-     * @var array<string> the format for date(time) types.
+     * @var array<string> the available enumators.
      */
     protected $enums = null;
 
@@ -61,6 +61,9 @@ class Filter extends Factory
 
     public function whereEach(): FilterTypePicker
     {
+        if($this->type != "array"){
+            throw new InvalidInputException("Invalid method chain, please start with ->expect()");
+        }
         return new FilterTypePicker($this);
     }
 
@@ -137,7 +140,7 @@ class Filter extends Factory
      */
     public function search($fields): self
     {
-        $this->expect();
+        $this->expect()->string();
         $this->handleUsing(new LikeFilter($fields));
         $this->description('Search based on the input string');
 
@@ -206,18 +209,36 @@ class Filter extends Factory
         return $this;
     }
 
+    /**
+     * @internal used by FilterTypePicker to set the type of the filter,
+     *
+     * @param string $type
+     * @return self
+     */
     public function setType(string $type): self
     {
         $this->type = $type;
         return $this;
     }
 
+    /**
+     * @internal used by FilterTypePicker to set whether or not to expect an array,
+     *
+     * @param bool $expectArray
+     * @return self
+     */
     public function setExpectArray(bool $expectArray): self
     {
         $this->expectArray = $expectArray;
         return $this;
     }
 
+    /**
+     * @internal used by FilterTypePicker to set the formatting.
+     *
+     * @param string $format
+     * @return self
+     */
     public function setFormatting(string $format): self
     {
         $this->format = $format;
