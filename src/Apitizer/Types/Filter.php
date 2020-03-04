@@ -61,7 +61,7 @@ class Filter extends Factory
 
     public function whereEach(): FilterTypePicker
     {
-        if($this->type != "array"){
+        if ($this->type != "array") {
             throw new InvalidInputException("Invalid method chain, please start with ->expect()");
         }
         return new FilterTypePicker($this);
@@ -90,7 +90,7 @@ class Filter extends Factory
     /**
      * Filter by field and operator.
      *
-     * If `expectMany` is used, the operator will be ignored in favour of a
+     * If `expectArray` is used, the operator will be ignored in favour of a
      * `whereIn` query.
      *
      * @param string $field
@@ -160,10 +160,16 @@ class Filter extends Factory
     protected function validateInput($input)
     {
         if ($this->enums) {
-            if (!in_array($input, $this->enums)) {
+            if (!\is_array($input) && !in_array($input, $this->enums)) {
                 throw InvalidInputException::filterTypeError($this, $input);
             }
-            return TypeCaster::cast($input, $this->type, $this->format);
+            if (\is_array($input)) {
+                foreach ($input as $enum) {
+                    if (!\is_array($enum) && !in_array($enum, $this->enums)) {
+                        throw InvalidInputException::filterTypeError($this, $input);
+                    }
+                }
+            }
         }
 
         if ($this->expectArray) {
@@ -176,7 +182,7 @@ class Filter extends Factory
             }, $input);
         }
 
-        if (\is_array($input)) {
+        if (\is_array($input) && !$this->expectArray) {
             throw InvalidInputException::filterTypeError($this, $input);
         }
         return TypeCaster::cast($input, $this->type, $this->format);
