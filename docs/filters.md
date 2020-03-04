@@ -8,7 +8,7 @@ is constructed when fetching the data for the response.
 
 Each filter defines a type that they expect as input and the number of
 parameters they expect. By default, a filter will expect a single string value.
-The `expect` and `expectMany` methods may be used to alter these expectations.
+The `expect` method may be used to alter these expectations.
 For example:
 
 ```php
@@ -27,7 +27,7 @@ public function filters(): array
         'created_before' => $this->filter()->expect()->date('d-m-Y'),
 
         // Expects an array of UUIDs
-        'groups' => $this->filter()->expectMany()->uuid(),
+        'groups' => $this->filter()->expect()->array()->whereEach()->uuid(),
 
         // Expect a single boolean value
         'is_active' => $this->filter()->expect()->boolean(),
@@ -129,7 +129,7 @@ public function filters(): array
 {
     return [
         'published_after' => $this->filter()->expect()->date()->byField('published', '>'),
-        'statuses' => $this->filter()->expectMany()->string()->byField('status'),
+        'statuses' => $this->filter()->expect()->array()->whereEach()->string()->byField('status'),
     ];
 }
 ```

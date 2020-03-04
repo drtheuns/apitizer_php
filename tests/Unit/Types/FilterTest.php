@@ -23,8 +23,8 @@ class FilterTest extends TestCase
     {
         $this->expectException(InvalidInputException::class);
 
-        $filter = $this->filter()->expectMany('string')->string();
-        $filter->setValue('name');
+        $filter = $this->filter()->expect()->array()->whereEach()->string();
+        $filter->setValue("name");
     }
 
     /** @test */
@@ -32,7 +32,7 @@ class FilterTest extends TestCase
     {
         $this->expectException(InvalidInputException::class);
 
-        $filter = $this->filter()->expectMany('uuid')->uuid();
+        $filter = $this->filter()->expect()->uuid();
         $filter->setValue(['should be uuid']);
     }
 
