@@ -132,7 +132,6 @@ class TypeCasterTest extends TestCase
             ['uuid', 'invalid'],
             ['uuid', 1],
             ['uuid', 1.0],
-            ['string', (object) ['wow' => 'oops']],
         ];
     }
 }
