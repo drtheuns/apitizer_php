@@ -59,15 +59,8 @@ class Filter extends Factory
         return new FilterTypePicker($this);
     }
 
-    /**
-     * Expect an array of the given type as input to the filter.
-     *
-     * @return FilterTypePicker
-     */
-    public function expectMany(): FilterTypePicker
+    public function whereEach(): FilterTypePicker
     {
-        $this->expectArray = true;
-
         return new FilterTypePicker($this);
     }
 
@@ -216,6 +209,12 @@ class Filter extends Factory
     public function setType(string $type): self
     {
         $this->type = $type;
+        return $this;
+    }
+
+    public function setExpectArray(bool $expectArray): self
+    {
+        $this->expectArray = $expectArray;
         return $this;
     }
 

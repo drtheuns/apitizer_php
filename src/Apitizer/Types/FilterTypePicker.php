@@ -119,9 +119,26 @@ class FilterTypePicker
         return $this->filter;
     }
 
+    /**
+     * Set the array type
+     *
+     * @return Filter
+     */
     public function array(): Filter
     {
+        $this->filter->setExpectArray(true);
         $this->filter->setType('array');
+        return $this->filter;
+    }
+
+    /**
+     * Set the any type
+     *
+     * @return Filter
+     */
+    public function any(): Filter
+    {
+        $this->filter->setType('any');
         return $this->filter;
     }
 }
