@@ -150,6 +150,10 @@ class FetchSpecFactory
                 $sort->setOrder($parserSort->getOrder());
                 $selectedSorting[] = $sort;
             }
+            if (!isset($availableSorting[$parserSort->getField()])) {
+                $execption = new InvalidInputException("The input you are trying to sort on does not exist");
+                $this->queryBuilder->getExceptionStrategy()->handle($this->queryBuilder, $execption);
+            }
         }
 
         return $selectedSorting;
@@ -169,6 +173,10 @@ class FetchSpecFactory
                     $filter = $availableFilters[$name];
                     $filter->setValue($filterInput);
                     $selectedFilters[] = $filter;
+                }
+                if (!isset($availableFilters[$name])) {
+                    $execption = new InvalidInputException("This filter does not exist");
+                    $this->queryBuilder->getExceptionStrategy()->handle($this->queryBuilder, $execption);
                 }
             } catch (InvalidInputException $e) {
                 $this->queryBuilder->getExceptionStrategy()->handle(
