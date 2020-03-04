@@ -45,15 +45,6 @@ class FilterTest extends TestCase
         $filter->setValue('black');
     }
 
-    /** @test */
-    public function it_throws_an_exception_if_an_enumerator_was_expected_but_an_array_was_given()
-    {
-        $this->expectException(InvalidInputException::class);
-
-        $filter = $this->filter()->expect()->enum(['orange', 'blue', 'green']);
-        $filter->setValue(['orange']);
-    }
-
     private function filter()
     {
         return new Filter(new UserBuilder());
