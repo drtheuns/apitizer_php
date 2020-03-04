@@ -14,7 +14,7 @@ class FilterTest extends TestCase
     {
         $this->expectException(InvalidInputException::class);
 
-        $filter = $this->filter()->expect('string');
+        $filter = $this->filter()->expect()->string();
         $filter->setValue(['name']);
     }
 
@@ -23,8 +23,8 @@ class FilterTest extends TestCase
     {
         $this->expectException(InvalidInputException::class);
 
-        $filter = $this->filter()->expectMany('string');
-        $filter->setValue('name');
+        $filter = $this->filter()->expect()->array()->whereEach()->string();
+        $filter->setValue("name");
     }
 
     /** @test */
@@ -32,8 +32,26 @@ class FilterTest extends TestCase
     {
         $this->expectException(InvalidInputException::class);
 
-        $filter = $this->filter()->expectMany('uuid');
+        $filter = $this->filter()->expect()->uuid();
         $filter->setValue(['should be uuid']);
+    }
+
+    /** @test */
+    public function it_throws_an_exception_if_an_enumerator_was_expected_but_value_is_not_in_the_input_array()
+    {
+        $this->expectException(InvalidInputException::class);
+
+        $filter = $this->filter()->expect()->enum(['orange', 'blue', 'green']);
+        $filter->setValue('black');
+    }
+
+    /** @test */
+    public function it_throws_an_exception_if_an_enumerator_was_expected_but_an_array_was_given()
+    {
+        $this->expectException(InvalidInputException::class);
+
+        $filter = $this->filter()->expect()->enum(['orange', 'blue', 'green']);
+        $filter->setValue(['orange']);
     }
 
     private function filter()

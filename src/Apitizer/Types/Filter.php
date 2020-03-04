@@ -24,6 +24,11 @@ class Filter extends Factory
     protected $format = null;
 
     /**
+     * @var array<string> the format for date(time) types.
+     */
+    protected $enums = null;
+
+    /**
      * If we expect an array of values or just one.
      *
      * @var bool
@@ -45,39 +50,18 @@ class Filter extends Factory
      *
      * To expect an array of types, look at `expectMany`.
      *
-     * @param string $type
-     * @param null|string $format the format for date(time) value. Defaults to
-     * 'Y-m-d' for dates, and 'Y-m-d H:i:s' for datetimes. This format is
-     * ignored for any other type.
-     *
-     * @return $this
+     * @return FilterTypePicker
      */
-    public function expect(string $type, string $format = null): self
+    public function expect(): FilterTypePicker
     {
         $this->expectArray = false;
-        $this->type = $type;
-        $this->format = $format;
 
-        return $this;
+        return new FilterTypePicker($this);
     }
 
-    /**
-     * Expect an array of the given type as input to the filter.
-     *
-     * @param string $type
-     * @param null|string $format the format for date(time) value. Defaults to
-     * 'Y-m-d' for dates, and 'Y-m-d H:i:s' for datetimes. This format is
-     * ignored for any other type.
-     *
-     * @return $this
-     */
-    public function expectMany(string $type, string $format = null): self
+    public function whereEach(): FilterTypePicker
     {
-        $this->expectArray = true;
-        $this->type = $type;
-        $this->format = $format;
-
-        return $this;
+        return new FilterTypePicker($this);
     }
 
     /**
@@ -153,7 +137,7 @@ class Filter extends Factory
      */
     public function search($fields): self
     {
-        $this->expect('string');
+        $this->expect();
         $this->handleUsing(new LikeFilter($fields));
         $this->description('Search based on the input string');
 
@@ -172,6 +156,13 @@ class Filter extends Factory
      */
     protected function validateInput($input)
     {
+        if ($this->enums) {
+            if (!in_array($input, $this->enums)) {
+                throw InvalidInputException::filterTypeError($this, $input);
+            }
+            return TypeCaster::cast($input, $this->type, $this->format);
+        }
+
         if ($this->expectArray) {
             if (! \is_array($input)) {
                 throw InvalidInputException::filterTypeError($this, $input);
@@ -185,7 +176,6 @@ class Filter extends Factory
         if (\is_array($input)) {
             throw InvalidInputException::filterTypeError($this, $input);
         }
-
         return TypeCaster::cast($input, $this->type, $this->format);
     }
 
@@ -213,6 +203,33 @@ class Filter extends Factory
             throw InvalidInputException::filterTypeError($this, $value);
         }
 
+        return $this;
+    }
+
+    public function setType(string $type): self
+    {
+        $this->type = $type;
+        return $this;
+    }
+
+    public function setExpectArray(bool $expectArray): self
+    {
+        $this->expectArray = $expectArray;
+        return $this;
+    }
+
+    public function setFormatting(string $format): self
+    {
+        $this->format = $format;
+        return $this;
+    }
+
+    /**
+     * @param array<string> $enums, This is used to check whether the value is an available option.
+     */
+    public function setEnumerators(array $enums): self
+    {
+        $this->enums = $enums;
         return $this;
     }
 
