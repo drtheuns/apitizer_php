@@ -15,7 +15,7 @@ class ExceptionHandlingTest extends TestCase
     {
         $this->expectException(InvalidInputException::class);
 
-        $request = $this->request()->filter('name', 'expect array')->make();
+        $request = $this->request()->filter('name', ['expect array'])->make();
         UserBuilder::make($request)->all();
     }
 
@@ -27,7 +27,7 @@ class ExceptionHandlingTest extends TestCase
         // 'name' filter expects array.
         $request = $this->request()
                         ->fields('id')
-                        ->filter('name', $users->first()->name)
+                        ->filter('name', [$users->first()->name])
                         ->make();
 
         $result = UserBuilder::make($request)
