@@ -21,6 +21,7 @@ install:
 
 script:
   - composer test -- --coverage-clover=coverage.xml
+  - composer analyse
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
