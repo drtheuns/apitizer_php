@@ -10,3 +10,5 @@ parameters:
     # This class does string-building with class-strings, which is more hassle
     # to type-hint and annotate than it's worth.
     - src/Apitizer/Support/ClassFilter.php
+
+  checkMissingIterableValueType: false

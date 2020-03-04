@@ -3,84 +3,108 @@
 namespace Apitizer\Rendering;
 
 use Apitizer\Exceptions\InvalidOutputException;
+use Apitizer\JsonApi\Document;
 use Apitizer\JsonApi\Resource;
-use Apitizer\QueryBuilder;
 use Apitizer\Policies\PolicyFailed;
+use Apitizer\QueryBuilder;
 use Apitizer\Types\AbstractField;
 use Apitizer\Types\Association;
+use Apitizer\Types\FetchSpec;
 use ArrayAccess;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use ReflectionClass;
 
-// class JsonApiRenderer extends AbstractRenderer implements Renderer
-// {
-    // public function render(QueryBuilder $queryBuilder, $data, array $selectedFields): array
-    // {
-    //     // We're only concerned with the happy path in this renderer. If any
-    //     // errors occur, such as an invalid filter, they will be caught
-    //     // beforehand during the processing of those filters.
-    //     $response = [];
+class JsonApiRenderer extends AbstractRenderer implements Renderer
+{
+    /** @var Document */
+    protected $document;
 
-    //     if ($this->isSingleRowOfData($data)) {
-    //         $response['data'] = $this->renderOne($data, $selectedFields);
-    //         return $response;
-    //     }
+    public function __construct()
+    {
+        $this->document = new Document();
+    }
 
-    //     return [];
-    // }
+    /**
+      * @param QueryBuilder $queryBuilder
+      * @param mixed $data
+      * @param FetchSpec $fetchSpec
+      * @return array
+      */
+    public function render(QueryBuilder $queryBuilder, $data, FetchSpec $fetchSpec): array
+    {
+        $attributes = [];
+        if ($this->isSingleRowOfData($data)) {
+            $data = collect([$data]);
+        }
 
-    // protected function renderOne(QueryBuilder $queryBuilder, $row, array $selectedFields): array
-    // {
-    //     $resource = [
-    //         'id'   => $this->getResourceId($queryBuilder, $row),
-    //         'type' => $this->getResourceType($queryBuilder, $row),
-    //     ];
+        foreach ($data as $row) {
+            foreach ($fetchSpec->getFields() as $field) {
+                $this->addRenderedField($row, $field, $attributes);
+            }
 
-    //     return [];
-    // }
+            $this->document->addResource(
+                $this->getResourceType($queryBuilder, $row),
+                $this->getResourceId($queryBuilder, $row),
+                $attributes,
+            );
+        }
 
-    // protected function getResourceType(QueryBuilder $queryBuilder, $row)
-    // {
-    //     if ($row instanceof Resource) {
-    //         return $row->getResourceType();
-    //     }
+        return $this->document->toArray();
+    }
 
-    //     $className = (new ReflectionClass($queryBuilder->model()))->getShortName();
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @param mixed $row
+     * @return string
+     */
+    protected function getResourceType(QueryBuilder $queryBuilder, $row): string
+    {
+        if ($row instanceof Resource) {
+            return $row->getResourceType();
+        }
 
-    //     return Str::snake($className);
-    // }
+        $className = (new ReflectionClass($queryBuilder->model()))->getShortName();
 
-    // protected function getResourceId(QueryBuilder $queryBuilder, $row): string
-    // {
-    //     if ($row instanceof Resource) {
-    //         return $row->getResourceId();
-    //     }
+        return Str::snake(Str::plural($className));
+    }
 
-    //     if ($row instanceof Model) {
-    //         return (string) $row->getKey();
-    //     }
+    /**
+     * @throws InvalidOutputException
+     * @param QueryBuilder $queryBuilder
+     * @param mixed $row
+     * @return string
+     */
+    protected function getResourceId(QueryBuilder $queryBuilder, $row): string
+    {
+        if ($row instanceof Resource) {
+            return $row->getResourceId();
+        }
 
-    //     if (is_array($row) || $row instanceof ArrayAccess) {
-    //         if (isset($row['id'])) {
-    //             return (string) $row['id'];
-    //         }
+        if ($row instanceof Model) {
+            return (string) $row->getKey();
+        }
 
-    //         if (isset($row['uuid'])) {
-    //             return (string) $row['uuid'];
-    //         }
-    //     }
+        if (is_array($row) || $row instanceof ArrayAccess) {
+            if (isset($row['id'])) {
+                return (string) $row['id'];
+            }
 
-    //     if (is_object($row)) {
-    //         if (isset($row->{'id'})) {
-    //             return (string) $row->{'id'};
-    //         }
+            if (isset($row['uuid'])) {
+                return (string) $row['uuid'];
+            }
+        }
 
-    //         if (isset($row->{'uuid'})) {
-    //             return (string) $row->{'uuid'};
-    //         }
-    //     }
+        if (is_object($row)) {
+            if (isset($row->{'id'})) {
+                return (string) $row->{'id'};
+            }
 
-    //     throw InvalidOutputException::noJsonApiIdentifier($queryBuilder, $row);
-    // }
-// }
+            if (isset($row->{'uuid'})) {
+                return (string) $row->{'uuid'};
+            }
+        }
+
+        throw InvalidOutputException::noJsonApiIdentifier($queryBuilder, $row);
+    }
+}
