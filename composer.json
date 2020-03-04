@@ -33,7 +33,8 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Apitizer\\ServiceProvider"
+                "Apitizer\\ServiceProvider",
+                "Apitizer\\RouteServiceProvider"
             ]
         }
     },

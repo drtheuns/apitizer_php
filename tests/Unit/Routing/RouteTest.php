@@ -6,9 +6,16 @@ use Apitizer\GenericApi\ModelService;
 use Apitizer\Routing\Route;
 use Tests\Support\Builders\UserBuilder;
 use Tests\Unit\TestCase;
+use Illuminate\Support\Facades\Route as LaravelRoute;
 
 class RouteTest extends TestCase
 {
+    protected function getPackageProviders($app)
+    {
+        // This is needed to register the router macro.
+        return ['Apitizer\RouteServiceProvider'];
+    }
+
     /** @test */
     public function it_creates_the_index_route(): void
     {
@@ -105,8 +112,56 @@ class RouteTest extends TestCase
         // registered with the router, rather than just instantiated but not
         // stored.
         $routes = (new Route(UserBuilder::class, []))->register();
-        $routeCollection = app('router')->getRoutes();
 
-        $this->assertCount(5, $routeCollection->getRoutes());
+        $this->assertCount(5, $this->getRegisteredRoutes());
+    }
+
+    /** @test */
+    public function routes_can_be_registered_using_the_schema_macro(): void
+    {
+        LaravelRoute::schema(UserBuilder::class);
+
+        $this->assertCount(5, $this->getRegisteredRoutes());
+    }
+
+    /** @test */
+    public function only_allows_only_certain_routes_to_be_registered(): void
+    {
+        LaravelRoute::schema(UserBuilder::class)->only(['show']);
+
+        $this->assertCount(1, $this->getRegisteredRoutes());
+    }
+
+    /** @test */
+    public function except_allows_routes_to_be_excluded_from_registration(): void
+    {
+        LaravelRoute::schema(UserBuilder::class)->except(['show']);
+
+        $this->assertCount(4, $this->getRegisteredRoutes());
+    }
+
+    /** @test */
+    public function the_service_and_controller_can_be_when_using_the_route_builder(): void
+    {
+        $controller = '\App\Http\Controllers\MyController';
+        $service = '\App\Services\UserService';
+
+        LaravelRoute::schema(UserBuilder::class)
+            ->only(['show'])
+            ->controller($controller)
+            ->service($service);
+
+        $routeCollection = app('router')->getRoutes();
+        $this->assertCount(1, $routeCollection->getRoutes());
+
+        $route = $routeCollection->getByAction('App\Http\Controllers\MyController@show');
+
+        $this->assertNotNull($route);
+        $this->assertEquals($service, $route->action['metadata']['service']);
+    }
+
+    private function getRegisteredRoutes()
+    {
+        return app('router')->getRoutes()->getRoutes();
     }
 }
