@@ -8,6 +8,7 @@ use Apitizer\GenericApi\Service;
 use Apitizer\QueryBuilder;
 use Illuminate\Support\Facades\Route as LaravelRoute;
 use Illuminate\Support\Str;
+use Illuminate\Routing\Route as RouteInstance;
 
 class Route
 {
@@ -69,24 +70,30 @@ class Route
         $this->controller = $options['controller'] ?? '\\' . Controller::class;
         $this->service = $options['service'] ?? ModelService::class;
         $this->router = app('router');
-    }
 
-    public function register(): void
-    {
         $className = class_basename($this->schema);
         $routeName = Str::endsWith($className, 'Builder') ? substr($className, 0, -7) : $className;
         $this->paramName = Str::slug($routeName);
         $this->routeName = Str::plural($this->paramName);
-
         $this->metadata = [
             'schema'         => $this->schema,
             'service'        => $this->service,
             'routeParamName' => $this->paramName,
         ];
+    }
+
+    /**
+     * @return \Illuminate\Routing\Route[] the routes that were registered
+     */
+    public function register(): array
+    {
+        $routes = [];
 
         foreach ($this->getResourceActions() as $actionMethod) {
-            static::{'register'.ucfirst($actionMethod)}();
+            $routes[] = static::{'register'.ucfirst($actionMethod)}();
         }
+
+        return $routes;
     }
 
     /**
@@ -107,39 +114,39 @@ class Route
         return $methods;
     }
 
-    public function registerIndex(): void
+    public function registerIndex(): RouteInstance
     {
         [$uses, $name] = $this->action('index');
 
-        $this->addRoute(['GET'], $this->routeName, $uses, $name);
+        return $this->addRoute(['GET'], $this->routeName, $uses, $name);
     }
 
-    public function registerShow(): void
+    public function registerShow(): RouteInstance
     {
         [$uses, $name] = $this->action('show');
 
-        $this->addRoute(['GET'], $this->routeWithParameter(), $uses, $name);
+        return $this->addRoute(['GET'], $this->routeWithParameter(), $uses, $name);
     }
 
-    public function registerStore(): void
+    public function registerStore(): RouteInstance
     {
         [$uses, $name] = $this->action('store');
 
-        $this->addRoute(['POST'], $this->routeName, $uses, $name);
+        return $this->addRoute(['POST'], $this->routeName, $uses, $name);
     }
 
-    public function registerUpdate(): void
+    public function registerUpdate(): RouteInstance
     {
         [$uses, $name] = $this->action('update');
 
-        $this->addRoute(['PUT', 'PATCH'], $this->routeWithParameter(), $uses, $name);
+        return $this->addRoute(['PUT', 'PATCH'], $this->routeWithParameter(), $uses, $name);
     }
 
-    public function registerDestroy(): void
+    public function registerDestroy(): RouteInstance
     {
         [$uses, $name] = $this->action('destroy');
 
-        $this->addRoute(['DELETE'], $this->routeWithParameter(), $uses, $name);
+        return $this->addRoute(['DELETE'], $this->routeWithParameter(), $uses, $name);
     }
 
     /**
@@ -147,10 +154,15 @@ class Route
      * @param string $route
      * @param string $uses
      * @param string $name
+     * @return \Illuminate\Routing\Route
      */
-    protected function addRoute(array $methods, string $route, string $uses, string $name): void
-    {
-        $this->router->match($methods, $route, [
+    protected function addRoute(
+        array $methods,
+        string $route,
+        string $uses,
+        string $name
+    ): RouteInstance {
+        return $this->router->match($methods, $route, [
             'uses' => $uses,
             'metadata' => $this->metadata,
         ])->name($name);
