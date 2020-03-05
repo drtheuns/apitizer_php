@@ -28,7 +28,7 @@ class PaginationTest extends TestCase
         factory(User::class, 2)->create();
         $request = $this->request()
                         ->fields('id')
-                        ->filter('empty', 1)
+                        ->filter('active', 1)
                         ->sort('id')
                         ->limit(1)
                         ->make();
@@ -38,7 +38,7 @@ class PaginationTest extends TestCase
         $this->assertNotNull($paginator->nextPageUrl());
         $this->paginatorLinkContainsString($paginator, Apitizer::getFieldKey() . '=id');
         $this->paginatorLinkContainsString($paginator, Apitizer::getSortKey() . '=id');
-        $this->paginatorLinkContainsString($paginator, Apitizer::getFilterKey() . '[empty]=1');
+        $this->paginatorLinkContainsString($paginator, Apitizer::getFilterKey() . '[active]=1');
         $this->paginatorLinkContainsString($paginator, 'limit=1');
     }
 
