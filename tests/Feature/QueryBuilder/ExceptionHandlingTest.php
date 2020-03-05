@@ -24,7 +24,7 @@ class ExceptionHandlingTest extends TestCase
     {
         $users = factory(User::class, 2)->create();
 
-        // 'name' filter expects array.
+        // 'name' filter expects a string.
         $request = $this->request()
                         ->fields('id')
                         ->filter('name', [$users->first()->name])
