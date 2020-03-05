@@ -90,7 +90,7 @@ class Filter extends Factory
     /**
      * Filter by field and operator.
      *
-     * If `expectArray` is used, the operator will be ignored in favour of a
+     * If an array of input is given, the operator will be ignored in favour of a
      * `whereIn` query.
      *
      * @param string $field
