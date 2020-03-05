@@ -17,7 +17,7 @@ class FilterTest extends TestCase
         $post = factory(Post::class)->make();
         $users->first()->posts()->save($post);
 
-        $request = $this->request()->fields('id')->filter('posts', $post->id)->make();
+        $request = $this->request()->fields('id')->filter('posts', [$post->id])->make();
         $result = UserBuilder::make($request)->all();
 
         $this->assertEquals([$users->first()->only('id')], $result);

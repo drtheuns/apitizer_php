@@ -31,7 +31,7 @@ class UserBuilder extends EmptyBuilder
         return [
             'name'       => $this->filter()->expect()->string()->byField('name'),
             'created_at' => $this->filter()->expect()->datetime()->byField('created_at', '>'),
-            'posts'      => $this->filter()->expect()->string()->byAssociation('posts', 'id'),
+            'posts'      => $this->filter()->expect()->array()->whereEach()->string()->byAssociation('posts', 'id'),
             'updated_at' => $this->filter()->expect()->datetime('d-m-Y')->byField('updated_at', '>'),
         ];
     }
