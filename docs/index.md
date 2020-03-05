@@ -211,6 +211,3 @@ return [
 ];
 ```
 
-## Next steps
-
-Head on over to the [documentation](https://github.com/drtheuns/apitizer_php/tree/master/docs).
