@@ -160,12 +160,12 @@ class Filter extends Factory
     protected function validateInput($input)
     {
         if ($this->enums) {
-            if (!\is_array($input) && !in_array($input, $this->enums)) {
+            if (!\is_array($input) && !\in_array($input, $this->enums)) {
                 throw InvalidInputException::filterTypeError($this, $input);
             }
             if (\is_array($input)) {
                 foreach ($input as $enum) {
-                    if (!\is_array($enum) && !in_array($enum, $this->enums)) {
+                    if (!\is_array($enum) && !\in_array($enum, $this->enums)) {
                         throw InvalidInputException::filterTypeError($this, $input);
                     }
                 }
@@ -173,11 +173,11 @@ class Filter extends Factory
         }
 
         if ($this->expectArray) {
-            if (! \is_array($input)) {
+            if (!\is_array($input)) {
                 throw InvalidInputException::filterTypeError($this, $input);
             }
 
-            return array_map(function ($value) {
+            return \array_map(function ($value) {
                 return TypeCaster::cast($value, $this->type, $this->format);
             }, $input);
         }
