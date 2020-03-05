@@ -1,16 +1,13 @@
 <?php
 
 use Faker\Generator as Faker;
-use Tests\Feature\Models\User;
 use Tests\Feature\Models\Post;
+use Tests\Feature\Models\User;
 
 $factory->define(User::class, function (Faker $faker, array $attributes) {
     return [
         'name'  => $faker->name,
         'email' => $faker->email,
-        'should_reset_password' => rand(0, 1),
-        'created_at' => $faker->dateTime('now'),
-        'updated_at' => $faker->dateTime('now'),
     ];
 });
 

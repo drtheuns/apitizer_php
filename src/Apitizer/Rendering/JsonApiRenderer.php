@@ -43,10 +43,11 @@ class JsonApiRenderer extends AbstractRenderer implements Renderer
                 $this->addRenderedField($row, $field, $attributes);
             }
 
+
             $this->document->addResource(
                 $this->getResourceType($queryBuilder, $row),
                 $this->getResourceId($queryBuilder, $row),
-                $attributes,
+                $attributes
             );
         }
 

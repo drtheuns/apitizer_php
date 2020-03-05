@@ -2,7 +2,9 @@
 
 namespace Apitizer\JsonApi;
 
-class ResourceObject
+use Illuminate\Contracts\Support\Arrayable;
+
+class ResourceObject implements Arrayable
 {
 
     /** @var array */

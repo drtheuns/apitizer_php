@@ -15,6 +15,18 @@ use Tests\Support\Builders\UserBuilder;
  */
 class JsonApiTest extends TestCase
 {
+
+    /** @test */
+    public function it_renders_nothing_with_empty_collection()
+    {
+        $request = $this->request()->fields('name, email')->make();
+        $result = UserBuilder::make($request)->setRenderer(new JsonApiRenderer)->render([]);
+
+        $this->assertEquals([
+            "data" => []
+        ], $result);
+    }
+
     /** @test */
     public function it_renders_existing_eloquent_model_to_jsonapi_format()
     {
@@ -27,10 +39,16 @@ class JsonApiTest extends TestCase
         $request = $this->request()->fields('name, email')->make();
         $result = UserBuilder::make($request)->setRenderer(new JsonApiRenderer)->render($user);
 
-        $this->assertJsonStringEqualsJsonFile(
-            'tests/assets/jsonapi/simple_user.json',
-            json_encode($result, JSON_PRETTY_PRINT)
-        );
+        $this->assertEquals([
+            "data" => [
+                'type' => 'users',
+                'id' => 1,
+                'attributes' => [
+                    'name' => 'Daan Hage',
+                    'email' => 'daan@atabix.nl'
+                ],
+            ]
+        ], $result);
     }
 
     /** @test */
@@ -51,9 +69,24 @@ class JsonApiTest extends TestCase
         $request = $this->request()->fields('name, email')->make();
         $result = UserBuilder::make($request)->setRenderer(new JsonApiRenderer)->render($collection);
 
-        $this->assertJsonStringEqualsJsonFile(
-            'tests/assets/jsonapi/multiple_users.json',
-            json_encode($result, JSON_PRETTY_PRINT)
-        );
+        $this->assertEquals([
+            'data' => [
+                [
+                    'type'       => 'users',
+                    'id'         => 1,
+                    'attributes' => [
+                        'name'  => 'Daan Hage',
+                        'email' => 'daan@atabix.nl',
+                    ],
+                ], [
+                    'type'       => 'users',
+                    'id'         => 2,
+                    'attributes' => [
+                        'name'  => 'Randall Theuns',
+                        'email' => 'randall@atabix.nl',
+                    ],
+                ],
+            ],
+        ], $result);
     }
 }
