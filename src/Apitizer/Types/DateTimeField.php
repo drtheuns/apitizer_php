@@ -11,7 +11,7 @@ class DateTimeField extends Field
      */
     public function format(string $format = null): DateTimeField
     {
-        $format = $format ?? ($this->type == 'date' ? 'Y-m-d' : 'Y-m-d H:i:s');
+        $format = $format ?? ($this->type == 'date' ? 'Y-m-d' : DATE_ATOM);
 
         $this->transform(new DateTimeFormat($format));
 
