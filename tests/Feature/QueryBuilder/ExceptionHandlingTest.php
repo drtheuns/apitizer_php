@@ -15,7 +15,7 @@ class ExceptionHandlingTest extends TestCase
     {
         $this->expectException(InvalidInputException::class);
 
-        $request = $this->request()->filter('name', 'expect array')->make();
+        $request = $this->request()->filter('name', ['expect array'])->make();
         UserBuilder::make($request)->all();
     }
 
@@ -24,10 +24,10 @@ class ExceptionHandlingTest extends TestCase
     {
         $users = factory(User::class, 2)->create();
 
-        // 'name' filter expects array.
+        // 'name' filter expects a string.
         $request = $this->request()
                         ->fields('id')
-                        ->filter('name', $users->first()->name)
+                        ->filter('name', [$users->first()->name])
                         ->make();
 
         $result = UserBuilder::make($request)

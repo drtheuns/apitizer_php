@@ -45,10 +45,16 @@ class TypeCaster
         // Null values should evaluate to "false" in the boolean cast,
         // which is why this check comes before the null check.
         if ($type === 'bool' || $type === 'boolean') {
-            return (bool) \filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+            $converted = \filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+
+            if (\is_null($converted)) {
+                throw new CastException($value, $type, $format);
+            }
+            
+            return $converted;
         }
 
-        if (is_null($value)) {
+        if (\is_null($value)) {
             return $value;
         }
 
