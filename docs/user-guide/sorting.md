@@ -35,7 +35,7 @@ be displayed in the generated documentation page:
 public function sorts(): array
 {
     return [
-        'name' => $this->sort()->byField('name')->description('Sort by first name');
+        'name' => $this->sort()->byField('name')->description('Sort by first name'),
     ];
 }
 ```
