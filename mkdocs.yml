@@ -1,5 +1,5 @@
 site_name: Apitizer PHP
 
 theme:
-  name: 'rtd-dropdown'
+  name: 'readthedocs'
   collapse_by_default: false
