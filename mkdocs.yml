@@ -5,7 +5,6 @@ theme:
 
 nav:
   - Overview:
-      - What is Apitizer?: overview/what-is-apitizer.md
       - Installation: overview/installation.md
   - User guide:
       - Query syntax: user-guide/query-syntax.md
