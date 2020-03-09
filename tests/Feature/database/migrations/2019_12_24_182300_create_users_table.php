@@ -18,6 +18,7 @@ class CreateUsersTable extends Migration
             $table->uuid('uuid');
             $table->string('name');
             $table->string('email');
+            $table->boolean('active');
             $table->string('should_reset_password')->default(false);
             $table->timestamps();
         });

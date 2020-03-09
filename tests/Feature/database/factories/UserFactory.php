@@ -8,6 +8,7 @@ $factory->define(User::class, function (Faker $faker, array $attributes) {
     return [
         'name'  => $faker->name,
         'email' => $faker->email,
+        'active' => 1,
     ];
 });
 
