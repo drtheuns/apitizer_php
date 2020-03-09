@@ -205,7 +205,8 @@ user to begin with, the policy would never pass. To solve this, the query
 builder has an `alwaysLoadColumns` property:
 
 ```php
-class PostBuilder {
+class PostBuilder extends QueryBuilder
+{
     protected $alwaysLoadColumns = ['author_id'];
 }
 ```
