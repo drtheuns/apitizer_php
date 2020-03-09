@@ -94,7 +94,7 @@ class FilterTest extends TestCase
         $expectedUser = $users->first();
 
         $request = $this->request()
-                        ->filter('name', [$expectedUser->name])
+                        ->filter('name', $expectedUser->name)
                         ->fields('id')
                         ->make();
         $result = UserBuilder::make($request)->all();
