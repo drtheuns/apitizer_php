@@ -2,6 +2,7 @@
 
 namespace Apitizer\Types;
 
+use Apitizer\Exceptions\DefinitionException;
 use Apitizer\Exceptions\InvalidInputException;
 use Apitizer\Exceptions\CastException;
 use Apitizer\Filters\AssociationFilter;
@@ -62,8 +63,9 @@ class Filter extends Factory
     public function whereEach(): FilterTypePicker
     {
         if ($this->type != "array") {
-            throw new InvalidInputException("Invalid method chain, please start with ->expect()");
+            throw DefinitionException::filterExpectRequired($this->getQueryBuilder(), $this);
         }
+
         return new FilterTypePicker($this);
     }
 
@@ -159,22 +161,18 @@ class Filter extends Factory
      */
     protected function validateInput($input)
     {
-        if ($this->enums) {
-            if (!\is_array($input) && !\in_array($input, $this->enums)) {
-                throw InvalidInputException::filterTypeError($this, $input);
-            }
-            if (\is_array($input)) {
-                foreach ($input as $enum) {
-                    if (!\is_array($enum) && !\in_array($enum, $this->enums)) {
-                        throw InvalidInputException::filterTypeError($this, $input);
-                    }
-                }
-            }
-        }
-
+        // Array-input
         if ($this->expectArray) {
             if (!\is_array($input)) {
                 throw InvalidInputException::filterTypeError($this, $input);
+            }
+
+            if ($this->enums) {
+                foreach ($input as $value) {
+                    if (! in_array($value, $this->enums)) {
+                        throw InvalidInputException::filterTypeError($this, $input);
+                    }
+                }
             }
 
             return \array_map(function ($value) {
@@ -182,9 +180,15 @@ class Filter extends Factory
             }, $input);
         }
 
-        if (\is_array($input) && !$this->expectArray) {
+        // Non-array input
+        if (\is_array($input)) {
             throw InvalidInputException::filterTypeError($this, $input);
         }
+
+        if ($this->enums && ! in_array($input, $this->enums)) {
+            throw InvalidInputException::filterTypeError($this, $input);
+        }
+
         return TypeCaster::cast($input, $this->type, $this->format);
     }
 

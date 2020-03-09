@@ -126,6 +126,15 @@ class DefinitionException extends ApitizerException
         return new static($message, $queryBuilder, 'filter', $filter->getName());
     }
 
+    public static function filterExpectRequired(QueryBuilder $queryBuilder, Filter $filter): self
+    {
+        $class = get_class($queryBuilder);
+        $name = $filter->getName();
+        $message = "Filter [$name] on [$class] should call expect() before defining array element type";
+
+        return new static($message, $queryBuilder, 'filter', $filter->getName());
+    }
+
     /**
      * @param QueryBuilder $queryBuilder
      * @param string $name
