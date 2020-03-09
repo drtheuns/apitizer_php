@@ -66,7 +66,7 @@ class TypeCasterTest extends TestCase
     public function it_can_cast_various_boolean_types()
     {
         $true = ['on', 'yes', 'true', 1, '1'];
-        $false = ['off', 'no', 'false', 0, '0', 'unexpected', null];
+        $false = ['off', 'no', 'false', 0, '0'];
 
         foreach ($true as $value) {
             $this->assertTrue(TypeCaster::cast($value, 'bool'));
@@ -122,6 +122,13 @@ class TypeCasterTest extends TestCase
     {
         $this->expectException(CastException::class);
         TypeCaster::cast($value, $type);
+    }
+    
+    public function it_does_not_convert_incorrect_booleans_to_false()
+    {
+        $this->expectException(CastException::class);
+
+        TypeCaster::cast('not a boolean', 'boolean');
     }
 
     public function invalidCasts()
