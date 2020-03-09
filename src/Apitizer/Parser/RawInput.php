@@ -44,7 +44,8 @@ class RawInput
     }
 
     /**
-     * @param array{fields: string|string[], filters: array<string, mixed>, sorts: string|string[]} $input
+     * @param array{fields?: string|string[], filters?: array<string, mixed>,
+     *              sorts?: string|string[]} $input
      */
     public static function fromArray(array $input): self
     {

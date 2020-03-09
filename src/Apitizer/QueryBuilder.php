@@ -93,7 +93,8 @@ abstract class QueryBuilder
     protected $availableFilters;
 
     /**
-     * @var array{fields: string|string[], sorts: string|string[], filters: array<string, mixed>}|null
+     * @var array{fields?: string|string[], sorts?: string|string[],
+     *            filters?: array<string, mixed>}|null
      * the specification that should be used when fetching or rendering data.
      * This is an alternative to the input from the Request object; therefore,
      * it this is null, the request's input will be used.
