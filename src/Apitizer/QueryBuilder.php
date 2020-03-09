@@ -264,7 +264,8 @@ abstract class QueryBuilder
     }
 
     /**
-     * @param array{fields: string|string[], sorts: string|string[], filters: array<string, mixed>} $specification
+     * @param array{fields?: string|string[], sorts?: string|string[],
+     *              filters?: array<string, mixed>} $specification
      * array the specification of data that should be used for this builder.
      * This array may contain three keys: `fields`, `filters`, and `sorts`. The
      * value for these should be the same as what you would send in a request;

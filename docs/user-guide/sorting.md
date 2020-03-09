@@ -25,3 +25,17 @@ public function sorts(): array
     ];
 }
 ```
+
+## Documentation
+
+The `description` method can be used to add documentation to a sort that will
+be displayed in the generated documentation page:
+
+```php
+public function sorts(): array
+{
+    return [
+        'name' => $this->sort()->byField('name')->description('Sort by first name');
+    ];
+}
+```
