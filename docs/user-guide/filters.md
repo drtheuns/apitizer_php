@@ -129,7 +129,8 @@ public function filters(): array
 {
     return [
         'published_after' => $this->filter()->expect()->date()->byField('published', '>'),
-        'statuses' => $this->filter()->expect()->array()->whereEach()->string()->byField('status'),
+        'statuses'        => $this->filter()->expect()->array()
+                                  ->whereEach()->string()->byField('status'),
     ];
 }
 ```
@@ -167,9 +168,8 @@ be displayed in the generated documentation page:
 public function filters(): array
 {
     return [
-        'name' => $this->filter()
-                       ->search('name')
-                       ->description('Search the name field for the given input')->expect()->string();
+        'name' => $this->filter()->search('name')
+                       ->description('Search the name field for the given input'),
     ];
 }
 ```

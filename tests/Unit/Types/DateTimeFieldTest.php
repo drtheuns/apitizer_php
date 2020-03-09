@@ -23,7 +23,7 @@ class DateTimeFieldTest extends TestCase
                           ->format()
                           ->render(['key' => '2020-01-01 13:00:00']);
 
-        $this->assertEquals('2020-01-01 13:00:00', $formatted);
+        $this->assertEquals('2020-01-01T13:00:00+00:00', $formatted);
     }
 
     /** @test */
