@@ -109,9 +109,9 @@ specification.
 ### Fetching and rendering
 
 There are two methods available to perform both query building and rendering in
-one step. The first is the `all` method, and the second is the `paginate`
-method. The query builder may therefore be used to implement controllers
-quickly:
+one step. The first is the `all` method which is the same as calling `get` on
+the query, and the second is the `paginate` method. A typical controller that
+utilizes some of these methods might look like this:
 
 ```php
 <?php
@@ -128,9 +128,19 @@ class UserController
     {
         return UserBuilder::make($request)->paginate();
     }
-    
-    public function show(Request $request, User $user) {
+
+    public function show(Request $request, User $user)
+    {
         return UserBuilder::make($request)->render($user);
+    }
+
+    public function store(Request $request)
+    {
+        $builder = UserBuilder::make($request);
+
+        $user = (new AccountService)->createUser($request->validated());
+
+        return $builder->render($user);
     }
 }
 ```

@@ -52,7 +52,7 @@ class UserBuilder extends \Apitizer\QueryBuilder
     public function sorts(): array
     {
         return [
-            'id' => $this->sort()->byField('id'),
+            'id'   => $this->sort()->byField('id'),
             'name' => $this->sort()->byField('name'),
         ];
     }
@@ -121,7 +121,10 @@ Filters follow the same syntax as JSON-API:
 
 ```
 ?filters[name_of_filter]=value
+
 ?filters[search]=term
+?filters[created_before]=2020-01-01
+?filters[user]=ed69bc2f-58ef-44bd-bfdb-5adcac43b6b9
 ```
 
 Filters may also accept an array of values:
