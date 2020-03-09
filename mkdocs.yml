@@ -1,0 +1,5 @@
+site_name: Apitizer PHP
+
+theme:
+  name: 'rtd-dropdown'
+  collapse_by_default: false
