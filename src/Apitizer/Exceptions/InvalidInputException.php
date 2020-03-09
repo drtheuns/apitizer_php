@@ -33,7 +33,12 @@ class InvalidInputException extends ApitizerException
     /**
      * @var Filter|Sort
      */
-    public $type;
+    public $instance;
+
+    /**
+     * @var string 'filter' | 'sort'
+     */
+    public $namespace;
 
     /**
      * @param Filter $filter
@@ -49,8 +54,32 @@ class InvalidInputException extends ApitizerException
         $message = "Expected $filterParam to receive [$expectedType] got [$type]";
 
         $e = new static($message);
-        $e->type = $filter;
+        $e->instance = $filter;
         $e->queryBuilder = $filter->getQueryBuilder();
+
+        return $e;
+    }
+
+    public static function undefinedFilterCalled(string $name, QueryBuilder $queryBuilder): self
+    {
+        $class = get_class($queryBuilder);
+        $message = "Filter $name does not exist on [$class]";
+
+        $e = new static($message);
+        $e->namespace = 'filter';
+        $e->queryBuilder = $queryBuilder;
+
+        return $e;
+    }
+
+    public static function undefinedSortCalled(string $name, QueryBuilder $queryBuilder): self
+    {
+        $class = get_class($queryBuilder);
+        $message = "Sort $name does not exist on [$class]";
+
+        $e = new static($message);
+        $e->namespace = 'sort';
+        $e->queryBuilder = $queryBuilder;
 
         return $e;
     }
