@@ -149,6 +149,11 @@ class FetchSpecFactory
                 $sort = $availableSorting[$parserSort->getField()];
                 $sort->setOrder($parserSort->getOrder());
                 $selectedSorting[] = $sort;
+            } else {
+                $this->queryBuilder->getExceptionStrategy()->handle(
+                    $this->queryBuilder,
+                    InvalidInputException::undefinedSortCalled($parserSort->getField(), $this->queryBuilder)
+                );
             }
         }
 
@@ -169,6 +174,11 @@ class FetchSpecFactory
                     $filter = $availableFilters[$name];
                     $filter->setValue($filterInput);
                     $selectedFilters[] = $filter;
+                } else {
+                    $this->queryBuilder->getExceptionStrategy()->handle(
+                        $this->queryBuilder,
+                        InvalidInputException::undefinedFilterCalled($name, $this->queryBuilder)
+                    );
                 }
             } catch (InvalidInputException $e) {
                 $this->queryBuilder->getExceptionStrategy()->handle(

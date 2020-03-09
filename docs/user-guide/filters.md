@@ -8,7 +8,7 @@ is constructed when fetching the data for the response.
 
 Each filter defines a type that they expect as input and the number of
 parameters they expect. By default, a filter will expect a single string value.
-The `expect` and `expectMany` methods may be used to alter these expectations.
+The `expect` method may be used to alter these expectations.
 For example:
 
 ```php
@@ -110,7 +110,7 @@ fields. It uses the `LikeFilter` class from the previous section.
 public function filters(): array
 {
     return [
-        'search' => $this->filter()->search(['first_name', 'last_name'']),
+        'search' => $this->filter()->search(['first_name', 'last_name'])->expect()->string(),
     ];
 }
 ```
@@ -128,8 +128,8 @@ is the comparison operator.
 public function filters(): array
 {
     return [
-        'published_after' => $this->filter()->expect('date')->byField('published', '>'),
-        'statuses' => $this->filter()->expectMany('string')->byField('status'),
+        'published_after' => $this->filter()->expect()->date()->byField('published', '>'),
+        'statuses' => $this->filter()->expect()->array()->whereEach()->string()->byField('status'),
     ];
 }
 ```
@@ -140,7 +140,7 @@ Filtering by association allows you to answer API calls such as: "get all users
 that are part of organization X":
 
 ```
-/users?filter[organization]=5bd9aaba-0928-4c01-93c2-b438beca934d
+/users?filters[organization]=5bd9aaba-0928-4c01-93c2-b438beca934d
 ```
 
 ```php
@@ -169,7 +169,7 @@ public function filters(): array
     return [
         'name' => $this->filter()
                        ->search('name')
-                       ->description('Search the name field for the given input');
+                       ->description('Search the name field for the given input')->expect()->string();
     ];
 }
 ```
