@@ -138,15 +138,19 @@ The `policy` and `policyAny` function can also be chained.
 
 ## Policies on associations
 
-Besides fields, associations can also use policies; however, they function
-slightly differently depending on the type of association. When you define a
-policy on an association that returns multiple rows — such as `hasMany`
-associations — the policy will be checked for each of those rows, whereas for
-associations such as `belongsTo` that return a single row, it will check only
-that row.
+Policies on associations function exactly the same as policies on fields: the
+policy will receive all the data from that association. If the policy fails, the
+association will not be rendered.
 
-The fields that were selected on an association will naturally also have their
-policies checked.
+The data the policy receives will be the same as directly accessing the relation
+on the model:
+
+```
+$user->posts   // hasMany
+$post->author  // belongsTo
+```
+
+No distinction is made based on the number of rows that an association returns.
 
 ## Caching expensive policies
 
@@ -190,3 +194,22 @@ class UserBuilder extends QueryBuilder
 
 With our new cached policy in place, the `Authenticated` policy will only be
 called once, regardless of how many fields use the policy.
+
+## Ensuring data is fetched
+
+Some policies might be dependent on certain data being available in order to
+pass. For example, a policy that checks if the row of data belongs to a user
+using a `user_id` column, is dependent on this column being present. However, if
+the client never requested this column, or if the column is not available to the
+user to begin with, the policy would never pass. To solve this, the query
+builder has an `alwaysLoadColumns` property:
+
+```php
+class PostBuilder extends QueryBuilder
+{
+    protected $alwaysLoadColumns = ['author_id'];
+}
+```
+
+This ensures that the `author_id` is always loaded by the query builder, making
+it available to use in policies.

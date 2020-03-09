@@ -93,14 +93,8 @@ abstract class QueryBuilder
     protected $availableFilters;
 
     /**
-     * Whether the output should adhere to the JsonApi standard.
-     *
-     * @var bool jsonApi
-     */
-    protected $jsonApi = false;
-
-    /**
-     * @var array{fields: string|string[], sorts: string|string[], filters: array<string, mixed>}|null
+     * @var array{fields?: string|string[], sorts?: string|string[],
+     *            filters?: array<string, mixed>}|null
      * the specification that should be used when fetching or rendering data.
      * This is an alternative to the input from the Request object; therefore,
      * it this is null, the request's input will be used.
@@ -271,7 +265,8 @@ abstract class QueryBuilder
     }
 
     /**
-     * @param array{fields: string|string[], sorts: string|string[], filters: array<string, mixed>} $specification
+     * @param array{fields?: string|string[], sorts?: string|string[],
+     *              filters?: array<string, mixed>} $specification
      * array the specification of data that should be used for this builder.
      * This array may contain three keys: `fields`, `filters`, and `sorts`. The
      * value for these should be the same as what you would send in a request;

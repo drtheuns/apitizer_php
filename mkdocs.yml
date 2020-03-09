@@ -1,0 +1,18 @@
+site_name: Apitizer PHP
+
+theme:
+  name: 'readthedocs'
+
+nav:
+  - Overview:
+      - Installation: overview/installation.md
+  - User guide:
+      - Query syntax: user-guide/query-syntax.md
+      - Schema: user-guide/schema.md
+      - Fields: user-guide/fields.md
+      - Associations: user-guide/associations.md
+      - Filters: user-guide/filters.md
+      - Sorting: user-guide/sorting.md
+      - Rules: user-guide/rules.md
+      - Policies: user-guide/policies.md
+      - Exception handling: user-guide/exception-handling.md
