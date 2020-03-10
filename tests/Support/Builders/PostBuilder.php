@@ -2,6 +2,7 @@
 
 namespace Tests\Support\Builders;
 
+use Apitizer\Routing\Scope;
 use Apitizer\Types\Apidoc;
 use Illuminate\Database\Eloquent\Model;
 use Tests\Feature\Models\Post;
@@ -47,6 +48,13 @@ class PostBuilder extends EmptyBuilder
     public function sorts(): array
     {
         return [];
+    }
+
+    public function scope(Scope $scope)
+    {
+        $scope->crud()
+              ->associationCrud('author')
+              ->associationCrud('comments');
     }
 
     public function model(): Model

@@ -3,6 +3,7 @@
 namespace Apitizer;
 
 use Apitizer\Routing\PendingSchemaRegistration;
+use Apitizer\Routing\SchemaRoute;
 use Illuminate\Routing\Router;
 
 class RouteServiceProvider extends \Illuminate\Support\ServiceProvider
@@ -11,7 +12,7 @@ class RouteServiceProvider extends \Illuminate\Support\ServiceProvider
     {
         Router::macro('schema', function (string $schema) {
             /** @var class-string<\Apitizer\QueryBuilder> $schema */
-            return new PendingSchemaRegistration($schema);
+            return (new SchemaRoute($schema))->generateRoutes();
         });
     }
 }

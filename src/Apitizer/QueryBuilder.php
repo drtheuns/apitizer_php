@@ -9,6 +9,7 @@ use Apitizer\Interpreter\QueryInterpreter;
 use Apitizer\Parser\Parser;
 use Apitizer\Parser\RawInput;
 use Apitizer\Rendering\Renderer;
+use Apitizer\Routing\Scope;
 use Apitizer\Support\DefinitionHelper;
 use Apitizer\Support\FetchSpecFactory;
 use Apitizer\Types\Apidoc;
@@ -132,6 +133,11 @@ abstract class QueryBuilder
     protected $rules;
 
     /**
+     * @var Scope|null
+     */
+    protected $scope;
+
+    /**
      * A function that returns the fields that are available to the client.
      *
      * If the value is a string, it will be implicitly cast to `$this->any`
@@ -199,6 +205,15 @@ abstract class QueryBuilder
      * @return void
      */
     abstract public function rules(Rules $rules);
+
+    /**
+     * Defines the scope that this resource affords.
+     *
+     * @param Scope $scope
+     *
+     * @return void
+     */
+    abstract public function scope(Scope $scope);
 
     /**
      * Overridable function to adjust the API documentation for this query
@@ -534,6 +549,8 @@ abstract class QueryBuilder
      * Traverse the parents to find out if any of them are of the same instance
      * as the given class name.
      *
+     * @internal
+     *
      * @return null|QueryBuilder
      */
     public function getParentByClassName(string $className): ?QueryBuilder
@@ -631,16 +648,25 @@ abstract class QueryBuilder
         return $this;
     }
 
+    /**
+     * @internal
+     */
     public function handleException(ApitizerException $e): void
     {
         $this->getExceptionStrategy()->handle($this, $e);
     }
 
+    /**
+     * @internal
+     */
     public function getParent(): ?QueryBuilder
     {
         return $this->parent;
     }
 
+    /**
+     * @internal
+     */
     public function setParent(QueryBuilder $parent): self
     {
         $this->parent = $parent;
@@ -665,6 +691,7 @@ abstract class QueryBuilder
     }
 
     /**
+     * @internal
      * @return string[]
      */
     public function getAlwaysLoadColumns(): array
@@ -672,6 +699,9 @@ abstract class QueryBuilder
         return $this->alwaysLoadColumns;
     }
 
+    /**
+     * @internal
+     */
     public function getRules(): Rules
     {
         $rules = $this->rules;
@@ -683,5 +713,18 @@ abstract class QueryBuilder
         }
 
         return $rules;
+    }
+
+    public function getScope(): Scope
+    {
+        $scope = $this->scope;
+
+        if (! $scope) {
+            $scope = new Scope();
+            $this->scope($scope);
+            $this->scope = $scope;
+        }
+
+        return $scope;
     }
 }

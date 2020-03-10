@@ -23,15 +23,12 @@ class Controller extends BaseController
     protected $queryBuilder;
 
     /**
-     * @var Service The service class that is responsible for actually
-     * processing the request and storing the resource.
+     * @var array{schema: class-string<QueryBuilder>,
+     *            service: string|null,
+     *            service_method: string|null,
+     *            routeParameters: array<string, class-string>}
      */
-    protected $service;
-
-    /**
-     * @var string the name of the route parameter.
-     */
-    protected $parameterName;
+    protected $metadata;
 
     /**
      * @param string $method
@@ -52,15 +49,20 @@ class Controller extends BaseController
 
         /** @var \Illuminate\Routing\Route $route */
         $route = $request->route();
+
+        /**
+         * @var array{schema: class-string<QueryBuilder>,
+         *            service: string|null,
+         *            service_method: string|null,
+         *            routeParameters: array<string, class-string>} $metadata
+         */
         $metadata = $route->action['metadata'];
 
         $schema = $metadata['schema'];
         $this->queryBuilder = new $schema($request);
+        $this->metadata = $metadata;
 
-        $service = $metadata['service'];
-        $this->service = new $service();
-
-        $this->parameterName = $metadata['routeParamName'];
+        dd($metadata);
     }
 
     /**
@@ -144,8 +146,7 @@ class Controller extends BaseController
         $model = $model ? new $model : $this->queryBuilder->model();
         $modelClass = get_class($model);
 
-        // Which is then used in the \Illuminate\Auth\Middleware\Authorize
-        // getModel method.
+        // This is used in the \Illuminate\Auth\Middleware\Authorize::getModel
         $value = $request->route($this->parameterName, null);
 
         // This logic is taken from the RouteBinding::getModel method.

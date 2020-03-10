@@ -3,6 +3,7 @@
 namespace Tests\Support\Builders;
 
 use Apitizer\QueryBuilder;
+use Apitizer\Routing\Scope;
 use Apitizer\Validation\Rules;
 use Tests\Feature\Models\User;
 use Illuminate\Database\Eloquent\Model;
@@ -29,12 +30,16 @@ class EmptyBuilder extends QueryBuilder
         return [];
     }
 
-    public function model(): Model
+    public function scope(Scope $scope)
     {
-        return new User();
     }
 
     public function rules(Rules $rules)
     {
+    }
+
+    public function model(): Model
+    {
+        return new User();
     }
 }
