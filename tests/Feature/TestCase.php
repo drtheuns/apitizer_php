@@ -8,7 +8,7 @@ class TestCase extends \Tests\TestCase
 {
     use DatabaseTransactions;
 
-    protected function setUp(): void
+    public function setUp(): void
     {
         parent::setUp();
 

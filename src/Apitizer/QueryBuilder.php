@@ -103,17 +103,6 @@ abstract class QueryBuilder
     protected $specification;
 
     /**
-     * The parent query builder instance.
-     *
-     * This is used to prevent infinite loops when dealing with associations and
-     * reducing the number of operations a query builder performs, such as
-     * parsing the request.
-     *
-     * @var QueryBuilder
-     */
-    protected $parent;
-
-    /**
      * The maximum number of rows that the client is able to request.
      *
      * @var int
@@ -309,17 +298,10 @@ abstract class QueryBuilder
      */
     protected function association(string $key, string $builderClass)
     {
-        $builderInstance = $this->getParentByClassName($builderClass);
+        $builderInstance = new $builderClass();
 
-        if (! $builderInstance) {
-            $builderInstance = new $builderClass();
-
-            if (! $builderInstance instanceof QueryBuilder) {
-                throw DefinitionException::builderClassExpected($this, $key, $builderClass);
-            }
-
-            // setParent will take care of all the other setters.
-            $builderInstance->setParent($this);
+        if (! $builderInstance instanceof QueryBuilder) {
+            throw DefinitionException::builderClassExpected($this, $key, $builderClass);
         }
 
         return new Association($this, $builderInstance, $key);
@@ -383,9 +365,9 @@ abstract class QueryBuilder
      * @param string  $pageName
      * @param int|null  $page
      *
-     * @return LengthAwarePaginator<array>
+     * @return array<string, mixed>|\Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
-    public function paginate(int $perPage = null, $pageName = 'page', $page = null): LengthAwarePaginator
+    public function paginate(int $perPage = null, $pageName = 'page', $page = null)
     {
         $fetchSpec = $this->makeFetchSpecification();
         $perPage = $this->getPerPage($perPage);
@@ -393,26 +375,7 @@ abstract class QueryBuilder
                           ->build($this, $fetchSpec)
                           ->paginate($perPage, [], $pageName, $page);
 
-        return tap($paginator, function (AbstractPaginator $paginator) use ($fetchSpec) {
-            $renderedData = $this->getRenderer()->render(
-                $this,
-                $paginator->getCollection(),
-                $fetchSpec
-            );
-
-            $paginator->setCollection(collect($renderedData));
-
-            /** @var array<string, mixed> $queryParameters */
-            $queryParameters = $this->getRequest()->query();
-
-            // Ensure the all the supported query parameters that were passed in are
-            // also present in the pagination links.
-            $queryParameters = Arr::only(
-                $queryParameters,
-                array_values(Apitizer::getQueryParams())
-            );
-            $paginator->appends($queryParameters);
-        });
+        return $this->getRenderer()->paginate($this, $paginator, $fetchSpec);
     }
 
     protected function getPerPage(int $perPage = null): ?int
@@ -545,29 +508,6 @@ abstract class QueryBuilder
         return $this->availableFilters;
     }
 
-    /**
-     * Traverse the parents to find out if any of them are of the same instance
-     * as the given class name.
-     *
-     * @internal
-     *
-     * @return null|QueryBuilder
-     */
-    public function getParentByClassName(string $className): ?QueryBuilder
-    {
-        $parent = $this;
-
-        while (! is_null($parent)) {
-            $parent = $parent->getParent();
-
-            if ($parent && \get_class($parent) === $className) {
-                return $parent;
-            }
-        }
-
-        return null;
-    }
-
     public function getRequest(): Request
     {
         if (! $this->request) {
@@ -654,28 +594,6 @@ abstract class QueryBuilder
     public function handleException(ApitizerException $e): void
     {
         $this->getExceptionStrategy()->handle($this, $e);
-    }
-
-    /**
-     * @internal
-     */
-    public function getParent(): ?QueryBuilder
-    {
-        return $this->parent;
-    }
-
-    /**
-     * @internal
-     */
-    public function setParent(QueryBuilder $parent): self
-    {
-        $this->parent = $parent;
-        $this->setRequest($parent->getRequest())
-             ->setQueryInterpreter($parent->getQueryInterpreter())
-             ->setParser($parent->getParser())
-             ->setRenderer($parent->getRenderer());
-
-        return $this;
     }
 
     public function getMaximumLimit(): int

@@ -10,8 +10,9 @@ class CommentBuilder extends EmptyBuilder
     public function fields(): array
     {
         return [
-            'id'     => $this->int('id'),
-            'body'   => $this->string('body'),
+            'id'   => $this->int('id'),
+            'uuid' => $this->uuid('uuid'),
+            'body' => $this->string('body'),
         ];
     }
 
