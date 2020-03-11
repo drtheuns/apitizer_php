@@ -16,3 +16,4 @@ nav:
       - Rules: user-guide/rules.md
       - Policies: user-guide/policies.md
       - Exception handling: user-guide/exception-handling.md
+      - Rendering: user-guide/rendering.md
