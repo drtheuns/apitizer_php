@@ -124,8 +124,8 @@ always be an `id` and a `type`. You can implement the
 
 ## `ReferenceMapRenderer`
 
-The ReferenceMap is based on JSON-API, but the includes is an object that links
-the `type` and `id` in way that is easier to parse.
+The ReferenceMap is based on JSON-API, but the `included` is an object that
+links the `type` and `id` in way that is easier to parse.
 
 ```json
 {
