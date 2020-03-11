@@ -5,7 +5,7 @@ fetched data will be rendered to a set of nested objects. There are several
 renders available out of the box and are documented below. There are several
 ways of changing the renderer:
 
-1. Change the `Apitizer\Rendering\Renderer` in the Laravel container:
+- Change the `Apitizer\Rendering\Renderer` in the Laravel container:
 
 ```php
 use Apitizer\Rendering\Renderer;
@@ -20,7 +20,7 @@ class AppServiceProvider extends ServiceProvider
 }
 ```
 
-2. Override the `getRenderer` on the query builder:
+- Override the `getRenderer` on the query builder:
 
 ```php
 use Apitizer\Rendering\Renderer;
@@ -35,7 +35,7 @@ class PostBuilder extends QueryBuilder
 }
 ```
 
-3. Use the `setRenderer` method on an instance:
+- Use the `setRenderer` method on an instance:
 
 ```php
 PostBuilder::make($request)
