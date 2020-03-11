@@ -2,14 +2,14 @@
 
 namespace Tests\Feature\Rendering;
 
-use Apitizer\Rendering\JsonApiRenderer;
+use Apitizer\Rendering\ReferenceMapRenderer;
 use Tests\Feature\Models\Comment;
 use Tests\Feature\Models\Post;
 use Tests\Feature\Models\User;
-use Tests\Feature\TestCase;
 use Tests\Support\Builders\PostBuilder;
+use Tests\Feature\TestCase;
 
-class JsonApiRendererTest extends TestCase
+class ReferenceMapRendererTest extends TestCase
 {
     /** @test */
     public function it_renders_paginated_data(): void
@@ -26,7 +26,7 @@ class JsonApiRendererTest extends TestCase
                                  .'author(email, posts(title))')
                         ->make();
         $actual = PostBuilder::make($request)
-                ->setRenderer(new JsonApiRenderer)
+                ->setRenderer(new ReferenceMapRenderer)
                 ->paginate();
 
         $data = [
@@ -54,53 +54,60 @@ class JsonApiRendererTest extends TestCase
         ];
 
         $included = [
-            [
-                'type' => 'comment',
-                'id' => (string) $comment->id,
-                'attributes' => [
-                    'body' => $comment->body,
-                    'uuid' => (string) $comment->uuid,
-                ],
-                'relationships' => [
-                    'author' => [
-                        'data' => [
-                            'type' => 'user',
-                            'id' => (string) $author->id,
-                        ]
+            'comment' => [
+                (string) $comment->id => [
+                    'type' => 'comment',
+                    'id' => (string) $comment->id,
+                    'attributes' => [
+                        'body' => $comment->body,
+                        'uuid' => (string) $comment->uuid,
                     ],
-                ]
-            ],
-            [
-                'type' => 'user',
-                'id' => (string) $author->id,
-                'attributes' => $author->only(['name', 'email', 'should_reset_password']),
-                'relationships' => [
-                    'comments' => [
-                        'data' => [
-                            [
-                                'type' => 'comment',
-                                'id' => (string) $comment->id,
+                    'relationships' => [
+                        'author' => [
+                            'data' => [
+                                'type' => 'user',
+                                'id' => (string) $author->id,
                             ]
-                        ]
-                    ],
-                    'posts' => [
-                        'data' => [
-                            [
-                                'type' => 'post',
-                                'id' => (string) $post->id,
+                        ],
+                    ]
+                ],
+            ],
+            'user' => [
+                (string) $author->id => [
+                    'type' => 'user',
+                    'id' => (string) $author->id,
+                    'attributes' => $author->only(['name', 'email', 'should_reset_password']),
+                    'relationships' => [
+                        'comments' => [
+                            'data' => [
+                                [
+                                    'type' => 'comment',
+                                    'id' => (string) $comment->id,
+                                ]
+                            ]
+                        ],
+                        'posts' => [
+                            'data' => [
+                                [
+                                    'type' => 'post',
+                                    'id' => (string) $post->id,
+                                ]
                             ]
                         ]
                     ]
-                ]
+                ],
             ],
-            [
-                'type' => 'post',
-                'id' => (string) $post->id,
-                'attributes' => $post->only('title'),
+            'post' => [
+                (string) $post->id => [
+                    'type' => 'post',
+                    'id' => (string) $post->id,
+                    'attributes' => $post->only('title'),
+                ]
             ]
         ];
 
         $this->assertEquals($data, $actual['data']);
         $this->assertEquals($included, $actual['included']);
     }
+
 }
