@@ -279,7 +279,7 @@ class JsonApiRenderer extends AbstractRenderer implements Renderer
             $this->included[$type][$id] = $this->renderOneWithoutRelations(
                 $row,
                 $queryBuilder,
-                $association->getFields() ?? [],
+                $association->getFields() ?? []
             );
 
             $resource = &$this->included[$type][$id];
