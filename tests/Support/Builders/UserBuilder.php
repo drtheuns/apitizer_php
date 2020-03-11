@@ -23,6 +23,7 @@ class UserBuilder extends EmptyBuilder
     {
         return [
             'posts' => $this->association('posts', PostBuilder::class),
+            'comments' => $this->association('comments', CommentBuilder::class),
         ];
     }
 

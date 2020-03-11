@@ -92,7 +92,7 @@ class SelectTest extends TestCase
 
         $this->assertEquals([
             'id' => $post->id,
-            'comments' => $post->comments->map->only('id', 'body')->all(),
+            'comments' => $post->comments->map->only('id', 'body', 'uuid')->all(),
         ], $result);
     }
 
@@ -110,7 +110,7 @@ class SelectTest extends TestCase
         $this->assertEquals([
             [
                 'id' => $post->id,
-                'comments' => [$comment->only('id', 'body')],
+                'comments' => [$comment->only('id', 'body', 'uuid')],
             ]
         ], $result);
     }
