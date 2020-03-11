@@ -9,6 +9,7 @@ $factory->define(User::class, function (Faker $faker, array $attributes) {
         'name'  => $faker->name,
         'email' => $faker->email,
         'active' => 1,
+        'should_reset_password' => false,
     ];
 });
 

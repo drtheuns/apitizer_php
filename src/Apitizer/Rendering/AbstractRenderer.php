@@ -7,11 +7,35 @@ use Apitizer\Types\AbstractField;
 use Apitizer\Types\Association;
 use Apitizer\Types\Concerns\FetchesValueFromRow;
 use Apitizer\Policies\PolicyFailed;
+use Apitizer\Types\FetchSpec;
+use Apitizer\Apitizer;
+use Apitizer\Exceptions\InvalidOutputException;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
 
-abstract class AbstractRenderer
+abstract class AbstractRenderer implements Renderer
 {
     use FetchesValueFromRow;
+
+    public function paginate(QueryBuilder $queryBuilder, LengthAwarePaginator $paginator, FetchSpec $fetchSpec)
+    {
+        $renderedData = $this->render($queryBuilder, $paginator->getCollection(), $fetchSpec);
+
+        $paginator->setCollection(collect($renderedData));
+
+        /** @var array<string, mixed> $queryParameters */
+        $queryParameters = $queryBuilder->getRequest()->query();
+
+        // Ensure the all the supported query parameters that were passed in are
+        // also present in the pagination links.
+        $queryParameters = Arr::only(
+            $queryParameters,
+            array_values(Apitizer::getQueryParams())
+        );
+        $paginator->appends($queryParameters);
+
+        return $paginator;
+    }
 
     /**
      * @param QueryBuilder $queryBuilder

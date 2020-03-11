@@ -3,6 +3,7 @@
 namespace Apitizer\Rendering;
 
 use ArrayAccess;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use ReflectionClass;
 use Apitizer\QueryBuilder;
 use Illuminate\Support\Str;
@@ -15,12 +16,45 @@ use Illuminate\Database\Eloquent\Model;
 use Apitizer\Exceptions\InvalidOutputException;
 
 class JsonApiRenderer extends AbstractRenderer implements Renderer
-
 {
     /**
-     * @var array<string, mixed>
+     * @var array<string, array<string, array<string, mixed>>>
      */
-    protected $includes = [];
+    protected $included = [];
+
+    public function paginate(QueryBuilder $queryBuilder, LengthAwarePaginator $paginator, FetchSpec $fetchSpec)
+    {
+        /** @var LengthAwarePaginator */
+        $paginator = parent::paginate($queryBuilder, $paginator, $fetchSpec);
+        $paginatedData = $paginator->toArray();
+
+        $rootObject = $paginatedData['data'];
+        unset($paginatedData['data']);
+
+        // This is to support the JSON-API pagination format:
+        // https://jsonapi.org/format/#fetching-pagination
+        $rootObject['links'] = [
+            'first' => $paginatedData['first_page_url'],
+            'last' => $paginatedData['last_page_url'],
+            'prev' => $paginatedData['prev_page_url'],
+            'next' => $paginatedData['next_page_url'],
+        ];
+
+        // This additional information is not part of the spec, so it must be
+        // put in the meta.
+        $rootObject['meta'] = [
+            'pagination' => [
+                'from'         => $paginatedData['from'],
+                'to'           => $paginatedData['to'],
+                'total'        => $paginatedData['total'],
+                'current_page' => $paginatedData['current_page'],
+                'last_page'    => $paginatedData['last_page'],
+                'per_page'     => $paginatedData['per_page'],
+            ],
+        ];
+
+        return $rootObject;
+    }
 
     public function render(QueryBuilder $queryBuilder, $data, FetchSpec $fetchSpec): array
     {
@@ -30,7 +64,13 @@ class JsonApiRenderer extends AbstractRenderer implements Renderer
             $fetchSpec->getFields(),
             $fetchSpec->getAssociations()
         );
-        $render['included'] = $this->includes;
+
+        $render['included'] = collect($this->included)->flatMap(function ($include) {
+            return array_values($include);
+        })->values()->all();
+
+        $this->included = [];
+
         return $render;
     }
 
@@ -48,21 +88,48 @@ class JsonApiRenderer extends AbstractRenderer implements Renderer
         array $fields,
         array $associations
     ): array {
+        $data = $this->renderOneWithoutRelations($row, $queryBuilder, $fields);
+
+        $this->renderAssociations($row, $associations, $data);
+
+        return $data;
+    }
+
+    /**
+     * @param mixed $row
+     * @param QueryBuilder $queryBuilder
+     * @param AbstractField[] $fields
+     * @return array{type: string, id: string, attributes: array<string, mixed>}
+     */
+    protected function renderOneWithoutRelations($row, QueryBuilder $queryBuilder, array $fields)
+    {
         $attributes = [];
-        $relationships = [];
         foreach ($fields as $field) {
             $this->addRenderedField($row, $field, $attributes);
-        }
-        foreach ($associations as $association) {
-            $this->addRenderedAssociation($row, $association, $relationships, $queryBuilder);
         }
 
         return [
             'type'          => $this->getResourceType($queryBuilder, $row),
             'id'            => $this->getResourceId($queryBuilder, $row),
             'attributes'    => $attributes,
-            'relationships' => $relationships,
         ];
+    }
+
+    /**
+     * @param mixed $row
+     * @param Association[] $associations
+     * @param array<string, mixed> $resource
+     */
+    protected function renderAssociations($row, array $associations, array &$resource): void
+    {
+        $relationships = [];
+        foreach ($associations as $association) {
+            $this->addRenderedAssociation($row, $association, $relationships);
+        }
+
+        if (! empty($relationships)) {
+            $resource['relationships'] = $relationships;
+        }
     }
 
     /**
@@ -125,265 +192,104 @@ class JsonApiRenderer extends AbstractRenderer implements Renderer
 
     /**
      * Render the associations of a resource.
-     * 
+     *
      * @param mixed $row
      * @param Association $association
      * @param array<string, mixed> $renderedData
-     * @param QueryBuilder $queryBuilder
      */
-    protected function addRenderedAssociation($row, Association $association, array &$renderedData, Querybuilder $queryBuilder): void
+    protected function addRenderedAssociation($row, Association $association, array &$renderedData): void
     {
+        $queryBuilder = $association->getRelatedQueryBuilder();
         $associationData = $this->valueFromRow($row, $association->getKey());
 
         if (! $association->passesPolicy($associationData, $row)) {
             return;
         }
 
-        //If it only contains an id.
-        $this->addRenderedAssociationSingleElement($row, $association, $associationData, $renderedData, $queryBuilder);
-        //If it contains more than just an id.
-        $this->addRenderedAssociationMultiElement($row, $association, $associationData, $renderedData, $queryBuilder);
-        
-   
-    }
+        // Generate the links for the original resource
+        if ($this->isSingleRowOfData($associationData)) {
+            $links = $this->generateResourceReference($associationData, $queryBuilder);
+            $this->addIncludedResource($associationData, $association, $association->getRelatedQueryBuilder());
+        } else {
+            $links = [];
 
-    /**
-     * Render the association data if only the id is provided
-     *
-     * @param mixed $row
-     * @param Association $association
-     * @param object $associationData
-     * @param array<string, mixed> $renderedData
-     * @param QueryBuilder $queryBuilder
-     * @return void
-     */
-    protected function addRenderedAssociationSingleElement($row, Association $association, object $associationData, array &$renderedData, $queryBuilder): void
-    {
-        $count = 0;
-        foreach ($associationData as $data) 
-        {
-            if (!is_bool($data)) {
-                $renderedData[$association->getName()]['data'][$count]['type'] = Str::snake(class_basename($data));
-                $renderedData[$association->getName()]['data'][$count]['id'] = $this->getResourceId($queryBuilder, $row);
-                $count++;
+            foreach ($associationData as $row) {
+                $links[] = $this->generateResourceReference($row, $queryBuilder);
+
+                $this->addIncludedResource($row, $association, $association->getRelatedQueryBuilder());
             }
         }
+
+        $renderedData[$association->getName()]['data'] = $links;
     }
 
     /**
-     * Render the association data if more than the id is provided
-     *
+     * @param mixed $row
+     * @param QueryBuilder $queryBuilder
+     * @return array{type: string, id: string}
+     */
+    protected function generateResourceReference($row, QueryBuilder $queryBuilder): array
+    {
+        return [
+            'type' => $this->getResourceType($queryBuilder, $row),
+            'id'   => $this->getResourceId($queryBuilder, $row),
+        ];
+    }
+
+    /**
      * @param mixed $row
      * @param Association $association
-     * @param object $associationData
-     * @param array<string, mixed> $renderedData
      * @param QueryBuilder $queryBuilder
-     * @return void
      */
-    protected function addRenderedAssociationMultiElement($row, Association $association, object $associationData, array &$renderedData, $queryBuilder): void
+    protected function addIncludedResource($row, Association $association, QueryBuilder $queryBuilder): void
     {
-        $count = 0;
-        foreach ($associationData->only('id') as $data) 
-        {
-            $renderedData[$association->getName()]['data'][$count]['type'] = Str::snake(class_basename($associationData));
-            $renderedData[$association->getName()]['data'][$count]['id'] = $this->getResourceId($queryBuilder, $row);
-            $count++;
+        $type = $this->getResourceType($queryBuilder, $row);
+        $id = $this->getResourceId($queryBuilder, $row);
+
+        // If it already exists, add any missing fields/associations.
+        if ($this->isIncluded($type, $id)) {
+            $resource = &$this->included[$type][$id];
+
+            // Add any missing associations or fields.
+            foreach ($association->getFields() ?? [] as $field) {
+                if (! isset($resource['attributes'][$field->getName()])) {
+                    $this->addRenderedField($row, $field, $resource['attributes']);
+                }
+            }
+
+            foreach ($association->getAssociations() ?? [] as $childAssociation) {
+                if (! isset($resource['relationships'])) {
+                    $resource['relationships'] = [];
+                }
+
+                if (! isset($resource['relationships'][$childAssociation->getName()])) {
+                    $this->addRenderedAssociation($row, $childAssociation, $resource['relationships']);
+                }
+            }
+
+        }
+
+        // Otherwise, we're going to create the resource from scratch.
+        else {
+            // Before we start rendering the associations, we need to first add
+            // the resource to the includes.
+            // If we have for example: comments -> author -> comments, then the
+            // child comments would have been rendered first, but the parent
+            // comments are not aware of this, and will overwrite the child.
+            $this->included[$type][$id] = $this->renderOneWithoutRelations(
+                $row,
+                $queryBuilder,
+                $association->getFields() ?? [],
+            );
+
+            $resource = &$this->included[$type][$id];
+
+            $this->renderAssociations($row, $association->getAssociations() ?? [], $resource);
         }
     }
 
-
-
-
-
-
-
-
-
-
-    // public function render(QueryBuilder $queryBuilder, $data, FetchSpec $fetchSpec): array
-    // {
-    //     return $this->renderManyRow(
-    //         $queryBuilder,
-    //         $data,
-    //         $fetchSpec->getFields(),
-    //         $fetchSpec->getAssociations()
-    //     );
-    // }
-
-    // /**
-    //  * @param mixed $row
-    //  * @param QueryBuilder $queryBuilder
-    //  * @param AbstractField[] $fields
-    //  * @param Association[] $associations
-    //  *
-    //  * @return array<string, mixed>
-    //  */
-    // protected function renderManyRow(
-    //     QueryBuilder $queryBuilder,
-    //     $rows,
-    //     array $fields,
-    //     array $associations
-    // ): array {
-    //     $renderedData = [];
-
-    //     // $renderedData['type'] = "posts";
-
-        
-    //     $rowCount = 0;
-    //     foreach($rows as $row){
-    //         //dd($row;)
-    //         $renderedData[]['type'] = Str::plural($this->getResourceType($queryBuilder, $rows));
-    //         $renderedData[]['id'] = $row->getKey();
-
-    //         // foreach($fields as $field){
-    //         //     $renderedData[$rowCount]['attributes'][$field->getName()] = $field->render($row, $this);
-    //         // }
-    //         $renderedData = $this->renderFields($renderedData, $fields, $row);
-    //         $className = (new ReflectionClass($queryBuilder->model()));
-    //         $availableMethods = $className->getMethods();
-    //         //dd($row);
-    //         //dd($availableMethods[0]->getReturnType());
-    //         //dd($row->getTraits());
-
-    //         $relations = [];
-    //         foreach ($className->getMethods() as $reflectionMethod) {
-    //             $returnType = $reflectionMethod->getReturnType();
-    //             if ($returnType) {
-    //                 if (in_array(class_basename($returnType->getName()), ['HasOne', 'HasMany', 'BelongsTo', 'BelongsToMany', 'MorphToMany', 'MorphTo'])) {
-    //                     $relations[] = $reflectionMethod;
-    //                 }
-    //             }
-    //         }
-
-    //         //dd($relations);
-    //         foreach($relations as $relation){
-    //             // dd($row);
-    //             $relationName = $relation->getName();
-    //             $renderedData[]['relationships'][$relationName]['links']['self']  = "url";
-    //             $renderedData[]['relationships'][$relationName]['links']['related'] = "url";
-    //             $renderedData[]['relationships'][$relationName]['data']['type'] = $relationName;
-    //             $renderedData[]['relationships'][$relationName]['data']['id'] = $row->author;
-    //             // $renderedData[$rowCount]['relationships'][$relationName]['data']['id'] = $row->$relationName->id;
-    //             //dd($row->$relationName());
-    //         }
-
-    //         $rowCount++;
-    //     }
-
-    //     // foreach ($fields as $field) {
-    //     //     $this->addRenderedField($row, $field, $renderedData);
-    //     // }
-
-    //     // foreach ($associations as $association) {
-    //     //     $this->addRenderedAssociation($row, $association, $renderedData);
-    //     // }
-
-    //     return $renderedData;
-    // }
-
-
-    // private function renderFields(array $renderedData, array $fields, object $row)
-    // {
-    //     foreach($fields as $field){
-    //         $renderedData[]['attributes'][$field->getName()] = $field->render($row, $this);
-    //     }
-    //     return $renderedData;
-    // }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // public function render(QueryBuilder $queryBuilder, $data, FetchSpec $fetchSpec): array
-    // {
- 
-    //     if ($this->isSingleRowOfData($data)) {
-    //         $response['data'] = $this->renderOne($data, $selectedFields);
-    //         return $response;
-    //     }
-    //     else {         
-
-    //         $response['data'] = $this->renderMultiplefields($queryBuilder, $data, $fetchSpec);
-    //         return $response;
-    //     }
-
-    //     return [];
-    // }
-
-    // protected function renderOne(QueryBuilder $queryBuilder, $row, array $selectedFields): array
-    // {
-    //     $resource = [
-    //         'id'   => $this->getResourceId($queryBuilder, $row),
-    //         'type' => $this->getResourceType($queryBuilder, $row),
-    //     ];
-
-    //     return [];
-    // }
-
-    // protected function renderMultiplefields(QueryBuilder $queryBuilder, $row, FetchSpec $selectedFields)
-    // {
-    //     return $row[0];
-    //     dd($row[0], $selectedFields);
-
-    // }
-
-    // protected function getResourceType(QueryBuilder $queryBuilder, $row)
-    // {
-    //     if ($row instanceof Resource) {
-    //         return $row->getResourceType();
-    //     }
-
-    //     $className = (new ReflectionClass($queryBuilder->model()))->getShortName();
-
-    //     return Str::snake($className);
-    // }
-
-    // protected function getResourceId(QueryBuilder $queryBuilder, $row): string
-    // {
-    //     if ($row instanceof Resource) {
-    //         return $row->getResourceId();
-    //     }
-
-    //     if ($row instanceof Model) {
-    //         return (string) $row->getKey();
-    //     }
-
-    //     if (is_array($row) || $row instanceof ArrayAccess) {
-    //         if (isset($row['id'])) {
-    //             return (string) $row['id'];
-    //         }
-
-    //         if (isset($row['uuid'])) {
-    //             return (string) $row['uuid'];
-    //         }
-    //     }
-
-    //     if (is_object($row)) {
-    //         if (isset($row->{'id'})) {
-    //             return (string) $row->{'id'};
-    //         }
-
-    //         if (isset($row->{'uuid'})) {
-    //             return (string) $row->{'uuid'};
-    //         }
-    //     }
-
-    //     throw InvalidOutputException::noJsonApiIdentifier($queryBuilder, $row);
-    // }
+    protected function isIncluded(string $type, string $id): bool
+    {
+        return isset($this->included[$type][$id]);
+    }
 }
