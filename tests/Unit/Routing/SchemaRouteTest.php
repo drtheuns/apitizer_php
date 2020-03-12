@@ -5,6 +5,7 @@ namespace Tests\Unit\Routing;
 use Apitizer\GenericApi\ModelService;
 use Apitizer\Routing\SchemaRoute;
 use Apitizer\Routing\Scope;
+use Tests\Support\Builders\EmptyBuilder;
 use Tests\Support\Builders\UserBuilder;
 use Tests\Unit\TestCase;
 use Illuminate\Support\Facades\Route as LaravelRoute;
@@ -86,99 +87,79 @@ class SchemaRouteTest extends TestCase
     public function it_registers_all_routes(): void
     {
         $scope = (new Scope)->crud();
-        $routes = (new SchemaRoute(UserBuilder::class))->generateRoutes($scope, new UserBuilder);
+        $routes = (new SchemaRoute(UserBuilder::class, $scope))->generateRoutes();
 
         $this->assertCount(5, $routes);
     }
 
-    // /** @test */
-    // public function it_stores_metadata_in_the_route_action(): void
-    // {
-    //     $route = (new Route(UserBuilder::class, []))->registerShow();
+    /** @test */
+    public function it_stores_metadata_in_the_route_action(): void
+    {
+        $scope = (new Scope)->readable();
+        $affordance = $scope->getAffordances()['readable'];
+        $route = (new SchemaRoute(UserBuilder::class))->registerShow($scope, $affordance, new UserBuilder);
 
-    //     $this->assertArrayHasKey('metadata', $route->action);
-    //     $this->assertEquals([
-    //         'schema'         => UserBuilder::class,
-    //         'service'        => ModelService::class,
-    //         'routeParamName' => 'user',
-    //     ], $route->action['metadata']);
-    // }
+        $this->assertArrayHasKey('metadata', $route->action);
+        $this->assertEquals([
+            'schema'         => UserBuilder::class,
+            'service'        => null,
+            'service_method' => null,
+            'routeParameters' => [
+                'users' => [
+                    'schema'      => UserBuilder::class,
+                    'has_param'   => false,
+                    'association' => null,
+                ],
+                'user' => [
+                    'schema'      => UserBuilder::class,
+                    'has_param'   => true,
+                    'association' => null
+                ]
+            ]
+        ], $route->action['metadata']);
+    }
 
-    // /** @test */
-    // public function it_allows_a_different_controller_to_be_passed(): void
-    // {
-    //     $controller = '\App\Http\Controllers\MyOwnController';
-    //     $route = (new Route(UserBuilder::class, ['controller' => $controller]))->registerShow();
+    /** @test */
+    public function it_allows_a_different_service_to_be_passed(): void
+    {
+        $service = 'App\Services\MyOwnService';
+        $scope = (new Scope)->creatable($service);
+        $affordance = $scope->getAffordances()['creatable'];
+        $route = (new SchemaRoute(UserBuilder::class))->registerStore($scope, $affordance, new UserBuilder);
 
-    //     $this->assertEquals($controller . '@show', $route->action['uses']);
-    // }
+        $this->assertEquals($service, $route->action['metadata']['service']);
+    }
 
-    // /** @test */
-    // public function it_allows_a_different_service_to_be_passed(): void
-    // {
-    //     $service = '\App\Services\MyOwnService';
-    //     $route = (new Route(UserBuilder::class, ['service' => $service]))->registerShow();
+    /** @test */
+    public function the_routes_are_registered_in_the_router(): void
+    {
+        // This test is primarily a sanity check that the routes are actually
+        // registered with the router, rather than just instantiated but not
+        // stored.
+        $scope = (new Scope)->crud();
+        $routes = (new SchemaRoute(UserBuilder::class, $scope))->generateRoutes();
 
-    //     $this->assertEquals($service, $route->action['metadata']['service']);
-    // }
+        $this->assertCount(5, $this->getRegisteredRoutes());
+    }
 
-    // /** @test */
-    // public function the_routes_are_registered_in_the_router(): void
-    // {
-    //     // This test is primarily a sanity check that the routes are actually
-    //     // registered with the router, rather than just instantiated but not
-    //     // stored.
-    //     $routes = (new Route(UserBuilder::class, []))->register();
+    /** @test */
+    public function routes_can_be_registered_using_the_schema_macro(): void
+    {
+        LaravelRoute::schema(CrudBuilder::class);
 
-    //     $this->assertCount(5, $this->getRegisteredRoutes());
-    // }
+        $this->assertCount(5, $this->getRegisteredRoutes());
+    }
 
-    // /** @test */
-    // public function routes_can_be_registered_using_the_schema_macro(): void
-    // {
-    //     LaravelRoute::schema(UserBuilder::class);
+    private function getRegisteredRoutes()
+    {
+        return app('router')->getRoutes()->getRoutes();
+    }
+}
 
-    //     $this->assertCount(5, $this->getRegisteredRoutes());
-    // }
-
-    // /** @test */
-    // public function only_allows_only_certain_routes_to_be_registered(): void
-    // {
-    //     LaravelRoute::schema(UserBuilder::class)->only(['show']);
-
-    //     $this->assertCount(1, $this->getRegisteredRoutes());
-    // }
-
-    // /** @test */
-    // public function except_allows_routes_to_be_excluded_from_registration(): void
-    // {
-    //     LaravelRoute::schema(UserBuilder::class)->except(['show']);
-
-    //     $this->assertCount(4, $this->getRegisteredRoutes());
-    // }
-
-    // /** @test */
-    // public function the_service_and_controller_can_be_when_using_the_route_builder(): void
-    // {
-    //     $controller = '\App\Http\Controllers\MyController';
-    //     $service = '\App\Services\UserService';
-
-    //     LaravelRoute::schema(UserBuilder::class)
-    //         ->only(['show'])
-    //         ->controller($controller)
-    //         ->service($service);
-
-    //     $routeCollection = app('router')->getRoutes();
-    //     $this->assertCount(1, $routeCollection->getRoutes());
-
-    //     $route = $routeCollection->getByAction('App\Http\Controllers\MyController@show');
-
-    //     $this->assertNotNull($route);
-    //     $this->assertEquals($service, $route->action['metadata']['service']);
-    // }
-
-    // private function getRegisteredRoutes()
-    // {
-    //     return app('router')->getRoutes()->getRoutes();
-    // }
+class CrudBuilder extends EmptyBuilder
+{
+    public function scope(Scope $scope)
+    {
+        $scope->crud();
+    }
 }

@@ -103,6 +103,11 @@ abstract class QueryBuilder
     protected $specification;
 
     /**
+     * @var QueryBuilder|null the parent query builder in case on associations.
+     */
+    protected $parent;
+
+    /**
      * The maximum number of rows that the client is able to request.
      *
      * @var int
@@ -303,6 +308,8 @@ abstract class QueryBuilder
         if (! $builderInstance instanceof QueryBuilder) {
             throw DefinitionException::builderClassExpected($this, $key, $builderClass);
         }
+
+        $builderInstance->setParent($this);
 
         return new Association($this, $builderInstance, $key);
     }
@@ -610,6 +617,24 @@ abstract class QueryBuilder
 
     /**
      * @internal
+     */
+    public function getParent(): ?QueryBuilder
+    {
+        return $this->parent;
+    }
+
+    /**
+     * @internal
+     */
+    public function setParent(QueryBuilder $parent): self
+    {
+        $this->parent = $parent;
+
+        return $this;
+    }
+
+    /**
+     * @internal
      * @return string[]
      */
     public function getAlwaysLoadColumns(): array
@@ -633,6 +658,9 @@ abstract class QueryBuilder
         return $rules;
     }
 
+    /**
+     * @internal
+     */
     public function getScope(): Scope
     {
         $scope = $this->scope;

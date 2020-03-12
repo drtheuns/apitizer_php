@@ -29,11 +29,17 @@ class SchemaRoute
     protected $router;
 
     /**
+     * @var Scope|null
+     */
+    protected $scope;
+
+    /**
      * @param class-string<QueryBuilder> $schema
      */
-    public function __construct(string $schema)
+    public function __construct(string $schema, Scope $scope = null)
     {
         $this->schema = $schema;
+        $this->scope = $scope;
         $this->router = app('router');
     }
 
@@ -48,7 +54,7 @@ class SchemaRoute
             throw RouteDefinitionException::queryBuilderExpected($this->schema);
         }
 
-        $scope = $schema->getScope();
+        $scope = $this->scope ?? $schema->getScope();
 
         return $this->generateRouteForScope($scope, $schema);
     }
@@ -163,7 +169,7 @@ class SchemaRoute
      * @return array{schema: class-string<QueryBuilder>,
      *               service: string|null,
      *               service_method: string|null,
-     *               routeParameters: array<string, class-string>}
+     *               routeParameters: array<string, array<string, string|bool>>}
      */
     protected function metadata(
         QueryBuilder $schema,

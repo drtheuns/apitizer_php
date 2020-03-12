@@ -3,6 +3,7 @@
 namespace Apitizer\Routing;
 
 use Apitizer\QueryBuilder;
+use Apitizer\Types\Association;
 use Illuminate\Support\Str;
 
 class RouteSegmentBuilder
@@ -63,18 +64,16 @@ class RouteSegmentBuilder
     }
 
     /**
-     * @return array<string, class-string>
+     * @return array<string, array<string, string|bool>>
      */
     public function routeParameters(): array
     {
         return collect($this->segments)
-            ->filter(function ($segment) {
-                return $segment['type'] === 'param';
-            })
             ->mapWithKeys(function ($segment) {
                 return [$segment['segment'] => [
-                    'schema'    => $segment['schema'],
-                    'has_param' => $segment['visible'],
+                    'schema'      => $segment['schema'],
+                    'has_param'   => $segment['type'] === 'param' && $segment['visible'],
+                    'association' => $segment['association'],
                 ]];
             })
             ->all();
@@ -91,6 +90,7 @@ class RouteSegmentBuilder
         // and work upwards through the parents.
         do {
             $segment = $this->getSegmentName($schema, $scope);
+            $association = $this->getAssociationToParent($schema, $scope);
 
             // After the first iteration we always need to add the ID param.
             // Since we're building the segments in reverse order, we need to
@@ -103,7 +103,8 @@ class RouteSegmentBuilder
                     // If the association is, for example, a belongsTo, then we
                     // don't have a route param, but we still need to add the
                     // segment so the controller knows about the relationship.
-                    'visible' => $this->associationHasRouteParam($schema, $scope),
+                    'visible' => $association ? $association->returnsCollection() : true,
+                    'association' => $association ? $association->getName() : null,
                 ];
             }
 
@@ -112,6 +113,7 @@ class RouteSegmentBuilder
                 'type'    => 'segment',
                 'schema'  => get_class($schema),
                 'visible' => true,
+                'association' => $association ? $association->getName() : null,
             ];
 
             // Prepare for next iteration.
@@ -149,14 +151,12 @@ class RouteSegmentBuilder
         return Str::plural(Str::slug($segment));
     }
 
-    protected function associationHasRouteParam(QueryBuilder $schema, Scope $scope): bool
+    protected function getAssociationToParent(QueryBuilder $schema, Scope $scope): ?Association
     {
         if (! $parent = $schema->getParent()) {
-            return true;
+            return null;
         }
 
-        $association = $parent->getAssociations()[$scope->getName()];
-
-        return $association->returnsCollection();
+        return $parent->getAssociations()[$scope->getName()];
     }
 }

@@ -24,7 +24,7 @@ class QueryInterpreter
      */
     public function build(QueryBuilder $queryBuilder, FetchSpec $fetchSpec): Builder
     {
-        $query = $queryBuilder->model()->query();
+        $query = $this->newQueryInstance($queryBuilder);
         $query = $queryBuilder->beforeQuery($query, $fetchSpec);
 
         $this->applySelect(
@@ -41,13 +41,18 @@ class QueryInterpreter
         return $query;
     }
 
+    protected function newQueryInstance(QueryBuilder $queryBuilder): Builder
+    {
+        return $queryBuilder->model()->query();
+    }
+
     /**
      * @param Builder $query
      * @param AbstractField[] $fields
      * @param Association[] $associations
      * @param string[] $additionalSelects
      */
-    private function applySelect(
+    protected function applySelect(
         Builder $query,
         array $fields,
         array $associations,
@@ -109,7 +114,7 @@ class QueryInterpreter
      * @param Builder $query
      * @param Sort[] $sorts
      */
-    private function applySorting(Builder $query, array $sorts): void
+    protected function applySorting(Builder $query, array $sorts): void
     {
         foreach ($sorts as $sort) {
             if ($handler = $sort->getHandler()) {
@@ -122,7 +127,7 @@ class QueryInterpreter
      * @param Builder $query
      * @param Filter[] $filters
      */
-    private function applyFilters(Builder $query, array $filters): void
+    protected function applyFilters(Builder $query, array $filters): void
     {
         foreach ($filters as $filter) {
             if ($handler = $filter->getHandler()) {

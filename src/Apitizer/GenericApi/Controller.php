@@ -2,13 +2,10 @@
 
 namespace Apitizer\GenericApi;
 
+use Apitizer\Interpreter\GenericApiQueryInterpreter;
 use Apitizer\QueryBuilder;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
-use Illuminate\Support\Str;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 /**
  * The generic controller is an ease-of-use feature so people don't have to
@@ -26,9 +23,16 @@ class Controller extends BaseController
      * @var array{schema: class-string<QueryBuilder>,
      *            service: string|null,
      *            service_method: string|null,
-     *            routeParameters: array<string, class-string>}
+     *            routeParameters: array<string, array{schema: class-string,
+     *                                                 has_param: bool,
+     *                                                 association: string|null}>}
      */
     protected $metadata;
+
+    /**
+     * @var RouteParameter[]
+     */
+    protected $routeParameters;
 
     /**
      * @param string $method
@@ -54,7 +58,10 @@ class Controller extends BaseController
          * @var array{schema: class-string<QueryBuilder>,
          *            service: string|null,
          *            service_method: string|null,
-         *            routeParameters: array<string, class-string>} $metadata
+         *            routeParameters: array<string, array{schema: class-string,
+         *                                                 has_param:bool,
+         *                                                 association: string|null}>} $metadata
+         * @see \Apitizer\Routing\SchemaRoute::metadata
          */
         $metadata = $route->action['metadata'];
 
@@ -62,15 +69,17 @@ class Controller extends BaseController
         $this->queryBuilder = new $schema($request);
         $this->metadata = $metadata;
 
-        dd($metadata);
+        $this->routeParameters = $this->prepareRouteParameters($request);
     }
 
     /**
-     * @return LengthAwarePaginator
+     * @return array<string, mixed>|\Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
     public function index(Request $request)
     {
-        return $this->queryBuilder->paginate();
+        return $this->queryBuilder
+            ->setQueryInterpreter(new GenericApiQueryInterpreter($this->routeParameters))
+            ->paginate();
     }
 
     /**
@@ -78,7 +87,10 @@ class Controller extends BaseController
      */
     public function show(Request $request)
     {
-        $model = $this->getModelFromRequest($request);
+        $model = $this->queryBuilder
+               ->setQueryInterpreter(new GenericApiQueryInterpreter($this->routeParameters))
+               ->buildQuery()
+               ->first();
 
         /** @var array<string, mixed> $rendered */
         $rendered = $this->queryBuilder->render($model);
@@ -86,74 +98,65 @@ class Controller extends BaseController
         return $rendered;
     }
 
+    // /**
+    //  * @return array<string, mixed>
+    //  */
+    // public function store(Request $request)
+    // {
+    //     $model = $this->service->create(
+    //         $this->queryBuilder->validated(),
+    //         $this->queryBuilder
+    //     );
+
+    //     /** @var array<string, mixed> $rendered */
+    //     $rendered = $this->queryBuilder->render($model);
+
+    //     return $rendered;
+    // }
+
+    // /**
+    //  * @return array<string, mixed>
+    //  */
+    // public function update(Request $request)
+    // {
+    //     $model = $this->service->update(
+    //         $this->getModelFromRequest($request),
+    //         $this->queryBuilder->validated(),
+    //         $this->queryBuilder
+    //     );
+
+    //     /** @var array<string, mixed> $rendered */
+    //     $rendered = $this->queryBuilder->render($model);
+
+    //     return $rendered;
+    // }
+
+    // /**
+    //  * @return \Illuminate\Http\Response
+    //  */
+    // public function destroy(Request $request)
+    // {
+    //     $this->service->delete(
+    //         $this->getModelFromRequest($request),
+    //         $this->queryBuilder
+    //     );
+
+    //     return response('', 204);
+    // }
+
     /**
-     * @return array<string, mixed>
+     * @return RouteParameter[]
      */
-    public function store(Request $request)
+    protected function prepareRouteParameters(Request $request): array
     {
-        $model = $this->service->create(
-            $this->queryBuilder->validated(),
-            $this->queryBuilder
-        );
+        $routeParameters = [];
 
-        /** @var array<string, mixed> $rendered */
-        $rendered = $this->queryBuilder->render($model);
-
-        return $rendered;
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    public function update(Request $request)
-    {
-        $model = $this->service->update(
-            $this->getModelFromRequest($request),
-            $this->queryBuilder->validated(),
-            $this->queryBuilder
-        );
-
-        /** @var array<string, mixed> $rendered */
-        $rendered = $this->queryBuilder->render($model);
-
-        return $rendered;
-    }
-
-    /**
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Request $request)
-    {
-        $this->service->delete(
-            $this->getModelFromRequest($request),
-            $this->queryBuilder
-        );
-
-        return response('', 204);
-    }
-
-    /**
-     * @param Request $request
-     * @param null|class-string $model
-     * @return Model
-     */
-    protected function getModelFromRequest(Request $request, string $model = null): Model
-    {
-        // The logic in this method is based on the authorizeResource
-        // middleware, which also fetches a model based on the class name and
-        // the route, as well as the implicit route binding resolver.
-        /** @var Model $model */
-        $model = $model ? new $model : $this->queryBuilder->model();
-        $modelClass = get_class($model);
-
-        // This is used in the \Illuminate\Auth\Middleware\Authorize::getModel
-        $value = $request->route($this->parameterName, null);
-
-        // This logic is taken from the RouteBinding::getModel method.
-        if (! $resolvedModel = $model->resolveRouteBinding($value)) {
-            throw (new ModelNotFoundException)->setModel($modelClass);
+        foreach ($this->metadata['routeParameters'] as $param => $paramInfo) {
+            $routeParameter = RouteParameter::fromRouteMetadata($param, $paramInfo);
+            $routeParameter->setValue($request->route($param, null));
+            $routeParameters[] = $routeParameter;
         }
 
-        return $resolvedModel;
+        return $routeParameters;
     }
 }
