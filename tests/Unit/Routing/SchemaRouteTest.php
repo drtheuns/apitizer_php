@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Routing;
 
+use Apitizer\Exceptions\RouteDefinitionException;
 use Apitizer\GenericApi\ModelService;
 use Apitizer\Routing\SchemaRoute;
 use Apitizer\Routing\Scope;
@@ -148,6 +149,24 @@ class SchemaRouteTest extends TestCase
         LaravelRoute::schema(CrudSchema::class);
 
         $this->assertCount(5, $this->getRegisteredRoutes());
+    }
+
+    /** @test */
+    public function it_throws_an_exception_if_the_given_class_is_not_a_schema(): void
+    {
+        $this->expectException(RouteDefinitionException::class);
+
+        LaravelRoute::schema(self::class);
+    }
+
+    /** @test */
+    public function it_throws_an_exception_if_the_association_does_not_exist_on_the_schema(): void
+    {
+        $this->expectException(RouteDefinitionException::class);
+
+        $scope = (new Scope)->associationCrud('author');
+
+        (new SchemaRoute(EmptySchema::class, $scope))->generateRoutes();
     }
 
     private function getRegisteredRoutes()

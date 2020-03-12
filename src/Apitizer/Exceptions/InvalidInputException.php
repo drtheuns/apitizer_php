@@ -54,6 +54,7 @@ class InvalidInputException extends ApitizerException
         $message = "Expected $filterParam to receive [$expectedType] got [$type]";
 
         $e = new static($message);
+        $e->namespace = 'filter';
         $e->instance = $filter;
         $e->schema = $filter->getSchema();
 

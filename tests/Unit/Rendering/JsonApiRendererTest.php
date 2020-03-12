@@ -2,12 +2,14 @@
 
 namespace Tests\Unit\Rendering;
 
+use Apitizer\Exceptions\InvalidOutputException;
 use Apitizer\JsonApi\ResourceContainer;
 use Apitizer\Schema;
 use Apitizer\Rendering\JsonApiRenderer;
 use Apitizer\Types\FetchSpec;
 use Illuminate\Support\Arr;
 use Tests\Feature\Models\User;
+use Tests\Support\Schemas\EmptySchema;
 use Tests\Support\Schemas\PostSchema;
 use Tests\Support\Schemas\UserSchema;
 use Tests\Unit\TestCase;
@@ -181,6 +183,16 @@ class JsonApiRendererTest extends TestCase
         ];
 
         $this->assertEquals($expected, $actual);
+    }
+
+    /** @test */
+    public function it_throws_if_it_cannot_generate_an_identifier(): void
+    {
+        $this->expectException(InvalidOutputException::class);
+
+        $input = ['title' => 'Fail me'];
+        $schema = new EmptySchema;
+        $actual = (new JsonApiRenderer)->renderSingleRow($input, $schema, [], []);
     }
 
     private function fields(Schema $schema, array $fields)
