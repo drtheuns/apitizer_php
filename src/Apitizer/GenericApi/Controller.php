@@ -3,7 +3,7 @@
 namespace Apitizer\GenericApi;
 
 use Apitizer\Interpreter\GenericApiQueryInterpreter;
-use Apitizer\QueryBuilder;
+use Apitizer\Schema;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 
@@ -14,13 +14,13 @@ use Illuminate\Routing\Controller as BaseController;
 class Controller extends BaseController
 {
     /**
-     * @var QueryBuilder the query builder that is responsible for handling the
+     * @var Schema the schema that is responsible for handling the
      * requests.
      */
-    protected $queryBuilder;
+    protected $schema;
 
     /**
-     * @var array{schema: class-string<QueryBuilder>,
+     * @var array{schema: class-string<Schema>,
      *            service: string|null,
      *            service_method: string|null,
      *            routeParameters: array<string, array{schema: class-string,
@@ -55,7 +55,7 @@ class Controller extends BaseController
         $route = $request->route();
 
         /**
-         * @var array{schema: class-string<QueryBuilder>,
+         * @var array{schema: class-string<Schema>,
          *            service: string|null,
          *            service_method: string|null,
          *            routeParameters: array<string, array{schema: class-string,
@@ -66,7 +66,7 @@ class Controller extends BaseController
         $metadata = $route->action['metadata'];
 
         $schema = $metadata['schema'];
-        $this->queryBuilder = new $schema($request);
+        $this->schema = new $schema($request);
         $this->metadata = $metadata;
 
         $this->routeParameters = $this->prepareRouteParameters($request);
@@ -77,7 +77,7 @@ class Controller extends BaseController
      */
     public function index(Request $request)
     {
-        return $this->queryBuilder
+        return $this->schema
             ->setQueryInterpreter(new GenericApiQueryInterpreter($this->routeParameters))
             ->paginate();
     }
@@ -87,62 +87,16 @@ class Controller extends BaseController
      */
     public function show(Request $request)
     {
-        $model = $this->queryBuilder
+        $model = $this->schema
                ->setQueryInterpreter(new GenericApiQueryInterpreter($this->routeParameters))
                ->buildQuery()
                ->first();
 
         /** @var array<string, mixed> $rendered */
-        $rendered = $this->queryBuilder->render($model);
+        $rendered = $this->schema->render($model);
 
         return $rendered;
     }
-
-    // /**
-    //  * @return array<string, mixed>
-    //  */
-    // public function store(Request $request)
-    // {
-    //     $model = $this->service->create(
-    //         $this->queryBuilder->validated(),
-    //         $this->queryBuilder
-    //     );
-
-    //     /** @var array<string, mixed> $rendered */
-    //     $rendered = $this->queryBuilder->render($model);
-
-    //     return $rendered;
-    // }
-
-    // /**
-    //  * @return array<string, mixed>
-    //  */
-    // public function update(Request $request)
-    // {
-    //     $model = $this->service->update(
-    //         $this->getModelFromRequest($request),
-    //         $this->queryBuilder->validated(),
-    //         $this->queryBuilder
-    //     );
-
-    //     /** @var array<string, mixed> $rendered */
-    //     $rendered = $this->queryBuilder->render($model);
-
-    //     return $rendered;
-    // }
-
-    // /**
-    //  * @return \Illuminate\Http\Response
-    //  */
-    // public function destroy(Request $request)
-    // {
-    //     $this->service->delete(
-    //         $this->getModelFromRequest($request),
-    //         $this->queryBuilder
-    //     );
-
-    //     return response('', 204);
-    // }
 
     /**
      * @return RouteParameter[]

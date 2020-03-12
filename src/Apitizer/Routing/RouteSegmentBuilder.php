@@ -2,14 +2,14 @@
 
 namespace Apitizer\Routing;
 
-use Apitizer\QueryBuilder;
+use Apitizer\Schema;
 use Apitizer\Types\Association;
 use Illuminate\Support\Str;
 
 class RouteSegmentBuilder
 {
     /**
-     * @var QueryBuilder
+     * @var Schema
      */
     protected $schema;
 
@@ -30,7 +30,7 @@ class RouteSegmentBuilder
      */
     protected $withParameter = false;
 
-    public function __construct(QueryBuilder $schema, Scope $scope, bool $withParameter = false)
+    public function __construct(Schema $schema, Scope $scope, bool $withParameter = false)
     {
         $this->schema = $schema;
         $this->scope = $scope;
@@ -126,7 +126,7 @@ class RouteSegmentBuilder
         $this->segments = array_reverse($segments);
     }
 
-    protected function getSegmentName(QueryBuilder $schema, Scope $scope): string
+    protected function getSegmentName(Schema $schema, Scope $scope): string
     {
         // The programmer may override the segment name by setting the path
         // variable.
@@ -143,15 +143,15 @@ class RouteSegmentBuilder
         return $this->guessSegmentNameFromSchema($schema);
     }
 
-    protected function guessSegmentNameFromSchema(QueryBuilder $schema): string
+    protected function guessSegmentNameFromSchema(Schema $schema): string
     {
         $classname = class_basename($schema);
-        $segment = Str::endsWith($classname, 'Builder') ? substr($classname, 0, -7) : $classname;
+        $segment = Str::endsWith($classname, 'Schema') ? substr($classname, 0, -6) : $classname;
 
         return Str::plural(Str::slug($segment));
     }
 
-    protected function getAssociationToParent(QueryBuilder $schema, Scope $scope): ?Association
+    protected function getAssociationToParent(Schema $schema, Scope $scope): ?Association
     {
         if (! $parent = $schema->getParent()) {
             return null;

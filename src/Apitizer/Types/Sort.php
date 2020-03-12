@@ -2,7 +2,7 @@
 
 namespace Apitizer\Types;
 
-use Apitizer\QueryBuilder;
+use Apitizer\Schema;
 use Apitizer\Sorting\ColumnSort;
 
 class Sort extends Factory
@@ -17,9 +17,9 @@ class Sort extends Factory
      */
     protected $handler;
 
-    public function __construct(QueryBuilder $queryBuilder)
+    public function __construct(Schema $schema)
     {
-        $this->queryBuilder = $queryBuilder;
+        $this->schema = $schema;
     }
 
     public function byField(string $field): self

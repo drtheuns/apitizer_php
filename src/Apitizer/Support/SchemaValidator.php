@@ -3,7 +3,7 @@
 namespace Apitizer\Support;
 
 use Apitizer\Apitizer;
-use Apitizer\QueryBuilder;
+use Apitizer\Schema;
 use Apitizer\Exceptions\DefinitionException;
 use Exception;
 use Closure;
@@ -16,83 +16,83 @@ class SchemaValidator
     protected $errors = [];
 
     /**
-     * Validates all the query builders that Apitizer knows about.
+     * Validates all the schemas that Apitizer knows about.
      *
-     * Requires the query builders to be defined in the config.
+     * Requires the schemas to be defined in the config.
      *
-     * @param null|(string|QueryBuilder)[] $queryBuilders the list of query
+     * @param null|(string|Schema)[] $schemas the list of query
      * builders to validate.
      */
-    public function validateAll(array $queryBuilders = null): self
+    public function validateAll(array $schemas = null): self
     {
-        foreach ($queryBuilders ?? Apitizer::getQueryBuilders() as $queryBuilder) {
-            if (is_string($queryBuilder)) {
-                $queryBuilder = new $queryBuilder;
+        foreach ($schemas ?? Apitizer::getSchemas() as $schema) {
+            if (is_string($schema)) {
+                $schema = new $schema;
             }
 
-            $this->validate($queryBuilder);
+            $this->validate($schema);
         }
 
         return $this;
     }
 
-    public function validate(QueryBuilder $queryBuilder): self
+    public function validate(Schema $schema): self
     {
-        $this->catchAll(function () use ($queryBuilder) {
-            $this->validateFields($queryBuilder);
+        $this->catchAll(function () use ($schema) {
+            $this->validateFields($schema);
         });
-        $this->catchAll(function () use ($queryBuilder) {
-            $this->validateAssociations($queryBuilder);
+        $this->catchAll(function () use ($schema) {
+            $this->validateAssociations($schema);
         });
-        $this->catchAll(function () use ($queryBuilder) {
-            $this->validateFilters($queryBuilder);
+        $this->catchAll(function () use ($schema) {
+            $this->validateFilters($schema);
         });
-        $this->catchAll(function () use ($queryBuilder) {
-            $this->validateSorting($queryBuilder);
+        $this->catchAll(function () use ($schema) {
+            $this->validateSorting($schema);
         });
 
         return $this;
     }
 
-    public function validateFields(QueryBuilder $queryBuilder): void
+    public function validateFields(Schema $schema): void
     {
         // Associations can fail the moment fields() is called.
-        foreach ($queryBuilder->fields() as $name => $field) {
+        foreach ($schema->fields() as $name => $field) {
             try {
-                DefinitionHelper::validateField($queryBuilder, $name, $field);
+                DefinitionHelper::validateField($schema, $name, $field);
             } catch (DefinitionException $e) {
                 $this->errors[] = $e;
             }
         }
     }
 
-    public function validateAssociations(QueryBuilder $queryBuilder): void
+    public function validateAssociations(Schema $schema): void
     {
-        foreach ($queryBuilder->associations() as $name => $field) {
+        foreach ($schema->associations() as $name => $field) {
             try {
-                DefinitionHelper::validateAssociation($queryBuilder, $name, $field);
+                DefinitionHelper::validateAssociation($schema, $name, $field);
             } catch (DefinitionException $e) {
                 $this->errors[] = $e;
             }
         }
     }
 
-    public function validateFilters(QueryBuilder $queryBuilder): void
+    public function validateFilters(Schema $schema): void
     {
-        foreach ($queryBuilder->filters() as $name => $filter) {
+        foreach ($schema->filters() as $name => $filter) {
             try {
-                DefinitionHelper::validateFilter($queryBuilder, $name, $filter);
+                DefinitionHelper::validateFilter($schema, $name, $filter);
             } catch (DefinitionException $e) {
                 $this->errors[] = $e;
             }
         }
     }
 
-    public function validateSorting(QueryBuilder $queryBuilder): void
+    public function validateSorting(Schema $schema): void
     {
-        foreach ($queryBuilder->sorts() as $name => $sort) {
+        foreach ($schema->sorts() as $name => $sort) {
             try {
-                DefinitionHelper::validateSort($queryBuilder, $name, $sort);
+                DefinitionHelper::validateSort($schema, $name, $sort);
             } catch (DefinitionException $e) {
                 $this->errors[] = $e;
             }

@@ -10,7 +10,7 @@ use Illuminate\Support\Arr;
 /**
  * The request parser is responsible for turning the request data that we
  * received from the client into something that can be interpreted by the
- * rest of the query builder.
+ * rest of the schema.
  */
 class InputParser implements Parser
 {

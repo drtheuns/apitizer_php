@@ -4,14 +4,14 @@ namespace Tests\Feature\Documentation;
 
 use Apitizer\Apitizer;
 use Tests\Feature\TestCase;
-use Tests\Support\Builders;
+use Tests\Support\Schemas;
 
 class MissingDocumentationTest extends TestCase
 {
-    protected $builderClasses = [
-        Builders\CommentBuilder::class,
-        Builders\PostBuilder::class,
-        Builders\UserBuilder::class,
+    protected $schemaClasses = [
+        Schemas\CommentSchema::class,
+        Schemas\PostSchema::class,
+        Schemas\UserSchema::class,
     ];
 
     /** @test */

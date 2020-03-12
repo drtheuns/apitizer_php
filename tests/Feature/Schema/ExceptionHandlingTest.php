@@ -1,10 +1,10 @@
 <?php
 
-namespace Tests\Feature\QueryBuilder;
+namespace Tests\Feature\Schema;
 
 use Apitizer\Exceptions\InvalidInputException;
 use Apitizer\ExceptionStrategy\Ignore;
-use Tests\Support\Builders\UserBuilder;
+use Tests\Support\Schemas\UserSchema;
 use Tests\Feature\TestCase;
 use Tests\Feature\Models\User;
 
@@ -16,7 +16,7 @@ class ExceptionHandlingTest extends TestCase
         $this->expectException(InvalidInputException::class);
 
         $request = $this->request()->filter('name', ['expect array'])->make();
-        UserBuilder::make($request)->all();
+        UserSchema::make($request)->all();
     }
 
     /** @test */
@@ -30,7 +30,7 @@ class ExceptionHandlingTest extends TestCase
                         ->filter('name', [$users->first()->name])
                         ->make();
 
-        $result = UserBuilder::make($request)
+        $result = UserSchema::make($request)
                 ->setExceptionStrategy(new Ignore)
                 ->all();
         $expected = $users->map->only('id')->all();
@@ -42,7 +42,7 @@ class ExceptionHandlingTest extends TestCase
     public function cast_errors_in_fields_can_be_ignored()
     {
         $request = $this->request()->fields('created_at')->make();
-        $result = UserBuilder::make($request)
+        $result = UserSchema::make($request)
                 ->setExceptionStrategy(new Ignore)
                 ->render(['created_at' => 'hello world']);
 

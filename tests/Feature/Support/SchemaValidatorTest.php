@@ -3,18 +3,18 @@
 namespace Tests\Feature\Support;
 
 use Apitizer\Exceptions\DefinitionException;
-use Apitizer\QueryBuilder;
+use Apitizer\Schema;
 use Apitizer\Support\SchemaValidator;
-use Tests\Support\Builders\EmptyBuilder;
-use Tests\Support\Builders\UserBuilder;
+use Tests\Support\Schemas\EmptySchema;
+use Tests\Support\Schemas\UserSchema;
 use Tests\Feature\TestCase;
 
 class SchemaValidatorTest extends TestCase
 {
     /** @test */
-    public function it_validates_non_builder_classes_in_associations()
+    public function it_validates_non_schema_classes_in_associations()
     {
-        $this->assertHasErrors(new BuilderClassExpected());
+        $this->assertHasErrors(new SchemaClassExpected());
     }
 
     /** @test */
@@ -48,14 +48,14 @@ class SchemaValidatorTest extends TestCase
     }
 
     /** @test */
-    public function it_finds_multiple_errors_in_a_query_builder()
+    public function it_finds_multiple_errors_in_a_schema()
     {
         $this->assertHasErrors(new MultipleErrors(), 2);
     }
 
-    private function assertHasErrors(QueryBuilder $queryBuilder, $count = 1)
+    private function assertHasErrors(Schema $schema, $count = 1)
     {
-        $validator = (new SchemaValidator)->validate($queryBuilder);
+        $validator = (new SchemaValidator)->validate($schema);
         $this->assertTrue($validator->hasErrors());
         $this->assertCount($count, $validator->getErrors());
         foreach ($validator->getErrors() as $error) {
@@ -64,20 +64,20 @@ class SchemaValidatorTest extends TestCase
     }
 }
 
-class NotABuilder
+class NotASchema
 {
 }
-class BuilderClassExpected extends EmptyBuilder
+class SchemaClassExpected extends EmptySchema
 {
     public function fields(): array
     {
         return [
-            'author' => $this->association('user', NotABuilder::class),
+            'author' => $this->association('user', NotASchema::class),
         ];
     }
 }
 
-class FieldDefinitionExpected extends EmptyBuilder
+class FieldDefinitionExpected extends EmptySchema
 {
     public function fields(): array
     {
@@ -87,7 +87,7 @@ class FieldDefinitionExpected extends EmptyBuilder
     }
 }
 
-class FilterDefinitionExpected extends EmptyBuilder
+class FilterDefinitionExpected extends EmptySchema
 {
     public function filters(): array
     {
@@ -97,7 +97,7 @@ class FilterDefinitionExpected extends EmptyBuilder
     }
 }
 
-class SortDefinitionExpected extends EmptyBuilder
+class SortDefinitionExpected extends EmptySchema
 {
     public function sorts(): array
     {
@@ -107,7 +107,7 @@ class SortDefinitionExpected extends EmptyBuilder
     }
 }
 
-class FilterHandlerNotDefined extends EmptyBuilder
+class FilterHandlerNotDefined extends EmptySchema
 {
     public function filters(): array
     {
@@ -117,22 +117,22 @@ class FilterHandlerNotDefined extends EmptyBuilder
     }
 }
 
-class AssociationDoesNotExist extends EmptyBuilder
+class AssociationDoesNotExist extends EmptySchema
 {
     public function fields(): array
     {
         return [
-            'geckos' => $this->association('geckos', UserBuilder::class),
+            'geckos' => $this->association('geckos', UserSchema::class),
         ];
     }
 }
 
-class MultipleErrors extends EmptyBuilder
+class MultipleErrors extends EmptySchema
 {
     public function fields(): array
     {
         return [
-            'geckos' => $this->association('geckos', UserBuilder::class),
+            'geckos' => $this->association('geckos', UserSchema::class),
         ];
     }
 

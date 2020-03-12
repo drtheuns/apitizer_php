@@ -11,18 +11,18 @@ class ApitizerTest extends TestCase
     /** @test */
     public function it_returns_a_collection_of_api_documentation()
     {
-        $apidoc = Apitizer::getQueryBuilderDocumentation();
+        $apidoc = Apitizer::getSchemaDocumentation();
 
         $this->assertInstanceOf(ApidocCollection::class, $apidoc);
-        $this->assertCount(count($this->builderClasses), $apidoc);
+        $this->assertCount(count($this->schemaClasses), $apidoc);
 
         $classes = [];
         foreach ($apidoc as $doc) {
             $this->assertInstanceOf(Apidoc::class, $doc);
-            $classes[] = get_class($doc->getQueryBuilder());
+            $classes[] = get_class($doc->getSchema());
         }
 
-        $this->assertEquals(Apitizer::getQueryBuilders(), $classes);
+        $this->assertEquals(Apitizer::getSchemas(), $classes);
     }
 
     protected function getPackageProviders($app)

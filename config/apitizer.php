@@ -3,7 +3,7 @@
 return [
     /*
      * Settings that determine which query parameters should be used for the
-     * query builder.
+     * schema.
      */
     'query_parameters' => [
         'filters' => 'filters',
@@ -14,7 +14,7 @@ return [
 
     /*
      * Whether or not Apitizer should generate API documentation based on the
-     * query builders.
+     * schemas.
      */
     'generate_documentation' => true,
 
@@ -32,9 +32,9 @@ return [
     ],
 
     /*
-     * Register the query builders of this project.
+     * Register the schemas of this project.
      */
-    'query_builders' => [
+    'schemas' => [
         /*
          * Individual classes can be registered here. Expects the fully qualified namespace.
          */
@@ -43,10 +43,10 @@ return [
         ],
 
         /*
-         * Register all the query builders from the given namespaces.
+         * Register all the schemas from the given namespaces.
          */
         'namespaces' => [
-            'App\QueryBuilders',
+            'App\Schemas',
         ],
     ],
 ];

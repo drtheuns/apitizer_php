@@ -5,7 +5,7 @@ namespace Tests\Unit\Types;
 use Apitizer\Transformers\CastValue;
 use Apitizer\Types\DateTimeField;
 use DateTimeInterface;
-use Tests\Support\Builders\UserBuilder;
+use Tests\Support\Schemas\UserSchema;
 use Tests\Unit\TestCase;
 
 class DateTimeFieldTest extends TestCase
@@ -55,11 +55,11 @@ class DateTimeFieldTest extends TestCase
 
     private function datetimeField(string $key = 'key'): DateTimeField
     {
-        return new DateTimeField(new UserBuilder(), $key, 'datetime');
+        return new DateTimeField(new UserSchema(), $key, 'datetime');
     }
 
     private function dateField(string $key = 'key'): DateTimeField
     {
-        return new DateTimeField(new UserBuilder(), $key, 'date');
+        return new DateTimeField(new UserSchema(), $key, 'date');
     }
 }

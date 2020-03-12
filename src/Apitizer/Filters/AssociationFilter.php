@@ -11,7 +11,7 @@ use Illuminate\Support\Arr;
 class AssociationFilter
 {
     /**
-     * @var string The name of the relation on the query builder.
+     * @var string The name of the relation on the schema.
      */
     protected $relation;
 

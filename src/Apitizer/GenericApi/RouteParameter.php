@@ -2,13 +2,13 @@
 
 namespace Apitizer\GenericApi;
 
-use Apitizer\QueryBuilder;
+use Apitizer\Schema;
 use Illuminate\Database\Eloquent\Model;
 
 class RouteParameter
 {
     /**
-     * @var QueryBuilder
+     * @var Schema
      */
     protected $schema;
 
@@ -27,7 +27,7 @@ class RouteParameter
      */
     protected $value;
 
-    public function __construct(string $parameterName, QueryBuilder $schema, ?string $associationName)
+    public function __construct(string $parameterName, Schema $schema, ?string $associationName)
     {
         $this->parameterName = $parameterName;
         $this->schema = $schema;
@@ -48,7 +48,7 @@ class RouteParameter
         return new static($parameterName, $schema, $metadata['association']);
     }
 
-    public function getSchema(): QueryBuilder
+    public function getSchema(): Schema
     {
         return $this->schema;
     }

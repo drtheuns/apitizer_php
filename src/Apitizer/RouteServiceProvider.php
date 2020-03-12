@@ -11,7 +11,7 @@ class RouteServiceProvider extends \Illuminate\Support\ServiceProvider
     public function register()
     {
         Router::macro('schema', function (string $schema) {
-            /** @var class-string<\Apitizer\QueryBuilder> $schema */
+            /** @var class-string<\Apitizer\Schema> $schema */
             return (new SchemaRoute($schema))->generateRoutes();
         });
     }

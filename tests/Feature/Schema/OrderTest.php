@@ -1,9 +1,9 @@
 <?php
 
-namespace Tests\Feature\QueryBuilder;
+namespace Tests\Feature\Schema;
 
 use Tests\Feature\TestCase;
-use Tests\Support\Builders\UserBuilder;
+use Tests\Support\Schemas\UserSchema;
 use Tests\Feature\Models\User;
 
 class OrderTest extends TestCase
@@ -16,7 +16,7 @@ class OrderTest extends TestCase
         })->values();
 
         $request = $this->request()->fields('id,name')->sort('id.desc')->make();
-        $result = UserBuilder::make($request)->all();
+        $result = UserSchema::make($request)->all();
 
         $this->assertEquals($users->map->only('id', 'name')->all(), $result);
     }

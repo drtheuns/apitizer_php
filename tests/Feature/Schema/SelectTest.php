@@ -1,11 +1,11 @@
 <?php
 
-namespace Tests\Feature\QueryBuilder;
+namespace Tests\Feature\Schema;
 
-use Tests\Support\Builders\EmptyBuilder;
+use Tests\Support\Schemas\EmptySchema;
 use Tests\Feature\TestCase;
-use Tests\Support\Builders\PostBuilder;
-use Tests\Support\Builders\UserBuilder;
+use Tests\Support\Schemas\PostSchema;
+use Tests\Support\Schemas\UserSchema;
 use Tests\Feature\Models\User;
 use Tests\Feature\Models\Post;
 use Tests\Feature\Models\Comment;
@@ -18,7 +18,7 @@ class SelectTest extends TestCase
         $post = factory(Post::class)->create();
 
         $request = $this->request()->fields('id,title,status')->make();
-        $results = PostBuilder::make($request)->all();
+        $results = PostSchema::make($request)->all();
 
         $this->assertEquals([$post->only('id', 'title', 'status')], $results);
     }
@@ -43,7 +43,7 @@ class SelectTest extends TestCase
                });
 
         $request = $this->request()->fields('id,name,posts(id,title,comments(id,body))')->make();
-        $result = UserBuilder::make($request)->all();
+        $result = UserSchema::make($request)->all();
 
         $expected = $users->map(function (User $user) {
             return [
@@ -67,7 +67,7 @@ class SelectTest extends TestCase
     {
         $user = factory(User::class)->create();
         $request = $this->request()->make();
-        $result = UserBuilder::make($request)->all();
+        $result = UserSchema::make($request)->all();
 
         $expected = [
             [
@@ -88,7 +88,7 @@ class SelectTest extends TestCase
     {
         $post = factory(Post::class)->state('withComments')->create();
         $request = $this->request()->fields('id,comments(unknown)')->make();
-        $result = PostBuilder::make($request)->render($post);
+        $result = PostSchema::make($request)->render($post);
 
         $this->assertEquals([
             'id' => $post->id,
@@ -105,7 +105,7 @@ class SelectTest extends TestCase
         $post->comments()->save($comment);
 
         $request = $this->request()->fields('id,comments')->make();
-        $result = PostBuilder::make($request)->all();
+        $result = PostSchema::make($request)->all();
 
         $this->assertEquals([
             [
@@ -122,7 +122,7 @@ class SelectTest extends TestCase
         $post = factory(Post::class)->create(['author_id' => $user->id]);
 
         $request = $this->request()->fields('id, author(id)')->make();
-        $result = PostBuilder::make($request)->all();
+        $result = PostSchema::make($request)->all();
 
         $this->assertEquals([
             [
@@ -138,7 +138,7 @@ class SelectTest extends TestCase
         $user = factory(User::class)->create();
 
         $request = $this->request()->fields(['id', 'posts(id)', 'posts' => ['id']])->make();
-        $result = UserBuilder::make($request)->all();
+        $result = UserSchema::make($request)->all();
 
         $this->assertEquals([
             [
@@ -152,7 +152,7 @@ class SelectTest extends TestCase
     {
         $post = factory(Post::class)->state('withTags')->create();
         $request = $this->request()->fields('id, tags(id)')->make();
-        $result = PostBuilder::make($request)->all();
+        $result = PostSchema::make($request)->all();
 
         $this->assertEquals([
             [
@@ -167,11 +167,11 @@ class SelectTest extends TestCase
     {
         $user = factory(User::class)->state('withPosts')->create();
         $request = $this->request()->fields('id,posts(id)')->make();
-        $builder = LoadColumn::make($request)->buildQuery();
+        $schema = LoadColumn::make($request)->buildQuery();
 
-        $this->assertTrue(in_array('name', $builder->getQuery()->columns));
+        $this->assertTrue(in_array('name', $schema->getQuery()->columns));
 
-        $user = $builder->find($user->id);
+        $user = $schema->find($user->id);
 
         $this->assertNotNull($user->posts->first()->status);
     }
@@ -179,12 +179,12 @@ class SelectTest extends TestCase
     /** @test */
     public function it_always_loads_the_primary_key()
     {
-        $builder = EmptyBuilder::build();
+        $builder = EmptySchema::build();
         $this->assertEquals(['id'], $builder->getQuery()->columns);
     }
 }
 
-class LoadColumn extends EmptyBuilder
+class LoadColumn extends EmptySchema
 {
     protected $alwaysLoadColumns = ['name'];
 
@@ -203,7 +203,7 @@ class LoadColumn extends EmptyBuilder
     }
 }
 
-class LoadRelatedColumn extends EmptyBuilder
+class LoadRelatedColumn extends EmptySchema
 {
     protected $alwaysLoadColumns = ['status'];
 

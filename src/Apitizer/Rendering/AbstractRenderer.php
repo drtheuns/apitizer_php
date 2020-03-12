@@ -2,7 +2,7 @@
 
 namespace Apitizer\Rendering;
 
-use Apitizer\QueryBuilder;
+use Apitizer\Schema;
 use Apitizer\Types\AbstractField;
 use Apitizer\Types\Association;
 use Apitizer\Types\Concerns\FetchesValueFromRow;
@@ -17,14 +17,14 @@ abstract class AbstractRenderer implements Renderer
 {
     use FetchesValueFromRow;
 
-    public function paginate(QueryBuilder $queryBuilder, LengthAwarePaginator $paginator, FetchSpec $fetchSpec)
+    public function paginate(Schema $schema, LengthAwarePaginator $paginator, FetchSpec $fetchSpec)
     {
-        $renderedData = $this->render($queryBuilder, $paginator->getCollection(), $fetchSpec);
+        $renderedData = $this->render($schema, $paginator->getCollection(), $fetchSpec);
 
         $paginator->setCollection(collect($renderedData));
 
         /** @var array<string, mixed> $queryParameters */
-        $queryParameters = $queryBuilder->getRequest()->query();
+        $queryParameters = $schema->getRequest()->query();
 
         // Ensure the all the supported query parameters that were passed in are
         // also present in the pagination links.
@@ -38,7 +38,7 @@ abstract class AbstractRenderer implements Renderer
     }
 
     /**
-     * @param QueryBuilder $queryBuilder
+     * @param Schema $schema
      * @param mixed $data
      * @param AbstractField[] $fields
      * @param Association[] $associations
@@ -46,20 +46,20 @@ abstract class AbstractRenderer implements Renderer
      * @return array<string, mixed>|array<int, array<string, mixed>>
      */
     public function doRender(
-        QueryBuilder $queryBuilder,
+        Schema $schema,
         $data,
         array $fields,
         array $associations
     ): array {
         if ($this->isSingleRowOfData($data)) {
-            return $this->renderSingleRow($data, $queryBuilder, $fields, $associations);
+            return $this->renderSingleRow($data, $schema, $fields, $associations);
         }
-        return $this->renderMany($data, $queryBuilder, $fields, $associations);
+        return $this->renderMany($data, $schema, $fields, $associations);
     }
 
     /**
      * @param mixed $data
-     * @param QueryBuilder $queryBuilder
+     * @param Schema $schema
      * @param AbstractField[] $fields
      * @param Association[] $associations
      *
@@ -67,18 +67,18 @@ abstract class AbstractRenderer implements Renderer
      */
     public function renderMany(
         $data,
-        QueryBuilder $queryBuilder,
+        Schema $schema,
         array $fields,
         array $associations
     ): array {
-        return collect($data)->map(function ($row) use ($queryBuilder, $fields, $associations) {
-            return $this->renderSingleRow($row, $queryBuilder, $fields, $associations);
+        return collect($data)->map(function ($row) use ($schema, $fields, $associations) {
+            return $this->renderSingleRow($row, $schema, $fields, $associations);
         })->all();
     }
 
     /**
      * @param mixed $row
-     * @param QueryBuilder $queryBuilder
+     * @param Schema $schema
      * @param AbstractField[] $fields
      * @param Association[] $associations
      *
@@ -86,7 +86,7 @@ abstract class AbstractRenderer implements Renderer
      */
     abstract protected function renderSingleRow(
         $row,
-        QueryBuilder $queryBuilder,
+        Schema $schema,
         array $fields,
         array $associations
     ): array ;

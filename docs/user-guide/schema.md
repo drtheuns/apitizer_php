@@ -11,10 +11,10 @@ defined. For example, if we write an association that does not exist on the
 model, we might get an error like:
 
 ```
-App\QueryBuilders\PostBuilder
+App\Schemas\PostSchema
 -----------------------------
 * Association
-  * Association [tags] on [App\QueryBuilders\PostBuilder] refers to association [tag] which does not exist on the model [App\Models\Post]
+  * Association [tags] on [App\Schemas\PostSchema] refers to association [tag] which does not exist on the model [App\Models\Post]
 ```
 
 This could easily be extended to a test case. Validating the schema in a test
@@ -49,7 +49,7 @@ class SchemaTest extends TestCase
 
 The optional `apidoc` callback method may be overridden to add extra information
 to the API documentation as it's created. The two most important options for
-this method are to either add a description to the builder, or to add metadata
+this method are to either add a description to the schema, or to add metadata
 to the documentation.
 
 ```php
@@ -57,7 +57,7 @@ to the documentation.
 
 use Apitizer\Types\Apidoc;
 
-class PostBuilder extends QueryBuilder
+class PostSchema extends Schema
 {
     public function apidoc(Apidoc $apidoc): void
     {
@@ -73,11 +73,11 @@ class PostBuilder extends QueryBuilder
 
 ### Building a query
 
-The query builder is able to build an Eloquent query based on the current
+The schema is able to build an Eloquent query based on the current
 request:
 
 ```php
-$query = UserBuilder::build($request);
+$query = UserSchema::build($request);
 ```
 
 You can also build a query from a specification, rather than a request. This
@@ -85,7 +85,7 @@ specification accepts the same keys as would be present on the request without
 having to actually build a request object:
 
 ```php
-$query = (new UserBuilder)->fromSpecification([
+$query = (new UserSchema)->fromSpecification([
     'fields'  => 'id,name,posts(id,title)',
     'filters' => ['search' => 'term'],
     'sorts'   => 'id.asc'
@@ -94,13 +94,13 @@ $query = (new UserBuilder)->fromSpecification([
 
 ### Rendering data
 
-If you fetch the data yourself, you can still use the query builder to render
+If you fetch the data yourself, you can still use the schema to render
 data:
 
 ```php
 $user = $accountService->createUser($parameters);
 
-return UserBuilder::make($request)->render($data);
+return UserSchema::make($request)->render($data);
 ```
 
 Just like with the query building, the rendering also works with a custom
@@ -118,7 +118,7 @@ utilizes some of these methods might look like this:
 
 namespace App\Http\Controllers;
 
-use App\QueryBuilders\UserBuilder;
+use App\Schemas\UserSchema;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -126,34 +126,34 @@ class UserController
 {
     public function index(Request $request)
     {
-        return UserBuilder::make($request)->paginate();
+        return UserSchema::make($request)->paginate();
     }
 
     public function show(Request $request, User $user)
     {
-        return UserBuilder::make($request)->render($user);
+        return UserSchema::make($request)->render($user);
     }
 
     public function store(Request $request)
     {
-        $builder = UserBuilder::make($request);
+        $schema = UserSchema::make($request);
 
         $user = (new AccountService)->createUser($request->validated());
 
-        return $builder->render($user);
+        return $schema->render($user);
     }
 }
 ```
 
 The maximum number of results per page in the pagination object can be
-controlled with the `maximumLimit` property on the query builder, as well as the
+controlled with the `maximumLimit` property on the schema, as well as the
 `getMaximumLimit` and `setMaximumLimit` methods.
 
 ### Before and after query
 
 Often times it's necessary to perform some additional logic to a query, such as
 setting the right tenant, or scoping the data to something the current user is
-allowed to see. The query builder offers two methods to control the query a bit
+allowed to see. The schema offers two methods to control the query a bit
 more: the `beforeQuery` and `afterQuery` methods. Each of these methods accept
 the current query object and the fetch specification, and return a modified
 query object.
@@ -164,7 +164,7 @@ query object.
 use Apitizer\Types\FetchSpec;
 use Illuminate\Database\Eloquent\Builder;
 
-class UserBuilder extends QueryBuilder
+class UserSchema extends Schema
 {
     public function beforeQuery(Builder $query, FetchSpec $fetchSpec): Builder
     {
@@ -189,16 +189,16 @@ The most common helper is `validated` to get the validated data for the current
 request.
 
 ```php
-$builder = UserBuilder::make($request);
+$schema = UserSchema::make($request);
 
 // Get the validation rules for the current request, as can be understood by
 // Laravel's Validator object.
-$builder->validationRules();
+$schema->validationRules();
 
 // Get a Validator object with the request's input and the validation rules.
-$builder->validator();
+$schema->validator();
 
 // Get the validated data. These two are the same.
-$builder->validated();
-$builder->validator()->validate();
+$schema->validated();
+$schema->validator()->validate();
 ```

@@ -1,6 +1,6 @@
 {
     "name": "drtheuns/apitizer_php",
-    "description": "A Laravel querybuilder library for JSON APIs",
+    "description": "A Laravel schema library for JSON APIs",
     "type": "library",
     "license": "MIT",
     "authors": [

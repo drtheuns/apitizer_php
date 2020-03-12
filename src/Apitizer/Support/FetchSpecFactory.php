@@ -5,7 +5,7 @@ namespace Apitizer\Support;
 use Apitizer\Exceptions\InvalidInputException;
 use Apitizer\Parser\ParsedInput;
 use Apitizer\Parser\Relation;
-use Apitizer\QueryBuilder;
+use Apitizer\Schema;
 use Apitizer\Types\FetchSpec;
 use Apitizer\Types\AbstractField;
 use Apitizer\Types\Association;
@@ -18,33 +18,33 @@ use Apitizer\Types\Filter;
 class FetchSpecFactory
 {
     /**
-     * @var QueryBuilder
+     * @var Schema
      */
-    protected $queryBuilder;
+    protected $schema;
 
     /**
      * @var ParsedInput
      */
     protected $input;
 
-    public function __construct(QueryBuilder $queryBuilder, ParsedInput $input)
+    public function __construct(Schema $schema, ParsedInput $input)
     {
-        $this->queryBuilder = $queryBuilder;
+        $this->schema = $schema;
         $this->input = $input;
     }
 
     public static function fromRequestInput(
         ParsedInput $input,
-        QueryBuilder $queryBuilder
+        Schema $schema
     ): FetchSpec {
-        return (new static($queryBuilder, $input))->make();
+        return (new static($schema, $input))->make();
     }
 
     public function make(): FetchSpec
     {
-        $fields = $this->selectedFields($this->queryBuilder, $this->input->fields);
+        $fields = $this->selectedFields($this->schema, $this->input->fields);
         $associations = $this->selectedAssociations(
-            $this->queryBuilder,
+            $this->schema,
             $this->input->associations,
             $this->input->fields
         );
@@ -52,7 +52,7 @@ class FetchSpecFactory
         // If nothing was (correct) was selected, return all the default fields
         // but no associations.
         if (empty($fields) && empty($associations)) {
-            $fields = $this->queryBuilder->getFields();
+            $fields = $this->schema->getFields();
         }
 
         $sorts = $this->selectedSorting();
@@ -62,14 +62,14 @@ class FetchSpecFactory
     }
 
     /**
-     * @param QueryBuilder $queryBuilder
+     * @param Schema $schema
      * @param string[] $requestedFields
      *
      * @return AbstractField[]
      */
-    protected function selectedFields(QueryBuilder $queryBuilder, array $requestedFields): array
+    protected function selectedFields(Schema $schema, array $requestedFields): array
     {
-        $availableFields = $queryBuilder->getFields();
+        $availableFields = $schema->getFields();
         /** @var AbstractField[] $selectedFields */
         $selectedFields = [];
 
@@ -83,18 +83,18 @@ class FetchSpecFactory
     }
 
     /**
-     * @param QueryBuilder $queryBuilder
+     * @param Schema $schema
      * @param Relation[] $relations
      * @param string[] $fields
      *
      * @return Association[]
      */
     protected function selectedAssociations(
-        QueryBuilder $queryBuilder,
+        Schema $schema,
         array $relations,
         array $fields
     ): array {
-        $availableAssociations = $queryBuilder->getAssociations();
+        $availableAssociations = $schema->getAssociations();
         $selectedAssociations = [];
 
         // Recursively select associations and their fields as specified by the
@@ -102,7 +102,7 @@ class FetchSpecFactory
         foreach ($relations as $relation) {
             if (isset($availableAssociations[$relation->name])) {
                 $association = $availableAssociations[$relation->name];
-                $relatedBuilder = $association->getRelatedQueryBuilder();
+                $relatedBuilder = $association->getRelatedSchema();
 
                 $association->setFields(
                     $this->selectedFields($relatedBuilder, $relation->fields)
@@ -128,7 +128,7 @@ class FetchSpecFactory
         foreach ($fields as $field) {
             if (is_string($field) && isset($availableAssociations[$field])) {
                 $association = $availableAssociations[$field];
-                $association->setFields($association->getRelatedQueryBuilder()->getFields());
+                $association->setFields($association->getRelatedSchema()->getFields());
                 $selectedAssociations[] = $association;
             }
         }
@@ -141,7 +141,7 @@ class FetchSpecFactory
      */
     protected function selectedSorting(): array
     {
-        $availableSorting = $this->queryBuilder->getSorts();
+        $availableSorting = $this->schema->getSorts();
         $selectedSorting = [];
 
         foreach ($this->input->sorts as $parserSort) {
@@ -150,9 +150,9 @@ class FetchSpecFactory
                 $sort->setOrder($parserSort->getOrder());
                 $selectedSorting[] = $sort;
             } else {
-                $this->queryBuilder->getExceptionStrategy()->handle(
-                    $this->queryBuilder,
-                    InvalidInputException::undefinedSortCalled($parserSort->getField(), $this->queryBuilder)
+                $this->schema->getExceptionStrategy()->handle(
+                    $this->schema,
+                    InvalidInputException::undefinedSortCalled($parserSort->getField(), $this->schema)
                 );
             }
         }
@@ -165,7 +165,7 @@ class FetchSpecFactory
      */
     protected function selectedFilters(): array
     {
-        $availableFilters = $this->queryBuilder->getFilters();
+        $availableFilters = $this->schema->getFilters();
         $selectedFilters = [];
 
         foreach ($this->input->filters as $name => $filterInput) {
@@ -175,14 +175,14 @@ class FetchSpecFactory
                     $filter->setValue($filterInput);
                     $selectedFilters[] = $filter;
                 } else {
-                    $this->queryBuilder->getExceptionStrategy()->handle(
-                        $this->queryBuilder,
-                        InvalidInputException::undefinedFilterCalled($name, $this->queryBuilder)
+                    $this->schema->getExceptionStrategy()->handle(
+                        $this->schema,
+                        InvalidInputException::undefinedFilterCalled($name, $this->schema)
                     );
                 }
             } catch (InvalidInputException $e) {
-                $this->queryBuilder->getExceptionStrategy()->handle(
-                    $this->queryBuilder,
+                $this->schema->getExceptionStrategy()->handle(
+                    $this->schema,
                     $e
                 );
             }

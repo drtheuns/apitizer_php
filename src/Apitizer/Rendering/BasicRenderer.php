@@ -3,7 +3,7 @@
 namespace Apitizer\Rendering;
 
 use Apitizer\Policies\PolicyFailed;
-use Apitizer\QueryBuilder;
+use Apitizer\Schema;
 use Apitizer\Types\FetchSpec;
 use Apitizer\Types\AbstractField;
 use Apitizer\Types\Association;
@@ -11,10 +11,10 @@ use Apitizer\Exceptions\InvalidOutputException;
 
 class BasicRenderer extends AbstractRenderer implements Renderer
 {
-    public function render(QueryBuilder $queryBuilder, $data, FetchSpec $fetchSpec): array
+    public function render(Schema $schema, $data, FetchSpec $fetchSpec): array
     {
         return $this->doRender(
-            $queryBuilder,
+            $schema,
             $data,
             $fetchSpec->getFields(),
             $fetchSpec->getAssociations()
@@ -38,7 +38,7 @@ class BasicRenderer extends AbstractRenderer implements Renderer
         }
 
         $renderedData[$association->getName()] = $this->doRender(
-            $association->getRelatedQueryBuilder(),
+            $association->getRelatedSchema(),
             $associationData,
             $association->getFields() ?? [],
             $association->getAssociations() ?? []
@@ -47,7 +47,7 @@ class BasicRenderer extends AbstractRenderer implements Renderer
 
     /**
      * @param mixed $row
-     * @param QueryBuilder $queryBuilder
+     * @param Schema $schema
      * @param AbstractField[] $fields
      * @param Association[] $associations
      *
@@ -55,7 +55,7 @@ class BasicRenderer extends AbstractRenderer implements Renderer
      */
     protected function renderSingleRow(
         $row,
-        QueryBuilder $queryBuilder,
+        Schema $schema,
         array $fields,
         array $associations
     ): array {

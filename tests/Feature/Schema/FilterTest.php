@@ -1,10 +1,10 @@
 <?php
 
-namespace Tests\Feature\QueryBuilder;
+namespace Tests\Feature\Schema;
 
 use Tests\Feature\TestCase;
-use Tests\Support\Builders\PostBuilder;
-use Tests\Support\Builders\UserBuilder;
+use Tests\Support\Schemas\PostSchema;
+use Tests\Support\Schemas\UserSchema;
 use Tests\Feature\Models\User;
 use Tests\Feature\Models\Post;
 
@@ -18,7 +18,7 @@ class FilterTest extends TestCase
         $users->first()->posts()->save($post);
 
         $request = $this->request()->fields('id')->filter('posts', [$post->id])->make();
-        $result = UserBuilder::make($request)->all();
+        $result = UserSchema::make($request)->all();
 
         $this->assertEquals([$users->first()->only('id')], $result);
     }
@@ -30,7 +30,7 @@ class FilterTest extends TestCase
         $post2 = factory(Post::class)->create(['title' => 'None']);
         $request = $this->request()->fields('id')->filter('search', 'Hello')->make();
 
-        $result = PostBuilder::make($request)->all();
+        $result = PostSchema::make($request)->all();
 
         $this->assertEquals([$post1->only('id')], $result);
     }
@@ -42,7 +42,7 @@ class FilterTest extends TestCase
         $post = $posts->first();
         $request = $this->request()->fields('id')->filter('user', $post->author_id)->make();
 
-        $result = PostBuilder::make($request)->all();
+        $result = PostSchema::make($request)->all();
 
         $this->assertNotEquals($post->author_id, $posts[1]->author_id);
         $this->assertEquals([$post->only('id')], $result);
@@ -55,7 +55,7 @@ class FilterTest extends TestCase
         $post = $posts->first();
         $request = $this->request()->fields('id')->filter('userUuid', $post->author->uuid)->make();
 
-        $result = PostBuilder::make($request)->all();
+        $result = PostSchema::make($request)->all();
 
         $this->assertNotEquals($post->author_id, $posts[1]->author_id);
         $this->assertEquals([$post->only('id')], $result);
@@ -69,7 +69,7 @@ class FilterTest extends TestCase
         $tag = $post->tags->first();
 
         $request = $this->request()->fields('id')->filter('tag', $tag->id)->make();
-        $result = PostBuilder::make($request)->all();
+        $result = PostSchema::make($request)->all();
 
         $this->assertEquals([$post->only('id')], $result);
     }
@@ -82,7 +82,7 @@ class FilterTest extends TestCase
         $tag = $post->tags->first();
 
         $request = $this->request()->fields('id')->filter('tagUuid', $tag->uuid)->make();
-        $result = PostBuilder::make($request)->all();
+        $result = PostSchema::make($request)->all();
 
         $this->assertEquals([$post->only('id')], $result);
     }
@@ -97,7 +97,7 @@ class FilterTest extends TestCase
                         ->filter('name', $expectedUser->name)
                         ->fields('id')
                         ->make();
-        $result = UserBuilder::make($request)->all();
+        $result = UserSchema::make($request)->all();
 
         $this->assertEquals([$expectedUser->only('id')], $result);
     }
@@ -114,7 +114,7 @@ class FilterTest extends TestCase
                         ->filter('created_at', '2021-01-01 00:00:00')
                         ->fields('id')
                         ->make();
-        $result = UserBuilder::make($request)->all();
+        $result = UserSchema::make($request)->all();
 
         $this->assertEquals([$expectedUser->only('id')], $result);
     }
@@ -131,7 +131,7 @@ class FilterTest extends TestCase
                         ->filter('updated_at', '01-01-2021')
                         ->fields('id')
                         ->make();
-        $result = UserBuilder::make($request)->all();
+        $result = UserSchema::make($request)->all();
 
         $this->assertEquals([$expectedUser->only('id')], $result);
     }

@@ -13,11 +13,11 @@ class DocumentationController
      */
     public function list(Request $request)
     {
-        $apidoc = Apitizer::getQueryBuilderDocumentation();
+        $apidoc = Apitizer::getSchemaDocumentation();
 
         if ($request->wantsJson()) {
             // return json response
-            // Use a query builder?
+            // Use a schema?
         }
 
         return view('apitizer::documentation', [

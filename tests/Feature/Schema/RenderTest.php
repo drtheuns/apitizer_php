@@ -5,10 +5,10 @@ namespace Tests\Feature;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Tests\Feature\Models\User;
-use Tests\Support\Builders\UserBuilder;
+use Tests\Support\Schemas\UserSchema;
 
 /**
- * The query builder can be used JUST to render data, rather than also fetching
+ * The schema can be used JUST to render data, rather than also fetching
  * it. That's what this class tests.
  */
 class RenderTest extends TestCase
@@ -18,7 +18,7 @@ class RenderTest extends TestCase
     {
         $user = factory(User::class)->create();
         $request = $this->request()->fields('id,name')->make();
-        $result = UserBuilder::make($request)->render($user);
+        $result = UserSchema::make($request)->render($user);
 
         $this->assertEquals($user->only('id', 'name'), $result);
     }
@@ -28,7 +28,7 @@ class RenderTest extends TestCase
     {
         $data = ['id' => 1, 'name' => 'Name', 'email' => 'Email'];
         $request = $this->request()->fields('id,name')->make();
-        $result = UserBuilder::make($request)->render($data);
+        $result = UserSchema::make($request)->render($data);
 
         $this->assertEquals([
             'id'   => 1,
@@ -41,7 +41,7 @@ class RenderTest extends TestCase
     {
         $users = factory(User::class, 2)->make()->map->toArray();
         $request = $this->request()->fields('name,email')->make();
-        $result = UserBuilder::make($request)->render($users);
+        $result = UserSchema::make($request)->render($users);
 
         $this->assertInstanceOf(Collection::class, $users);
         $this->assertEquals($users->map(function (array $user) {
@@ -54,7 +54,7 @@ class RenderTest extends TestCase
     {
         $user = factory(User::class)->make();
         $request = $this->request()->fields('name,email')->make();
-        $result = UserBuilder::make($request)->render((object) $user->only('name', 'email'));
+        $result = UserSchema::make($request)->render((object) $user->only('name', 'email'));
 
         $this->assertEquals($user->only('name', 'email'), $result);
     }
@@ -63,7 +63,7 @@ class RenderTest extends TestCase
     public function it_can_render_data_using_a_manual_fetch_specification()
     {
         $user = factory(User::class)->make();
-        $result = UserBuilder::make()->fromSpecification([
+        $result = UserSchema::make()->fromSpecification([
             'fields' => 'name,email',
         ])->render($user);
 

@@ -1,11 +1,11 @@
 <?php
 
-namespace Tests\Support\Builders;
+namespace Tests\Support\Schemas;
 
 use Illuminate\Database\Eloquent\Model;
 use Tests\Feature\Models\User;
 
-class UserBuilder extends EmptyBuilder
+class UserSchema extends EmptySchema
 {
     public function fields(): array
     {
@@ -22,8 +22,8 @@ class UserBuilder extends EmptyBuilder
     public function associations(): array
     {
         return [
-            'posts' => $this->association('posts', PostBuilder::class),
-            'comments' => $this->association('comments', CommentBuilder::class),
+            'posts' => $this->association('posts', PostSchema::class),
+            'comments' => $this->association('comments', CommentSchema::class),
         ];
     }
 

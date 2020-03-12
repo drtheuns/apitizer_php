@@ -7,16 +7,16 @@ use Illuminate\Support\Collection;
 class ApidocCollection extends Collection
 {
     /**
-     * @param string[] $builders
+     * @param string[] $schemas
      *
      * @return ApidocCollection<Apidoc>
      */
-    public static function forQueryBuilders(array $builders): ApidocCollection
+    public static function forSchemas(array $schemas): ApidocCollection
     {
         $collection = [];
 
-        foreach ($builders as $builderClass) {
-            $collection[$builderClass] = new Apidoc(new $builderClass);
+        foreach ($schemas as $schemaClass) {
+            $collection[$schemaClass] = new Apidoc(new $schemaClass);
         }
 
         return new static($collection);
@@ -24,8 +24,8 @@ class ApidocCollection extends Collection
 
     public function findAssociationType(Association $assoc): ?Apidoc
     {
-        $builder = \get_class($assoc->getRelatedQueryBuilder());
+        $schema = \get_class($assoc->getRelatedSchema());
 
-        return $this->items[$builder] ?? null;
+        return $this->items[$schema] ?? null;
     }
 }

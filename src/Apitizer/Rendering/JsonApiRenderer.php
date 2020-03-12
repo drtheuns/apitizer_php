@@ -5,7 +5,7 @@ namespace Apitizer\Rendering;
 use ArrayAccess;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use ReflectionClass;
-use Apitizer\QueryBuilder;
+use Apitizer\Schema;
 use Illuminate\Support\Str;
 use Apitizer\Types\FetchSpec;
 use Apitizer\JsonApi\Resource;
@@ -22,10 +22,10 @@ class JsonApiRenderer extends AbstractRenderer implements Renderer
      */
     protected $included = [];
 
-    public function paginate(QueryBuilder $queryBuilder, LengthAwarePaginator $paginator, FetchSpec $fetchSpec)
+    public function paginate(Schema $schema, LengthAwarePaginator $paginator, FetchSpec $fetchSpec)
     {
         /** @var LengthAwarePaginator */
-        $paginator = parent::paginate($queryBuilder, $paginator, $fetchSpec);
+        $paginator = parent::paginate($schema, $paginator, $fetchSpec);
         $paginatedData = $paginator->toArray();
 
         $rootObject = $paginatedData['data'];
@@ -56,11 +56,11 @@ class JsonApiRenderer extends AbstractRenderer implements Renderer
         return $rootObject;
     }
 
-    public function render(QueryBuilder $queryBuilder, $data, FetchSpec $fetchSpec): array
+    public function render(Schema $schema, $data, FetchSpec $fetchSpec): array
     {
         $render = [];
         $render['data'] = $this->doRender(
-            $queryBuilder, $data,
+            $schema, $data,
             $fetchSpec->getFields(),
             $fetchSpec->getAssociations()
         );
@@ -76,7 +76,7 @@ class JsonApiRenderer extends AbstractRenderer implements Renderer
 
     /**
      * @param mixed $row
-     * @param QueryBuilder $queryBuilder
+     * @param Schema $schema
      * @param AbstractField[] $fields
      * @param Association[] $associations
      *
@@ -84,11 +84,11 @@ class JsonApiRenderer extends AbstractRenderer implements Renderer
      */
     public function renderSingleRow(
         $row,
-        QueryBuilder $queryBuilder,
+        Schema $schema,
         array $fields,
         array $associations
     ): array {
-        $data = $this->renderOneWithoutRelations($row, $queryBuilder, $fields);
+        $data = $this->renderOneWithoutRelations($row, $schema, $fields);
 
         $this->renderAssociations($row, $associations, $data);
 
@@ -97,11 +97,11 @@ class JsonApiRenderer extends AbstractRenderer implements Renderer
 
     /**
      * @param mixed $row
-     * @param QueryBuilder $queryBuilder
+     * @param Schema $schema
      * @param AbstractField[] $fields
      * @return array{type: string, id: string, attributes: array<string, mixed>}
      */
-    protected function renderOneWithoutRelations($row, QueryBuilder $queryBuilder, array $fields)
+    protected function renderOneWithoutRelations($row, Schema $schema, array $fields)
     {
         $attributes = [];
         foreach ($fields as $field) {
@@ -109,8 +109,8 @@ class JsonApiRenderer extends AbstractRenderer implements Renderer
         }
 
         return [
-            'type'          => $this->getResourceType($queryBuilder, $row),
-            'id'            => $this->getResourceId($queryBuilder, $row),
+            'type'          => $this->getResourceType($schema, $row),
+            'id'            => $this->getResourceId($schema, $row),
             'attributes'    => $attributes,
         ];
     }
@@ -135,17 +135,17 @@ class JsonApiRenderer extends AbstractRenderer implements Renderer
     /**
      * Get the type of a resource.
      *
-     * @param QueryBuilder $queryBuilder
+     * @param Schema $schema
      * @param mixed $row
      * @return string
      */
-    protected function getResourceType(QueryBuilder $queryBuilder, $row): string
+    protected function getResourceType(Schema $schema, $row): string
     {
         if ($row instanceof Resource) {
             return $row->getResourceType();
         }
 
-        $className = (new ReflectionClass($queryBuilder->model()))->getShortName();
+        $className = (new ReflectionClass($schema->model()))->getShortName();
 
         return Str::snake($className);
     }
@@ -153,11 +153,11 @@ class JsonApiRenderer extends AbstractRenderer implements Renderer
     /**
      * Get the id or uuid of the resource.
      *
-     * @param QueryBuilder $queryBuilder
+     * @param Schema $schema
      * @param mixed $row
      * @return string
      */
-    protected function getResourceId(QueryBuilder $queryBuilder, $row): string
+    protected function getResourceId(Schema $schema, $row): string
     {
         if ($row instanceof Resource) {
             return $row->getResourceId();
@@ -187,7 +187,7 @@ class JsonApiRenderer extends AbstractRenderer implements Renderer
             }
         }
 
-        throw InvalidOutputException::noJsonApiIdentifier($queryBuilder, $row);
+        throw InvalidOutputException::noJsonApiIdentifier($schema, $row);
     }
 
     /**
@@ -199,7 +199,7 @@ class JsonApiRenderer extends AbstractRenderer implements Renderer
      */
     protected function addRenderedAssociation($row, Association $association, array &$renderedData): void
     {
-        $queryBuilder = $association->getRelatedQueryBuilder();
+        $schema = $association->getRelatedSchema();
         $associationData = $this->valueFromRow($row, $association->getKey());
 
         if (! $association->passesPolicy($associationData, $row)) {
@@ -208,15 +208,15 @@ class JsonApiRenderer extends AbstractRenderer implements Renderer
 
         // Generate the links for the original resource
         if ($this->isSingleRowOfData($associationData)) {
-            $links = $this->generateResourceReference($associationData, $queryBuilder);
-            $this->addIncludedResource($associationData, $association, $association->getRelatedQueryBuilder());
+            $links = $this->generateResourceReference($associationData, $schema);
+            $this->addIncludedResource($associationData, $association, $association->getRelatedSchema());
         } else {
             $links = [];
 
             foreach ($associationData as $row) {
-                $links[] = $this->generateResourceReference($row, $queryBuilder);
+                $links[] = $this->generateResourceReference($row, $schema);
 
-                $this->addIncludedResource($row, $association, $association->getRelatedQueryBuilder());
+                $this->addIncludedResource($row, $association, $association->getRelatedSchema());
             }
         }
 
@@ -225,26 +225,26 @@ class JsonApiRenderer extends AbstractRenderer implements Renderer
 
     /**
      * @param mixed $row
-     * @param QueryBuilder $queryBuilder
+     * @param Schema $schema
      * @return array{type: string, id: string}
      */
-    protected function generateResourceReference($row, QueryBuilder $queryBuilder): array
+    protected function generateResourceReference($row, Schema $schema): array
     {
         return [
-            'type' => $this->getResourceType($queryBuilder, $row),
-            'id'   => $this->getResourceId($queryBuilder, $row),
+            'type' => $this->getResourceType($schema, $row),
+            'id'   => $this->getResourceId($schema, $row),
         ];
     }
 
     /**
      * @param mixed $row
      * @param Association $association
-     * @param QueryBuilder $queryBuilder
+     * @param Schema $schema
      */
-    protected function addIncludedResource($row, Association $association, QueryBuilder $queryBuilder): void
+    protected function addIncludedResource($row, Association $association, Schema $schema): void
     {
-        $type = $this->getResourceType($queryBuilder, $row);
-        $id = $this->getResourceId($queryBuilder, $row);
+        $type = $this->getResourceType($schema, $row);
+        $id = $this->getResourceId($schema, $row);
 
         // If it already exists, add any missing fields/associations.
         if ($this->isIncluded($type, $id)) {
@@ -278,7 +278,7 @@ class JsonApiRenderer extends AbstractRenderer implements Renderer
             // comments are not aware of this, and will overwrite the child.
             $this->included[$type][$id] = $this->renderOneWithoutRelations(
                 $row,
-                $queryBuilder,
+                $schema,
                 $association->getFields() ?? []
             );
 

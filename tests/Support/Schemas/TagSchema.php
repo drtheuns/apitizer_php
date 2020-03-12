@@ -1,11 +1,11 @@
 <?php
 
-namespace Tests\Support\Builders;
+namespace Tests\Support\Schemas;
 
 use Illuminate\Database\Eloquent\Model;
 use Tests\Feature\Models\Tag;
 
-class TagBuilder extends EmptyBuilder
+class TagSchema extends EmptySchema
 {
     public function fields(): array
     {

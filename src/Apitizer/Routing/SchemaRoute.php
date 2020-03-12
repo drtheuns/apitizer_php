@@ -4,7 +4,7 @@ namespace Apitizer\Routing;
 
 use Apitizer\Exceptions\RouteDefinitionException;
 use Apitizer\GenericApi\Controller;
-use Apitizer\QueryBuilder;
+use Apitizer\Schema;
 use Illuminate\Routing\Route;
 
 /**
@@ -12,14 +12,14 @@ use Illuminate\Routing\Route;
  *
  * This class is used when you use the `schema` macro on the router:
  *
- *     Route::schema(PostBuilder::class);
+ *     Route::schema(PostSchema::class);
  *
  * Take a look at the RouteServiceProvider for the macro definition.
  */
 class SchemaRoute
 {
     /**
-     * @var class-string<QueryBuilder>
+     * @var class-string<Schema>
      */
     protected $schema;
 
@@ -34,7 +34,7 @@ class SchemaRoute
     protected $scope;
 
     /**
-     * @param class-string<QueryBuilder> $schema
+     * @param class-string<Schema> $schema
      */
     public function __construct(string $schema, Scope $scope = null)
     {
@@ -50,8 +50,8 @@ class SchemaRoute
     {
         $schema = new $this->schema;
 
-        if (! $schema instanceof QueryBuilder) {
-            throw RouteDefinitionException::queryBuilderExpected($this->schema);
+        if (! $schema instanceof Schema) {
+            throw RouteDefinitionException::schemaExpected($this->schema);
         }
 
         $scope = $this->scope ?? $schema->getScope();
@@ -62,7 +62,7 @@ class SchemaRoute
     /**
      * @return \Illuminate\Routing\Route[] the routes that were registered
      */
-    protected function generateRouteForScope(Scope $scope, QueryBuilder $schema): array
+    protected function generateRouteForScope(Scope $scope, Schema $schema): array
     {
         $routes = [];
 
@@ -84,14 +84,14 @@ class SchemaRoute
 
             $routes = array_merge(
                 $routes,
-                $this->generateRouteForScope($childScope, $association->getRelatedQueryBuilder())
+                $this->generateRouteForScope($childScope, $association->getRelatedSchema())
             );
         }
 
         return $routes;
     }
 
-    public function registerIndex(Scope $scope, ScopeAffordance $affordance, QueryBuilder $schema): Route
+    public function registerIndex(Scope $scope, ScopeAffordance $affordance, Schema $schema): Route
     {
         $segments = new RouteSegmentBuilder($schema, $scope);
         $metadata = $this->metadata($schema, $affordance, $segments);
@@ -102,7 +102,7 @@ class SchemaRoute
         ])->name($segments->name('index'));
     }
 
-    public function registerShow(Scope $scope, ScopeAffordance $affordance, QueryBuilder $schema): Route
+    public function registerShow(Scope $scope, ScopeAffordance $affordance, Schema $schema): Route
     {
         $segments = new RouteSegmentBuilder($schema, $scope, true);
         $metadata = $this->metadata($schema, $affordance, $segments);
@@ -113,7 +113,7 @@ class SchemaRoute
         ])->name($segments->name('show'));
     }
 
-    public function registerStore(Scope $scope, ScopeAffordance $affordance, QueryBuilder $schema): Route
+    public function registerStore(Scope $scope, ScopeAffordance $affordance, Schema $schema): Route
     {
         $segments = new RouteSegmentBuilder($schema, $scope);
         $metadata = $this->metadata($schema, $affordance, $segments);
@@ -124,7 +124,7 @@ class SchemaRoute
         ])->name($segments->name('store'));
     }
 
-    public function registerUpdate(Scope $scope, ScopeAffordance $affordance, QueryBuilder $schema): Route
+    public function registerUpdate(Scope $scope, ScopeAffordance $affordance, Schema $schema): Route
     {
         $segments = new RouteSegmentBuilder($schema, $scope, true);
         $metadata = $this->metadata($schema, $affordance, $segments);
@@ -135,7 +135,7 @@ class SchemaRoute
         ])->name($segments->name('update'));
     }
 
-    public function registerDestroy(Scope $scope, ScopeAffordance $affordance, QueryBuilder $schema): Route
+    public function registerDestroy(Scope $scope, ScopeAffordance $affordance, Schema $schema): Route
     {
         $segments = new RouteSegmentBuilder($schema, $scope, true);
         $metadata = $this->metadata($schema, $affordance, $segments);
@@ -166,13 +166,13 @@ class SchemaRoute
     }
 
     /**
-     * @return array{schema: class-string<QueryBuilder>,
+     * @return array{schema: class-string<Schema>,
      *               service: string|null,
      *               service_method: string|null,
      *               routeParameters: array<string, array<string, string|bool>>}
      */
     protected function metadata(
-        QueryBuilder $schema,
+        Schema $schema,
         ScopeAffordance $affordance,
         RouteSegmentBuilder $segments
     ): array {

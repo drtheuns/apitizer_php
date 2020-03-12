@@ -14,34 +14,34 @@ page](https://packagist.org/packages/drtheuns/apitizer_php)
 The setup assumes you already have your [models](https://laravel.com/docs/6.x/eloquent),
 and [factories & seeders](https://laravel.com/docs/6.x/seeding) setup.
 
-I recommend any project to always have their own base query builder, in case
+I recommend any project to always have their own base schema, in case
 they ever want to change the behaviour globally. A simple override without
 anything else should be enough to get started:
 
 ```php
-// File: /my_project/app/QueryBuilders/QueryBuilder.php
+// File: /my_project/app/Schemas/Schema.php
 <?php
 
-namespace App\QueryBuilders;
+namespace App\Schemas;
 
-abstract class QueryBuilder extends \Apitizer\QueryBuilder
+abstract class Schema extends \Apitizer\Schema
 {
 }
 ```
 
-Next, we'll add a very minimal user builder:
+Next, we'll add a very minimal user schema:
 
 ```php
-// File: /my_project/app/QueryBuilders/UserBuilder.php
+// File: /my_project/app/Schemas/UserSchema.php
 <?php
 
-namespace App\QueryBuilders;
+namespace App\Schemas;
 
 use App\Models\User;
 use Apitizer\Validation\Rules;
 use Illuminate\Database\Eloquent\Model;
 
-class UserBuilder extends QueryBuilder
+class UserSchema extends Schema
 {
     public function fields(): array
     {
@@ -77,7 +77,7 @@ class UserBuilder extends QueryBuilder
 }
 ```
 
-Add a controller that uses this builder:
+Add a controller that uses this schema:
 
 ```php
 // File: /my_project/app/Http/Controllers/UserController.php
@@ -85,14 +85,14 @@ Add a controller that uses this builder:
 
 namespace App\Http\Controllers;
 
-use App\QueryBuilders\UserBuilder;
+use App\Schemas\UserSchema;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
     public function index(Request $request)
     {
-        return UserBuilder::make($request)->paginate();
+        return UserSchema::make($request)->paginate();
     }
 }
 ```
@@ -121,10 +121,10 @@ need to register them in the configuration:
 ```
 // File: /project_root/config/apitizer.php
 return [
-    'query_builders' => [
+    'schemas' => [
         'classes' => [
             // Register individual classes here, for example:
-            \App\Api\UserBuilder::class,
+            \App\Api\UserSchema::class,
         ],
         'namespaces' => [
             // Register entire namespaces here (non recursive)

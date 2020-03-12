@@ -3,8 +3,8 @@
 namespace Tests\Unit\Types;
 
 use Apitizer\Types\Apidoc;
-use Tests\Support\Builders\EmptyBuilder;
-use Tests\Support\Builders\UserBuilder;
+use Tests\Support\Schemas\EmptySchema;
+use Tests\Support\Schemas\UserSchema;
 use Tests\Unit\TestCase;
 
 class ApidocTest extends TestCase
@@ -16,28 +16,24 @@ class ApidocTest extends TestCase
     }
 
     /** @test */
-    public function it_should_guess_resource_names_from_the_query_builder()
+    public function it_should_guess_resource_names_from_the_schema()
     {
-        // UserBuilder -> User
-        $onlyBuilder = new Apidoc(new UserBuilder());
-        $this->assertEquals('User', $onlyBuilder->getName());
-
-        // UserQueryBuilder -> User
-        $queryBuilder = new Apidoc(new UserQueryBuilder());
-        $this->assertEquals('User', $queryBuilder->getName());
+        // UserSchema -> User
+        $schema = new Apidoc(new OrganizationSchema());
+        $this->assertEquals('Organization', $schema->getName());
     }
 
     /** @test */
     public function it_falls_back_to_the_class_name_if_it_cannot_guess_the_name()
     {
-        $apidoc = new Apidoc(new NonBuilderName());
-        $this->assertEquals('NonBuilderName', $apidoc->getName());
+        $apidoc = new Apidoc(new NonSchemaName());
+        $this->assertEquals('NonSchemaName', $apidoc->getName());
     }
 
     /** @test */
     public function arbitrary_metadata_can_be_attached_to_the_documenation()
     {
-        $apidoc = new Apidoc(new UserBuilder());
+        $apidoc = new Apidoc(new UserSchema());
         $apidoc->setMetadata(['deprecated' => true]);
 
         $this->assertEquals(['deprecated' => true], $apidoc->getMetadata());
@@ -45,9 +41,9 @@ class ApidocTest extends TestCase
 }
 
 // Used as examples for name guessing.
-class UserQueryBuilder extends EmptyBuilder
+class OrganizationSchema extends EmptySchema
 {
 }
-class NonBuilderName extends EmptyBuilder
+class NonSchemaName extends EmptySchema
 {
 }

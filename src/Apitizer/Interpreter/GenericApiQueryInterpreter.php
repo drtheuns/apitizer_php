@@ -3,7 +3,7 @@
 namespace Apitizer\Interpreter;
 
 use Apitizer\GenericApi\RouteParameter;
-use Apitizer\QueryBuilder;
+use Apitizer\Schema;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -26,10 +26,10 @@ class GenericApiQueryInterpreter extends QueryInterpreter
         $this->routeParameters = $routeParameters;
     }
 
-    protected function newQueryInstance(QueryBuilder $queryBuilder): Builder
+    protected function newQueryInstance(Schema $schema): Builder
     {
         if (empty($this->routeParameters)) {
-            return $queryBuilder->model()->query();
+            return $schema->model()->query();
         }
 
         $previousParameter = null;
@@ -98,7 +98,7 @@ class GenericApiQueryInterpreter extends QueryInterpreter
         }
 
         if (! $query) {
-            return $queryBuilder->model()->query();
+            return $schema->model()->query();
         }
 
         return $query;

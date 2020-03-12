@@ -5,8 +5,8 @@ namespace Tests\Unit\Routing;
 use Apitizer\GenericApi\ModelService;
 use Apitizer\Routing\SchemaRoute;
 use Apitizer\Routing\Scope;
-use Tests\Support\Builders\EmptyBuilder;
-use Tests\Support\Builders\UserBuilder;
+use Tests\Support\Schemas\EmptySchema;
+use Tests\Support\Schemas\UserSchema;
 use Tests\Unit\TestCase;
 use Illuminate\Support\Facades\Route as LaravelRoute;
 
@@ -22,8 +22,8 @@ class SchemaRouteTest extends TestCase
     public function it_creates_the_index_route(): void
     {
         $scope = (new Scope)->readable();
-        $route = (new SchemaRoute(UserBuilder::class))->registerIndex(
-            $scope, $scope->getAffordances()['readable'], new UserBuilder
+        $route = (new SchemaRoute(UserSchema::class))->registerIndex(
+            $scope, $scope->getAffordances()['readable'], new UserSchema
         );
 
         $this->assertEquals($route->uri, 'users');
@@ -35,8 +35,8 @@ class SchemaRouteTest extends TestCase
     public function it_creates_the_show_route(): void
     {
         $scope = (new Scope)->readable();
-        $route = (new SchemaRoute(UserBuilder::class))->registerShow(
-            $scope, $scope->getAffordances()['readable'], new UserBuilder
+        $route = (new SchemaRoute(UserSchema::class))->registerShow(
+            $scope, $scope->getAffordances()['readable'], new UserSchema
         );
 
         $this->assertEquals($route->uri, 'users/{user}');
@@ -48,8 +48,8 @@ class SchemaRouteTest extends TestCase
     public function it_creates_the_store_route(): void
     {
         $scope = (new Scope)->creatable();
-        $route = (new SchemaRoute(UserBuilder::class))->registerStore(
-            $scope, $scope->getAffordances()['creatable'], new UserBuilder
+        $route = (new SchemaRoute(UserSchema::class))->registerStore(
+            $scope, $scope->getAffordances()['creatable'], new UserSchema
         );
 
         $this->assertEquals($route->uri, 'users');
@@ -61,8 +61,8 @@ class SchemaRouteTest extends TestCase
     public function it_creates_the_update_route(): void
     {
         $scope = (new Scope)->updatable();
-        $route = (new SchemaRoute(UserBuilder::class))->registerUpdate(
-            $scope, $scope->getAffordances()['updatable'], new UserBuilder
+        $route = (new SchemaRoute(UserSchema::class))->registerUpdate(
+            $scope, $scope->getAffordances()['updatable'], new UserSchema
         );
 
         $this->assertEquals($route->uri, 'users/{user}');
@@ -74,8 +74,8 @@ class SchemaRouteTest extends TestCase
     public function it_creates_the_destroy_route(): void
     {
         $scope = (new Scope)->deletable();
-        $route = (new SchemaRoute(UserBuilder::class))->registerDestroy(
-            $scope, $scope->getAffordances()['deletable'], new UserBuilder
+        $route = (new SchemaRoute(UserSchema::class))->registerDestroy(
+            $scope, $scope->getAffordances()['deletable'], new UserSchema
         );
 
         $this->assertEquals($route->uri, 'users/{user}');
@@ -87,7 +87,7 @@ class SchemaRouteTest extends TestCase
     public function it_registers_all_routes(): void
     {
         $scope = (new Scope)->crud();
-        $routes = (new SchemaRoute(UserBuilder::class, $scope))->generateRoutes();
+        $routes = (new SchemaRoute(UserSchema::class, $scope))->generateRoutes();
 
         $this->assertCount(5, $routes);
     }
@@ -97,21 +97,21 @@ class SchemaRouteTest extends TestCase
     {
         $scope = (new Scope)->readable();
         $affordance = $scope->getAffordances()['readable'];
-        $route = (new SchemaRoute(UserBuilder::class))->registerShow($scope, $affordance, new UserBuilder);
+        $route = (new SchemaRoute(UserSchema::class))->registerShow($scope, $affordance, new UserSchema);
 
         $this->assertArrayHasKey('metadata', $route->action);
         $this->assertEquals([
-            'schema'         => UserBuilder::class,
+            'schema'         => UserSchema::class,
             'service'        => null,
             'service_method' => null,
             'routeParameters' => [
                 'users' => [
-                    'schema'      => UserBuilder::class,
+                    'schema'      => UserSchema::class,
                     'has_param'   => false,
                     'association' => null,
                 ],
                 'user' => [
-                    'schema'      => UserBuilder::class,
+                    'schema'      => UserSchema::class,
                     'has_param'   => true,
                     'association' => null
                 ]
@@ -125,7 +125,7 @@ class SchemaRouteTest extends TestCase
         $service = 'App\Services\MyOwnService';
         $scope = (new Scope)->creatable($service);
         $affordance = $scope->getAffordances()['creatable'];
-        $route = (new SchemaRoute(UserBuilder::class))->registerStore($scope, $affordance, new UserBuilder);
+        $route = (new SchemaRoute(UserSchema::class))->registerStore($scope, $affordance, new UserSchema);
 
         $this->assertEquals($service, $route->action['metadata']['service']);
     }
@@ -137,7 +137,7 @@ class SchemaRouteTest extends TestCase
         // registered with the router, rather than just instantiated but not
         // stored.
         $scope = (new Scope)->crud();
-        $routes = (new SchemaRoute(UserBuilder::class, $scope))->generateRoutes();
+        $routes = (new SchemaRoute(UserSchema::class, $scope))->generateRoutes();
 
         $this->assertCount(5, $this->getRegisteredRoutes());
     }
@@ -145,7 +145,7 @@ class SchemaRouteTest extends TestCase
     /** @test */
     public function routes_can_be_registered_using_the_schema_macro(): void
     {
-        LaravelRoute::schema(CrudBuilder::class);
+        LaravelRoute::schema(CrudSchema::class);
 
         $this->assertCount(5, $this->getRegisteredRoutes());
     }
@@ -156,7 +156,7 @@ class SchemaRouteTest extends TestCase
     }
 }
 
-class CrudBuilder extends EmptyBuilder
+class CrudSchema extends EmptySchema
 {
     public function scope(Scope $scope)
     {

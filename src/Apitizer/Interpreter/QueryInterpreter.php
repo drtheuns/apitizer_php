@@ -3,7 +3,7 @@
 namespace Apitizer\Interpreter;
 
 use Apitizer\Types\FetchSpec;
-use Apitizer\QueryBuilder;
+use Apitizer\Schema;
 use Apitizer\Types\Field;
 use Apitizer\Types\AbstractField;
 use Apitizer\Types\Association;
@@ -19,31 +19,31 @@ class QueryInterpreter
      * Prepare the query based on the fetch specification.
      *
      * This will apply selects, filters, and sorting. The `beforeQuery` and
-     * `afterQuery` hooks are called on the query builder before and after the
+     * `afterQuery` hooks are called on the schema before and after the
      * query is built.
      */
-    public function build(QueryBuilder $queryBuilder, FetchSpec $fetchSpec): Builder
+    public function build(Schema $schema, FetchSpec $fetchSpec): Builder
     {
-        $query = $this->newQueryInstance($queryBuilder);
-        $query = $queryBuilder->beforeQuery($query, $fetchSpec);
+        $query = $this->newQueryInstance($schema);
+        $query = $schema->beforeQuery($query, $fetchSpec);
 
         $this->applySelect(
             $query,
             $fetchSpec->getFields(),
             $fetchSpec->getAssociations(),
-            $queryBuilder->getAlwaysLoadColumns()
+            $schema->getAlwaysLoadColumns()
         );
         $this->applySorting($query, $fetchSpec->getSorts());
         $this->applyFilters($query, $fetchSpec->getFilters());
 
-        $query = $queryBuilder->afterQuery($query, $fetchSpec);
+        $query = $schema->afterQuery($query, $fetchSpec);
 
         return $query;
     }
 
-    protected function newQueryInstance(QueryBuilder $queryBuilder): Builder
+    protected function newQueryInstance(Schema $schema): Builder
     {
-        return $queryBuilder->model()->query();
+        return $schema->model()->query();
     }
 
     /**
@@ -94,7 +94,7 @@ class QueryInterpreter
 
                     $additionalSelects = array_merge(
                         $additionalSelects,
-                        $association->getRelatedQueryBuilder()->getAlwaysLoadColumns()
+                        $association->getRelatedSchema()->getAlwaysLoadColumns()
                     );
 
                     $this->applySelect(

@@ -6,7 +6,7 @@ use Apitizer\Exceptions\CastException;
 use Apitizer\Exceptions\InvalidInputException;
 use Apitizer\Exceptions\InvalidOutputException;
 use Apitizer\Policies\PolicyFailed;
-use Apitizer\QueryBuilder;
+use Apitizer\Schema;
 use Apitizer\Rendering\Renderer;
 use ArrayAccess;
 
@@ -118,7 +118,7 @@ abstract class AbstractField extends Factory
                 $value = call_user_func($transformer, $value, $row, $this);
             } catch (CastException $e) {
                 $e = InvalidOutputException::castError($this, $e, $row);
-                $this->getQueryBuilder()->handleException($e);
+                $this->getSchema()->handleException($e);
 
                 // If the error is ignored, continuing transformations will likely
                 // generate more unexpected errors, so we'll stop here.

@@ -5,7 +5,7 @@ namespace Tests\Unit\Types;
 use Apitizer\Exceptions\DefinitionException;
 use Apitizer\Exceptions\InvalidInputException;
 use Apitizer\Types\Filter;
-use Tests\Support\Builders\UserBuilder;
+use Tests\Support\Schemas\UserSchema;
 use Tests\Unit\TestCase;
 
 class FilterTest extends TestCase
@@ -56,6 +56,6 @@ class FilterTest extends TestCase
 
     private function filter()
     {
-        return new Filter(new UserBuilder());
+        return new Filter(new UserSchema());
     }
 }

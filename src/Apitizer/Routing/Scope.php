@@ -2,7 +2,7 @@
 
 namespace Apitizer\Routing;
 
-use Apitizer\QueryBuilder;
+use Apitizer\Schema;
 use Closure;
 
 class Scope
@@ -130,7 +130,7 @@ class Scope
      * Set the path segment name for this builder.
      *
      * By default, the name of the builder will be wrangled to a path segment.
-     * For example, PostBuilder would turn into /posts.
+     * For example, PostSchema would turn into /posts.
      */
     public function path(string $name): self
     {

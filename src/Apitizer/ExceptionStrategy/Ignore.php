@@ -2,13 +2,13 @@
 
 namespace Apitizer\ExceptionStrategy;
 
-use Apitizer\QueryBuilder;
+use Apitizer\Schema;
 use Apitizer\Exceptions\ApitizerException;
 
 class Ignore implements Strategy
 {
     public function handle(
-        QueryBuilder $queryBuilder,
+        Schema $schema,
         ApitizerException $apitizerException
     ): void {
         //

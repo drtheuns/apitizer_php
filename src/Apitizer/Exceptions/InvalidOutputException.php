@@ -3,7 +3,7 @@
 namespace Apitizer\Exceptions;
 
 use Apitizer\Types\EnumField;
-use Apitizer\QueryBuilder;
+use Apitizer\Schema;
 use Apitizer\Types\AbstractField;
 use Illuminate\Database\Eloquent\Model;
 use ArrayAccess;
@@ -19,11 +19,11 @@ use ArrayAccess;
 class InvalidOutputException extends ApitizerException
 {
     /**
-     * The query builder where the exception occurred.
+     * The schema where the exception occurred.
      *
-     * @var QueryBuilder
+     * @var Schema
      */
-    public $queryBuilder;
+    public $schema;
 
     /**
      * The class from which the exception originates
@@ -39,14 +39,14 @@ class InvalidOutputException extends ApitizerException
     public static function fieldIsNull(AbstractField $field, $row): self
     {
         $fieldName = $field->getName();
-        $queryBuilderName = get_class($field->getQueryBuilder());
+        $schemaName = get_class($field->getSchema());
         $reference = static::rowReference($row);
-        $message = "Field [$fieldName] on [$queryBuilderName] is declared as not"
+        $message = "Field [$fieldName] on [$schemaName] is declared as not"
                  ." nullable but a null value was received for row [$reference]";
 
         $e = new static($message);
         $e->origin = $field;
-        $e->queryBuilder = $field->getQueryBuilder();
+        $e->schema = $field->getSchema();
 
         return $e;
     }
@@ -59,14 +59,14 @@ class InvalidOutputException extends ApitizerException
     public static function invalidEnum(EnumField $field, $value, $row): self
     {
         $fieldName = $field->getName();
-        $queryBuilderName = get_class($field->getQueryBuilder());
+        $schemaName = get_class($field->getSchema());
         $reference = static::rowReference($row);
-        $message = "Field [$fieldName] on [$queryBuilderName] received unexpected"
+        $message = "Field [$fieldName] on [$schemaName] received unexpected"
             . " enum value [$value] for row [$reference]";
 
         $e = new static($message);
         $e->origin = $field;
-        $e->queryBuilder = $field->getQueryBuilder();
+        $e->schema = $field->getSchema();
 
         return $e;
     }
@@ -79,32 +79,32 @@ class InvalidOutputException extends ApitizerException
     public static function castError(AbstractField $field, CastException $e, $row): self
     {
         $fieldName = $field->getName();
-        $queryBuilderName = get_class($field->getQueryBuilder());
+        $schemaName = get_class($field->getSchema());
         $reference = static::rowReference($row);
         $value = $e->value;
         $type = $e->type;
-        $message = "Field [$fieldName] on [$queryBuilderName] received a cast error"
+        $message = "Field [$fieldName] on [$schemaName] received a cast error"
                  . " when attempting to cast [$value] to [$type] for row [$reference]";
 
         $e = new static($message);
         $e->origin = $field;
-        $e->queryBuilder = $field->getQueryBuilder();
+        $e->schema = $field->getSchema();
 
         return $e;
     }
 
     /**
-     * @param QueryBuilder $queryBuilder
+     * @param Schema $schema
      * @param mixed $row
      */
-    public static function noJsonApiIdentifier(QueryBuilder $queryBuilder, $row): self
+    public static function noJsonApiIdentifier(Schema $schema, $row): self
     {
-        $class = get_class($queryBuilder);
+        $class = get_class($schema);
         $obj = is_array($row) ? json_encode($row) : gettype($row);
         $message = "Failed to get a JSON-API id reference for [$class] from [$obj]";
 
         $e = new static($message);
-        $e->queryBuilder = $queryBuilder;
+        $e->schema = $schema;
         return $e;
     }
 
