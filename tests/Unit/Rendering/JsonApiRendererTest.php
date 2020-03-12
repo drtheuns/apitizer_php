@@ -3,13 +3,13 @@
 namespace Tests\Unit\Rendering;
 
 use Apitizer\JsonApi\ResourceContainer;
-use Apitizer\QueryBuilder;
+use Apitizer\Schema;
 use Apitizer\Rendering\JsonApiRenderer;
 use Apitizer\Types\FetchSpec;
 use Illuminate\Support\Arr;
 use Tests\Feature\Models\User;
-use Tests\Support\Builders\PostBuilder;
-use Tests\Support\Builders\UserBuilder;
+use Tests\Support\Schemas\PostSchema;
+use Tests\Support\Schemas\UserSchema;
 use Tests\Unit\TestCase;
 
 class JsonApiRendererTest extends TestCase
@@ -25,7 +25,7 @@ class JsonApiRendererTest extends TestCase
     public function it_renders_a_resource_correctly(): void
     {
         $input = new ResourceContainer('user', '1', ['name' => 'John Doe']);
-        $schema = new UserBuilder;
+        $schema = new UserSchema;
         $renderer = new JsonApiRenderer;
 
         $actual = $renderer->renderSingleRow(
@@ -53,7 +53,7 @@ class JsonApiRendererTest extends TestCase
             'title' => 'Hello Test',
             'author' => new ResourceContainer('user', '1', ['name' => 'John Doe'])
         ]);
-        $schema = new PostBuilder;
+        $schema = new PostSchema;
         $renderer = new JsonApiRenderer;
 
         $actual = $renderer->renderSingleRow(
@@ -89,8 +89,8 @@ class JsonApiRendererTest extends TestCase
             'title' => 'Hello Test',
             'author' => new ResourceContainer('user', '1', ['name' => 'John Doe'])
         ]);
-        $postSchema = new PostBuilder;
-        $userSchema = new UserBuilder;
+        $postSchema = new PostSchema;
+        $userSchema = new UserSchema;
         $associations = $this->associations($postSchema, ['author']);
         $associations['author']->setFields($this->fields($userSchema, ['name']));
 
@@ -138,8 +138,8 @@ class JsonApiRendererTest extends TestCase
             'title' => 'Hello Test',
             'author' => new ResourceContainer('user', '1', ['name' => 'John Doe'])
         ]);
-        $postSchema = new PostBuilder;
-        $userSchema = new UserBuilder;
+        $postSchema = new PostSchema;
+        $userSchema = new UserSchema;
         $associations = $this->associations($postSchema, ['author']);
         $associations['author']->setFields($this->fields($userSchema, ['name']));
 
@@ -183,13 +183,13 @@ class JsonApiRendererTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
-    private function fields(QueryBuilder $queryBuilder, array $fields)
+    private function fields(Schema $schema, array $fields)
     {
-        return Arr::only($queryBuilder->getFields(), $fields);
+        return Arr::only($schema->getFields(), $fields);
     }
 
-    private function associations(QueryBuilder $queryBuilder, array $associations)
+    private function associations(Schema $schema, array $associations)
     {
-        return Arr::only($queryBuilder->getAssociations(), $associations);
+        return Arr::only($schema->getAssociations(), $associations);
     }
 }

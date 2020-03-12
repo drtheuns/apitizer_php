@@ -1,12 +1,13 @@
 <?php
 
-namespace Tests\Support\Builders;
+namespace Tests\Support\Schemas;
 
+use Apitizer\Routing\Scope;
 use Apitizer\Types\Apidoc;
 use Illuminate\Database\Eloquent\Model;
 use Tests\Feature\Models\Post;
 
-class PostBuilder extends EmptyBuilder
+class PostSchema extends EmptySchema
 {
     const DESCRIPTION = 'A blog post';
 
@@ -27,9 +28,9 @@ class PostBuilder extends EmptyBuilder
     public function associations(): array
     {
         return [
-            'author'   => $this->association('author', UserBuilder::class),
-            'comments' => $this->association('comments', CommentBuilder::class),
-            'tags'     => $this->association('tags', TagBuilder::class),
+            'author'   => $this->association('author', UserSchema::class),
+            'comments' => $this->association('comments', CommentSchema::class),
+            'tags'     => $this->association('tags', TagSchema::class),
         ];
     }
 
@@ -47,6 +48,13 @@ class PostBuilder extends EmptyBuilder
     public function sorts(): array
     {
         return [];
+    }
+
+    public function scope(Scope $scope)
+    {
+        $scope->crud()
+              ->associationCrud('author')
+              ->associationCrud('comments');
     }
 
     public function model(): Model

@@ -20,13 +20,13 @@ class AppServiceProvider extends ServiceProvider
 }
 ```
 
-- Override the `getRenderer` on the query builder:
+- Override the `getRenderer` on the schema:
 
 ```php
 use Apitizer\Rendering\Renderer;
 use Apitizer\Rendering\ReferenceMapRenderer;
 
-class PostBuilder extends QueryBuilder
+class PostSchema extends Schema
 {
     public function getRenderer(): Renderer
     {
@@ -38,7 +38,7 @@ class PostBuilder extends QueryBuilder
 - Use the `setRenderer` method on an instance:
 
 ```php
-PostBuilder::make($request)
+PostSchema::make($request)
     ->setRenderer(new JsonApiRenderer)
     ->paginate()
 ```

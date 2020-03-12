@@ -56,30 +56,30 @@ function.
 ## Defining custom types
 
 If you followed along with the Installation guide, you should have an abstract
-base query builder defined for your project:
+base schema defined for your project:
 
 ```php
 <?php
 
-namespace App\QueryBuilders;
+namespace App\Schemas;
 
-abstract class QueryBuilder extends \Apitizer\QueryBuilder
+abstract class Schema extends \Apitizer\Schema
 {
 }
 ```
 
-We can use this base query builder to either add new types, extend the field
+We can use this base schema to either add new types, extend the field
 type, or tweak settings. We're first going to add a new `color` type that always
 prefixes the color hex code with a pound sign:
 
 ```
 <?php
 
-namespace App\QueryBuilders;
+namespace App\Schemas;
 
 use Apitizer\Types\Field;
 
-abstract class QueryBuilder extends \Apitizer\QueryBuilder
+abstract class Schema extends \Apitizer\Schema
 {
     public function color(string $key): Field
     {
@@ -102,7 +102,7 @@ callable accepts up to two parameters: the row of data that is currently being
 rendered, and the `\Apitizer\Types\GeneratedField` instance.
 
 ```php
-class InvoiceBuilder {
+class InvoiceSchema {
     public function fields(): array
     {
         return [
@@ -119,7 +119,7 @@ Any `callable` is accepted, so something like this could also be used:
 ```php
 use Apitizer\Types\GeneratedField;
 
-class InvoiceBuilder {
+class InvoiceSchema {
     public function fields(): array
     {
         return [

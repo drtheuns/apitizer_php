@@ -9,6 +9,7 @@ use Apitizer\Interpreter\QueryInterpreter;
 use Apitizer\Parser\Parser;
 use Apitizer\Parser\RawInput;
 use Apitizer\Rendering\Renderer;
+use Apitizer\Routing\Scope;
 use Apitizer\Support\DefinitionHelper;
 use Apitizer\Support\FetchSpecFactory;
 use Apitizer\Types\Apidoc;
@@ -27,7 +28,7 @@ use Illuminate\Pagination\AbstractPaginator;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
 
-abstract class QueryBuilder
+abstract class Schema
 {
     use Concerns\HasFields;
 
@@ -102,6 +103,11 @@ abstract class QueryBuilder
     protected $specification;
 
     /**
+     * @var Schema|null the parent schema in case on associations.
+     */
+    protected $parent;
+
+    /**
      * The maximum number of rows that the client is able to request.
      *
      * @var int
@@ -121,6 +127,11 @@ abstract class QueryBuilder
     protected $rules;
 
     /**
+     * @var Scope|null
+     */
+    protected $scope;
+
+    /**
      * A function that returns the fields that are available to the client.
      *
      * If the value is a string, it will be implicitly cast to `$this->any`
@@ -137,7 +148,7 @@ abstract class QueryBuilder
      * A callback that returns all the associations that are available to the
      * client.
      *
-     * @see QueryBuilder::association
+     * @see Schema::association
      *
      * @return array<string, Association>
      */
@@ -190,8 +201,16 @@ abstract class QueryBuilder
     abstract public function rules(Rules $rules);
 
     /**
-     * Overridable function to adjust the API documentation for this query
-     * builder.
+     * Defines the scope that this resource affords.
+     *
+     * @param Scope $scope
+     *
+     * @return void
+     */
+    abstract public function scope(Scope $scope);
+
+    /**
+     * Overridable function to adjust the API documentation for this schema.
      *
      * @see Apidoc
      */
@@ -202,13 +221,13 @@ abstract class QueryBuilder
 
     /**
      * This function is called before the query is built and conditions are applied.
-     * It allows query builders to hook into the query building process and
+     * It allows schemas to hook into the query building process and
      * modify the query based on state and user input.
      *
      * For example, if you need to always add conditions to the query based on
      * the user's role, this would be the place to put it.
      *
-     * @see QueryBuilder::getRequest()
+     * @see Schema::getRequest()
      * @see FetchSpec::fieldSelected
      * @see FetchSpec::filterSelected
      * @see FetchSpec::sortSelected
@@ -223,7 +242,7 @@ abstract class QueryBuilder
      * the query building process when it is done (but the data hasn't been
      * fetched yet).
      *
-     * @see QueryBuilder::beforeQuery
+     * @see Schema::beforeQuery
      */
     public function afterQuery(Builder $query, FetchSpec $fetchSpec): Builder
     {
@@ -238,13 +257,13 @@ abstract class QueryBuilder
     /**
      * Static alias for the constructor.
      */
-    public static function make(Request $request = null): QueryBuilder
+    public static function make(Request $request = null): Schema
     {
         return (new static($request));
     }
 
     /**
-     * Build a query object using this builder without actually fetching the data.
+     * Build a query object using this schema without actually fetching the data.
      *
      * @return Builder
      */
@@ -265,7 +284,7 @@ abstract class QueryBuilder
     }
 
     /**
-     * Defines a relationship to another querybuilder.
+     * Defines a relationship to another schema.
      *
      * This can be used in the `fields` callback to handle nested selects such
      * as:
@@ -274,22 +293,24 @@ abstract class QueryBuilder
      *
      * where `comments` is defined like:
      *
-     *   $this->association('comments', CommentBuilder::class)
+     *   $this->association('comments', CommentSchema::class)
      *
      * @param string $key
-     * @param string $builderClass
+     * @param string $schemaClass
      *
      * @return Association
      */
-    protected function association(string $key, string $builderClass)
+    protected function association(string $key, string $schemaClass)
     {
-        $builderInstance = new $builderClass();
+        $schemaInstance = new $schemaClass();
 
-        if (! $builderInstance instanceof QueryBuilder) {
-            throw DefinitionException::builderClassExpected($this, $key, $builderClass);
+        if (! $schemaInstance instanceof Schema) {
+            throw DefinitionException::schemaClassExpected($this, $key, $schemaClass);
         }
 
-        return new Association($this, $builderInstance, $key);
+        $schemaInstance->setParent($this);
+
+        return new Association($this, $schemaInstance, $key);
     }
 
     /**
@@ -313,7 +334,7 @@ abstract class QueryBuilder
     }
 
     /**
-     * Render the given data based on either the current query builder and
+     * Render the given data based on either the current schema and
      * request, or the fields that were passed in.
      *
      * @param mixed $data
@@ -426,7 +447,7 @@ abstract class QueryBuilder
     }
 
     /**
-     * Build the fetch specification based on the query builder and the request.
+     * Build the fetch specification based on the schema and the request.
      *
      * @return FetchSpec
      */
@@ -573,6 +594,9 @@ abstract class QueryBuilder
         return $this;
     }
 
+    /**
+     * @internal
+     */
     public function handleException(ApitizerException $e): void
     {
         $this->getExceptionStrategy()->handle($this, $e);
@@ -591,6 +615,25 @@ abstract class QueryBuilder
     }
 
     /**
+     * @internal
+     */
+    public function getParent(): ?Schema
+    {
+        return $this->parent;
+    }
+
+    /**
+     * @internal
+     */
+    public function setParent(Schema $parent): self
+    {
+        $this->parent = $parent;
+
+        return $this;
+    }
+
+    /**
+     * @internal
      * @return string[]
      */
     public function getAlwaysLoadColumns(): array
@@ -598,6 +641,9 @@ abstract class QueryBuilder
         return $this->alwaysLoadColumns;
     }
 
+    /**
+     * @internal
+     */
     public function getRules(): Rules
     {
         $rules = $this->rules;
@@ -609,5 +655,21 @@ abstract class QueryBuilder
         }
 
         return $rules;
+    }
+
+    /**
+     * @internal
+     */
+    public function getScope(): Scope
+    {
+        $scope = $this->scope;
+
+        if (! $scope) {
+            $scope = new Scope();
+            $this->scope($scope);
+            $this->scope = $scope;
+        }
+
+        return $scope;
     }
 }

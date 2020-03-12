@@ -3,7 +3,7 @@
 namespace Apitizer\Types;
 
 use Apitizer\Exceptions\InvalidOutputException;
-use Apitizer\QueryBuilder;
+use Apitizer\Schema;
 
 /**
  * Specialization of the field type to display enumerable values.
@@ -19,18 +19,18 @@ class EnumField extends Field
     protected $enum = [];
 
     /**
-     * @param QueryBuilder $queryBuilder
+     * @param Schema $schema
      * @param string $key
      * @param array<mixed> $enum
      * @param string $type
      */
     public function __construct(
-        QueryBuilder $queryBuilder,
+        Schema $schema,
         string $key,
         array $enum,
         string $type = 'string'
     ) {
-        parent::__construct($queryBuilder, $key, $type);
+        parent::__construct($schema, $key, $type);
         $this->enum = $enum;
     }
 

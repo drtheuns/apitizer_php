@@ -9,7 +9,7 @@ use.
 use Apitizer\Validation\Rules;
 use Apitizer\Validation\ObjectRules;
 
-class PostBuilder extends QueryBuilder
+class PostSchema extends Schema
 {
     // --snip-- the other callbacks
 

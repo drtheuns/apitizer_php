@@ -1,17 +1,17 @@
 <?php
 
-namespace Tests\Feature\QueryBuilder;
+namespace Tests\Feature\Schema;
 
 use Apitizer\Policies\CachedPolicy;
 use Apitizer\Policies\OwnerPolicy;
 use Apitizer\Policies\Policy;
-use Apitizer\QueryBuilder;
+use Apitizer\Schema;
 use Apitizer\Types\Association;
 use Apitizer\Types\Field;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
-use Tests\Support\Builders\EmptyBuilder;
-use Tests\Support\Builders\PostBuilder;
+use Tests\Support\Schemas\EmptySchema;
+use Tests\Support\Schemas\PostSchema;
 use Tests\Feature\Models\Post;
 use Tests\Feature\TestCase;
 use Tests\Feature\Models\User;
@@ -27,18 +27,18 @@ class PolicyTest extends TestCase
         ];
 
         $request = $this->request()->fields('name')->user($user)->make();
-        $result = PolicyTestBuilder::new($request, $fields)->render($user);
+        $result = PolicyTestSchema::new($request, $fields)->render($user);
 
         $this->assertEquals(['name' => $user->name], $result);
 
         $otherUser = factory(User::class)->create();
         $request = $this->request()->fields('name')->user($otherUser)->make();
-        $result = PolicyTestBuilder::new($request, $fields)->render($user);
+        $result = PolicyTestSchema::new($request, $fields)->render($user);
 
         $this->assertEmpty($result);
 
         $request = $this->request()->fields('name')->make();
-        $result = PolicyTestBuilder::new($request, $fields)->render($user);
+        $result = PolicyTestSchema::new($request, $fields)->render($user);
 
         $this->assertEmpty($result);
     }
@@ -52,13 +52,13 @@ class PolicyTest extends TestCase
         $user = factory(User::class)->create();
 
         $request = $this->request()->fields('name')->user($user)->make();
-        $result = PolicyTestBuilder::new($request, $fields)->render($user);
+        $result = PolicyTestSchema::new($request, $fields)->render($user);
 
         $this->assertEquals(['name' => $user->name], $result);
 
         $otherUser = factory(User::class)->create();
         $request = $this->request()->fields('name')->user($otherUser)->make();
-        $result = PolicyTestBuilder::new($request, $fields)->render($user);
+        $result = PolicyTestSchema::new($request, $fields)->render($user);
 
         $this->assertEmpty($result);
     }
@@ -71,7 +71,7 @@ class PolicyTest extends TestCase
         ];
         $user = factory(User::class)->create();
         $request = $this->request()->fields('name')->make();
-        $result = PolicyTestBuilder::new($request, $fields)->render($user);
+        $result = PolicyTestSchema::new($request, $fields)->render($user);
 
         $this->assertEquals(['name' => $user->name], $result);
 
@@ -80,7 +80,7 @@ class PolicyTest extends TestCase
         ];
 
         $request = $this->request()->fields('name')->make();
-        $result = PolicyTestBuilder::new($request, $fields)->render($user);
+        $result = PolicyTestSchema::new($request, $fields)->render($user);
 
         $this->assertEmpty($result);
     }
@@ -96,7 +96,7 @@ class PolicyTest extends TestCase
         ];
         $user = factory(User::class)->create();
         $request = $this->request()->fields('name')->make();
-        $result = PolicyTestBuilder::new($request, $fields)->render($user);
+        $result = PolicyTestSchema::new($request, $fields)->render($user);
 
         $this->assertEquals(['name' => $user->name], $result);
     }
@@ -113,7 +113,7 @@ class PolicyTest extends TestCase
         ];
         $user = factory(User::class)->create();
         $request = $this->request()->fields('id,name')->make();
-        $result = PolicyTestBuilder::new($request, $fields)->render($user);
+        $result = PolicyTestSchema::new($request, $fields)->render($user);
 
         $this->assertEquals($user->only('id', 'name'), $result);
         $this->assertEquals(1, $policy->called);
@@ -124,7 +124,7 @@ class PolicyTest extends TestCase
     {
         $post = factory(Post::class)->create();
         $request = $this->request()->fields('id,author(id)')->make();
-        $result = PolicyPostBuilder::make($request)->render($post);
+        $result = PolicyPostSchema::make($request)->render($post);
 
         $this->assertEquals($post->only('id'), $result);
     }
@@ -134,7 +134,7 @@ class PolicyTest extends TestCase
     {
         $user = factory(User::class)->state('withPosts')->create();
         $request = $this->request()->fields('id,posts(id,name)')->make();
-        $result = PolicyUserBuilder::make($request)->render($user);
+        $result = PolicyUserSchema::make($request)->render($user);
 
         $this->assertEquals([
             'id' => $user->id,
@@ -144,12 +144,12 @@ class PolicyTest extends TestCase
 
     private function field(string $name, string $type = 'string'): Field
     {
-        return (new Field(new EmptyBuilder, $name, $type))->setName($name);
+        return (new Field(new EmptySchema, $name, $type))->setName($name);
     }
 
-    private function association(string $name, QueryBuilder $builder): Association
+    private function association(string $name, Schema $schema): Association
     {
-        return (new Association(new EmptyBuilder(), $builder, $name))
+        return (new Association(new EmptySchema(), $schema, $name))
             ->setName($name);
     }
 }
@@ -171,14 +171,14 @@ class FalseP implements Policy
 }
 
 // Allows for arbitrary field definitions in tests.
-class PolicyTestBuilder extends EmptyBuilder
+class PolicyTestSchema extends EmptySchema
 {
     protected $fields;
 
     public function __construct(Request $request, $fields)
     {
         parent::__construct($request);
-        $this->fields = collect($fields)->each->setQueryBuilder($this)->all();
+        $this->fields = collect($fields)->each->setSchema($this)->all();
     }
 
     public static function new(Request $request, array $fields)
@@ -227,7 +227,7 @@ class FailId implements Policy
     }
 }
 
-class PolicyUserBuilder extends EmptyBuilder
+class PolicyUserSchema extends EmptySchema
 {
     public function fields(): array
     {
@@ -239,12 +239,12 @@ class PolicyUserBuilder extends EmptyBuilder
     public function associations(): array
     {
         return [
-            'posts' => $this->association('posts', PolicyPostBuilder::class),
+            'posts' => $this->association('posts', PolicyPostSchema::class),
         ];
     }
 }
 
-class PolicyPostBuilder extends EmptyBuilder
+class PolicyPostSchema extends EmptySchema
 {
     public function fields(): array
     {
@@ -257,7 +257,7 @@ class PolicyPostBuilder extends EmptyBuilder
     public function associations(): array
     {
         return [
-            'author' => $this->association('author', PolicyUserBuilder::class)
+            'author' => $this->association('author', PolicyUserSchema::class)
                 ->policy(new FalseP),
         ];
     }

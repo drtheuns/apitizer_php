@@ -12,19 +12,19 @@ class Apitizer
      *
      * @return string[]
      */
-    public static function getQueryBuilders(): array
+    public static function getSchemas(): array
     {
-        return app(QueryBuilderLoader::class)->getQueryBuilders();
+        return app(SchemaLoader::class)->getSchemas();
     }
 
     /**
-     * Get the documentation for each registered query builder.
+     * Get the documentation for each registered schema.
      *
      * @return ApidocCollection<Apidoc>
      */
-    public static function getQueryBuilderDocumentation(): ApidocCollection
+    public static function getSchemaDocumentation(): ApidocCollection
     {
-        return ApidocCollection::forQueryBuilders(self::getQueryBuilders());
+        return ApidocCollection::forSchemas(self::getSchemas());
     }
 
     /**

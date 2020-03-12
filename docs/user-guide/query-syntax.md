@@ -10,12 +10,12 @@ about some weird design decisions (an `id` and a `uuid`?); it's just an example.
 ```php
 <?php
 
-namespace App\QueryBuilders;
+namespace App\Schemas;
 
 use Apitizer\Validation\Rules;
 use Illuminate\Database\Eloquent\Model;
 
-class UserBuilder extends \Apitizer\QueryBuilder
+class UserSchema extends \Apitizer\Schema
 {
     public function fields(): array
     {
@@ -33,10 +33,10 @@ class UserBuilder extends \Apitizer\QueryBuilder
     public function associations(): array
     {
         return [
-            'author'   => $this->association('author', UserBuilder::class),
-            'comments' => $this->association('comments', CommentBuilder::class)
+            'author'   => $this->association('author', UserSchema::class),
+            'comments' => $this->association('comments', CommentSchema::class)
                                  ->description('People always have an opinion.'),
-            'tags'     => $this->association('tags', TagBuilder::class),
+            'tags'     => $this->association('tags', TagSchema::class),
         ];
     }
 

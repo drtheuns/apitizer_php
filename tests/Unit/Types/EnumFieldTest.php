@@ -5,7 +5,7 @@ namespace Tests\Unit\Types;
 use Apitizer\Exceptions\InvalidOutputException;
 use Apitizer\Types\EnumField;
 use Tests\Unit\TestCase;
-use Tests\Support\Builders\UserBuilder;
+use Tests\Support\Schemas\UserSchema;
 
 class EnumFieldTest extends TestCase
 {
@@ -21,6 +21,6 @@ class EnumFieldTest extends TestCase
 
     private function enumField(array $enum, string $key = 'key', string $type = 'string')
     {
-        return new EnumField(new UserBuilder(), $key, $enum, $type);
+        return new EnumField(new UserSchema(), $key, $enum, $type);
     }
 }

@@ -1,13 +1,14 @@
 <?php
 
-namespace Tests\Support\Builders;
+namespace Tests\Support\Schemas;
 
-use Apitizer\QueryBuilder;
+use Apitizer\Schema;
+use Apitizer\Routing\Scope;
 use Apitizer\Validation\Rules;
 use Tests\Feature\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
-class EmptyBuilder extends QueryBuilder
+class EmptySchema extends Schema
 {
     public function fields(): array
     {
@@ -29,12 +30,16 @@ class EmptyBuilder extends QueryBuilder
         return [];
     }
 
-    public function model(): Model
+    public function scope(Scope $scope)
     {
-        return new User();
     }
 
     public function rules(Rules $rules)
     {
+    }
+
+    public function model(): Model
+    {
+        return new User();
     }
 }

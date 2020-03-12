@@ -3,7 +3,7 @@
 namespace Apitizer\Types;
 
 use Apitizer\Policies\PolicyFailed;
-use Apitizer\QueryBuilder;
+use Apitizer\Schema;
 use Apitizer\Rendering\Renderer;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -21,7 +21,7 @@ class Association extends Factory
 
     /**
      * @var null|AbstractField[] The fields to render on the related query
-     * builder.
+     * schema.
      */
     protected $fields;
 
@@ -31,17 +31,17 @@ class Association extends Factory
     protected $associations;
 
     /**
-     * @var QueryBuilder the query builder that renders the associated data.
+     * @var Schema the schema that renders the associated data.
      */
-    protected $relatedBuilder;
+    protected $relatedSchema;
 
     public function __construct(
-        QueryBuilder $declaredBuilder,
-        QueryBuilder $relatedBuilder,
+        Schema $declaredSchema,
+        Schema $relatedSchema,
         string $key
     ) {
-        parent::__construct($declaredBuilder);
-        $this->relatedBuilder = $relatedBuilder;
+        parent::__construct($declaredSchema);
+        $this->relatedSchema = $relatedSchema;
         $this->key = $key;
     }
 
@@ -91,7 +91,7 @@ class Association extends Factory
      */
     public function returnsCollection(): bool
     {
-        $model = $this->getQueryBuilder()->model();
+        $model = $this->getSchema()->model();
         $relation = $model->{$this->key}();
 
         return ! $relation instanceof BelongsTo
@@ -99,8 +99,8 @@ class Association extends Factory
             && ! $relation instanceof MorphOne;
     }
 
-    public function getRelatedQueryBuilder(): QueryBuilder
+    public function getRelatedSchema(): Schema
     {
-        return $this->relatedBuilder;
+        return $this->relatedSchema;
     }
 }

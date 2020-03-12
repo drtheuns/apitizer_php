@@ -3,7 +3,7 @@
 namespace Tests\Feature\Documentation;
 
 use Apitizer\Apitizer;
-use Tests\Support\Builders\PostBuilder;
+use Tests\Support\Schemas\PostSchema;
 use Tests\Feature\TestCase;
 
 class DocumentationControllerTest extends TestCase
@@ -15,19 +15,19 @@ class DocumentationControllerTest extends TestCase
                          ->assertOk()
                          ->assertSeeTextInOrder(['Post', 'Comment', 'User', 'Tag']);
 
-        foreach (Apitizer::getQueryBuilders() as $class) {
-            $builder = new $class();
+        foreach (Apitizer::getSchemas() as $class) {
+            $schema = new $class();
 
-            $fields = collect($builder->getFields())->map->getName()->values();
+            $fields = collect($schema->getFields())->map->getName()->values();
             $response->assertSeeTextInOrder($fields->all());
 
-            $filters = collect($builder->getFilters())->map->getName()->values();
+            $filters = collect($schema->getFilters())->map->getName()->values();
             $response->assertSeeTextInOrder($filters->all());
 
-            $sorts = collect($builder->getSorts())->map->getName()->values();
+            $sorts = collect($schema->getSorts())->map->getName()->values();
             $response->assertSeeTextInOrder($sorts->all());
         }
 
-        $response->assertSeeText(PostBuilder::DESCRIPTION);
+        $response->assertSeeText(PostSchema::DESCRIPTION);
     }
 }

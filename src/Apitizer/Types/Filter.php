@@ -63,7 +63,7 @@ class Filter extends Factory
     public function whereEach(): FilterTypePicker
     {
         if ($this->type != "array") {
-            throw DefinitionException::filterExpectRequired($this->getQueryBuilder(), $this);
+            throw DefinitionException::filterExpectRequired($this->getSchema(), $this);
         }
 
         return new FilterTypePicker($this);
@@ -117,7 +117,7 @@ class Filter extends Factory
      * Uses the AssociationFilter class.
      *
      * @param string $relation the name of the relation on the parent model (the
-     * model of the current query builder)
+     * model of the current schema)
      * @param null|string $key the key on the child model that should be
      * filtered on. Defaults to the primary key of that model.
      *

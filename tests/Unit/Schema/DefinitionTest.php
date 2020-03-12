@@ -1,10 +1,10 @@
 <?php
 
-namespace Tests\Unit\QueryBuilder;
+namespace Tests\Unit\Schema;
 
 use Apitizer\Types\Field;
 use Tests\Unit\TestCase;
-use Tests\Support\Builders\EmptyBuilder;
+use Tests\Support\Schemas\EmptySchema;
 
 class DefinitionTest extends TestCase
 {
@@ -17,7 +17,7 @@ class DefinitionTest extends TestCase
     /** @test */
     public function it_casts_string_fields_to_any_type()
     {
-        $fields = (new AnyBuilder())->getFields();
+        $fields = (new AnySchema())->getFields();
 
         $this->assertCount(1, $fields);
         $this->assertInstanceOf(Field::class, $fields['any']);
@@ -26,7 +26,7 @@ class DefinitionTest extends TestCase
 }
 
 
-class AnyBuilder extends EmptyBuilder
+class AnySchema extends EmptySchema
 {
     public function fields(): array
     {

@@ -6,7 +6,7 @@ use Apitizer\Apitizer;
 use Apitizer\Types\Filter;
 use Apitizer\Types\Sort;
 use Apitizer\Types\Factory;
-use Apitizer\QueryBuilder;
+use Apitizer\Schema;
 
 /**
  * This error occurs when the client passes invalid data.
@@ -17,11 +17,11 @@ use Apitizer\QueryBuilder;
 class InvalidInputException extends ApitizerException
 {
     /**
-     * The query builder where the exception occurred.
+     * The schema where the exception occurred.
      *
-     * @var QueryBuilder
+     * @var Schema
      */
-    public $queryBuilder;
+    public $schema;
 
     /**
      * The class from which the exception originates
@@ -55,31 +55,31 @@ class InvalidInputException extends ApitizerException
 
         $e = new static($message);
         $e->instance = $filter;
-        $e->queryBuilder = $filter->getQueryBuilder();
+        $e->schema = $filter->getSchema();
 
         return $e;
     }
 
-    public static function undefinedFilterCalled(string $name, QueryBuilder $queryBuilder): self
+    public static function undefinedFilterCalled(string $name, Schema $schema): self
     {
-        $class = get_class($queryBuilder);
+        $class = get_class($schema);
         $message = "Filter $name does not exist on [$class]";
 
         $e = new static($message);
         $e->namespace = 'filter';
-        $e->queryBuilder = $queryBuilder;
+        $e->schema = $schema;
 
         return $e;
     }
 
-    public static function undefinedSortCalled(string $name, QueryBuilder $queryBuilder): self
+    public static function undefinedSortCalled(string $name, Schema $schema): self
     {
-        $class = get_class($queryBuilder);
+        $class = get_class($schema);
         $message = "Sort $name does not exist on [$class]";
 
         $e = new static($message);
         $e->namespace = 'sort';
-        $e->queryBuilder = $queryBuilder;
+        $e->schema = $schema;
 
         return $e;
     }

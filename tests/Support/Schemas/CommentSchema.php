@@ -1,11 +1,11 @@
 <?php
 
-namespace Tests\Support\Builders;
+namespace Tests\Support\Schemas;
 
 use Illuminate\Database\Eloquent\Model;
 use Tests\Feature\Models\Comment;
 
-class CommentBuilder extends EmptyBuilder
+class CommentSchema extends EmptySchema
 {
     public function fields(): array
     {
@@ -19,7 +19,7 @@ class CommentBuilder extends EmptyBuilder
     public function associations(): array
     {
         return [
-            'author' => $this->association('author', UserBuilder::class),
+            'author' => $this->association('author', UserSchema::class),
         ];
     }
 

@@ -6,7 +6,7 @@ use Apitizer\Rendering\ReferenceMapRenderer;
 use Tests\Feature\Models\Comment;
 use Tests\Feature\Models\Post;
 use Tests\Feature\Models\User;
-use Tests\Support\Builders\PostBuilder;
+use Tests\Support\Schemas\PostSchema;
 use Tests\Feature\TestCase;
 
 class ReferenceMapRendererTest extends TestCase
@@ -25,7 +25,7 @@ class ReferenceMapRendererTest extends TestCase
                         ->fields('title,comments(body,author(name, comments(uuid,author(should_reset_password)))),'
                                  .'author(email, posts(title))')
                         ->make();
-        $actual = PostBuilder::make($request)
+        $actual = PostSchema::make($request)
                 ->setRenderer(new ReferenceMapRenderer)
                 ->paginate();
 

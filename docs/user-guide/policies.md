@@ -6,19 +6,19 @@ API, you will probably want to hide certain data from unauthenticated requests,
 while other data might be visible. This page will go over creating such a
 policy. It will assume you have already read the Getting Started page.
 
-## Defining the builders
+## Defining the schemas
 
 We'll start with a single resource: users. A user usually has a bunch of
 sensitive data that should not be visible to just about anyone, such as their
 address, birth date, email, etc.
 
 ```php
-// File: /my_project/app/QueryBuilders/UserBuilder.php
+// File: /my_project/app/Schemas/UserSchema.php
 <?php
 
-namespace App\QueryBuilders;
+namespace App\Schemas;
 
-class UserBuilder extends QueryBuilder
+class UserSchema extends Schema
 {
     public function fields(): array
     {
@@ -35,7 +35,7 @@ class UserBuilder extends QueryBuilder
 }
 ```
 
-With the above query builder, anyone can access any of the fields.
+With the above schema, anyone can access any of the fields.
 
 ## Writing a policy
 
@@ -44,10 +44,10 @@ the request must come from an authenticated request; that is, there is a logged
 in user available on the `Request` object.
 
 ```php
-// File: /my_project/app/QueryBuilders/Policies/Authenticated.php
+// File: /my_project/app/Schemas/Policies/Authenticated.php
 <?php
 
-namespace App\QueryBuilder\Policies;
+namespace App\Schema\Policies;
 
 use Apitizer\Policies\Policy;
 
@@ -55,7 +55,7 @@ class Authenticated implements Policy
 {
     public function passes($value, $row, $fieldOrAssociation): bool
     {
-        return !! $fieldOrAssociation->getQueryBuilder()->getRequest()->user();
+        return !! $fieldOrAssociation->getSchema()->getRequest()->user();
     }
 }
 ```
@@ -70,14 +70,14 @@ that the `email`, `birthdate`, and `member_since` fields require the user to be
 logged in.
 
 ```php
-// File: /my_project/app/QueryBuilders/UserBuilder.php
+// File: /my_project/app/Schemas/UserSchema.php
 <?php
 
-namespace App\QueryBuilders;
+namespace App\Schemas;
 
-use App\QueryBuilders\Policies\Authenticated;
+use App\Schemas\Policies\Authenticated;
 
-class UserBuilder extends QueryBuilder
+class UserSchema extends Schema
 {
     public function fields(): array
     {
@@ -165,15 +165,15 @@ will get the same result. The `Authenticated` policy can therefore be easily
 cached. Luckily, `Apitizer` already defines a helper for this: `CachedPolicy`:
 
 ```php
-// File: /my_project/app/QueryBuilders/UserBuilder.php
+// File: /my_project/app/Schemas/UserSchema.php
 <?php
 
-namespace App\QueryBuilders;
+namespace App\Schemas;
 
-use App\QueryBuilders\Policies\Authenticated;
+use App\Schemas\Policies\Authenticated;
 use Apitizer\Policies\CachedPolicy;
 
-class UserBuilder extends QueryBuilder
+class UserSchema extends Schema
 {
     public function fields(): array
     {
@@ -201,15 +201,15 @@ Some policies might be dependent on certain data being available in order to
 pass. For example, a policy that checks if the row of data belongs to a user
 using a `user_id` column, is dependent on this column being present. However, if
 the client never requested this column, or if the column is not available to the
-user to begin with, the policy would never pass. To solve this, the query
-builder has an `alwaysLoadColumns` property:
+user to begin with, the policy would never pass. To solve this, the schema has
+an `alwaysLoadColumns` property:
 
 ```php
-class PostBuilder extends QueryBuilder
+class PostSchema extends Schema
 {
     protected $alwaysLoadColumns = ['author_id'];
 }
 ```
 
-This ensures that the `author_id` is always loaded by the query builder, making
+This ensures that the `author_id` is always loaded by the schema, making
 it available to use in policies.

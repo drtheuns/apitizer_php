@@ -1,12 +1,12 @@
 <?php
 
-namespace Tests\Feature\QueryBuilder;
+namespace Tests\Feature\Schema;
 
 use Apitizer\Apitizer;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Tests\Feature\Models\User;
 use Tests\Feature\TestCase;
-use Tests\Support\Builders\UserBuilder;
+use Tests\Support\Schemas\UserSchema;
 
 class PaginationTest extends TestCase
 {
@@ -15,7 +15,7 @@ class PaginationTest extends TestCase
     {
         $user = factory(User::class)->create();
         $request = $this->request()->fields('id,name')->make();
-        $paginator = UserBuilder::make($request)->paginate();
+        $paginator = UserSchema::make($request)->paginate();
 
         $this->assertInstanceOf(LengthAwarePaginator::class, $paginator);
         $this->assertEquals([$user->only('id', 'name')], $paginator->getCollection()->all());
@@ -33,7 +33,7 @@ class PaginationTest extends TestCase
                         ->limit(1)
                         ->make();
 
-        $paginator = UserBuilder::make($request)->paginate();
+        $paginator = UserSchema::make($request)->paginate();
 
         $this->assertNotNull($paginator->nextPageUrl());
         $this->paginatorLinkContainsString($paginator, Apitizer::getFieldKey() . '=id');
@@ -53,7 +53,7 @@ class PaginationTest extends TestCase
     {
         $limit = 1;
         $request = $this->request()->limit($limit + 1)->make();
-        $paginator = UserBuilder::make($request)->setMaximumLimit($limit)->paginate();
+        $paginator = UserSchema::make($request)->setMaximumLimit($limit)->paginate();
 
         $this->assertEquals($limit, $paginator->perPage());
     }
@@ -62,7 +62,7 @@ class PaginationTest extends TestCase
     public function the_pagination_limit_may_not_be_lower_than_1()
     {
         $request = $this->request()->limit(0)->make();
-        $paginator = UserBuilder::make($request)->paginate();
+        $paginator = UserSchema::make($request)->paginate();
 
         $this->assertEquals(1, $paginator->perPage());
     }
@@ -71,7 +71,7 @@ class PaginationTest extends TestCase
     public function paginate_accepts_a_custom_limit()
     {
         $request = $this->request()->make();
-        $paginator = UserBuilder::make($request)->paginate(1);
+        $paginator = UserSchema::make($request)->paginate(1);
         $this->assertEquals(1, $paginator->perPage());
     }
 
@@ -80,7 +80,7 @@ class PaginationTest extends TestCase
     {
         // If you do want it to exceed the defined limit, call setMaximumLimit first.
         $request = $this->request()->make();
-        $paginator = UserBuilder::make($request)->paginate(1000);
+        $paginator = UserSchema::make($request)->paginate(1000);
         $this->assertEquals(1, $paginator->perPage());
     }
 
@@ -90,7 +90,7 @@ class PaginationTest extends TestCase
         $users = factory(User::class, 2)->create();
 
         $request = $this->request()->limit(1)->fields('id')->make();
-        $paginator = UserBuilder::make($request)->paginate();
+        $paginator = UserSchema::make($request)->paginate();
 
         $this->assertEquals(1, $paginator->perPage());
         $this->assertCount(1, $paginator->getCollection());

@@ -3,7 +3,7 @@
 namespace Apitizer\Commands;
 
 use Apitizer\Exceptions\DefinitionException;
-use Apitizer\QueryBuilder;
+use Apitizer\Schema;
 use Illuminate\Console\Command;
 use Apitizer\Support\SchemaValidator;
 use Exception;
@@ -12,8 +12,8 @@ use Illuminate\Support\Str;
 
 class ValidateSchemaCommand extends Command
 {
-    protected $signature = 'apitizer:validate-schema { builderClass? : the fully qualified class name of the builder to check }';
-    protected $description = 'Validate the query builders';
+    protected $signature = 'apitizer:validate-schema { schemaClass? : the fully qualified class name of the schema to check }';
+    protected $description = 'Validate the schemas';
 
     /**
      * @var SchemaValidator
@@ -28,23 +28,23 @@ class ValidateSchemaCommand extends Command
 
     public function handle(): ?int
     {
-        /** @var string $builderClass */
-        $builderClass = $this->argument('builderClass');
+        /** @var string $schemaClass */
+        $schemaClass = $this->argument('schemaClass');
 
-        if ($builderClass) {
-            if (! class_exists($builderClass)) {
-                $this->error("The given class [$builderClass] could not be found");
+        if ($schemaClass) {
+            if (! class_exists($schemaClass)) {
+                $this->error("The given class [$schemaClass] could not be found");
                 return 1;
             }
 
-            $builder = new $builderClass();
+            $schema = new $schemaClass();
 
-            if (! $builder instanceof QueryBuilder) {
-                $this->error("The given class [$builderClass] is not a query builder");
+            if (! $schema instanceof Schema) {
+                $this->error("The given class [$schemaClass] is not a schema");
                 return 1;
             }
 
-            $this->schemaValidator->validate($builder);
+            $this->schemaValidator->validate($schema);
         } else {
             $this->schemaValidator->validateAll();
         }
@@ -78,11 +78,11 @@ class ValidateSchemaCommand extends Command
         }
 
         $definitionErrors = $definitionErrors->groupBy(function (DefinitionException $e) {
-            return get_class($e->getQueryBuilder());
+            return get_class($e->getSchema());
         })->sortKeys();
 
-        $definitionErrors->each(function (Collection $errors, string $builderClass) {
-            $this->section($builderClass);
+        $definitionErrors->each(function (Collection $errors, string $schemaClass) {
+            $this->section($schemaClass);
 
             $errors = $errors->groupBy->getNamespace();
             foreach (DefinitionException::NAMESPACES as $namespace) {

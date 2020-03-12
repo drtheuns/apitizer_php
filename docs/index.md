@@ -3,7 +3,7 @@
 Apitizer is a Laravel library that primarily offers a Schema that allows you to
 easily create documented API endpoints that are capable of filtering, sorting,
 and selection of sparse fieldsets. For example, the following HTTP request could
-be handled by the query builder below it.
+be handled by the schema below it.
 
 ```
 /users?fields=id,name,organization(id,name)&filters[search]=John&sort=id.asc&limit=30
@@ -36,12 +36,12 @@ be handled by the query builder below it.
 ```php
 <?php
 
-namespace App\QueryBuilders;
+namespace App\Schemas;
 
 use Apitizer\Validation\Rules;
 use Illuminate\Database\Eloquent\Model;
 
-class UserBuilder extends \Apitizer\QueryBuilder
+class UserSchema extends \Apitizer\Schema
 {
     public function fields(): array
     {
@@ -55,7 +55,7 @@ class UserBuilder extends \Apitizer\QueryBuilder
     public function associations(): array
     {
         return [
-            'organizations' => $this->association('organization', OrganizationBuilder::class),
+            'organizations' => $this->association('organization', OrganizationSchema::class),
         ];
     }
 
@@ -91,7 +91,7 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
-        return UserBuilder::make($request)->paginate();
+        return UserSchema::make($request)->paginate();
     }
 }
 ```

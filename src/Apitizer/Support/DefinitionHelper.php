@@ -2,7 +2,7 @@
 
 namespace Apitizer\Support;
 
-use Apitizer\QueryBuilder;
+use Apitizer\Schema;
 use Apitizer\Types\AbstractField;
 use Apitizer\Types\Association;
 use Apitizer\Exceptions\DefinitionException;
@@ -12,31 +12,31 @@ use Apitizer\Types\Sort;
 use Illuminate\Database\Eloquent\Relations\Relation as EloquentRelation;
 
 // Separate class so it can be reused by the schema validator without cluttering
-// up the query builder methods with more public methods.
+// up the schema methods with more public methods.
 class DefinitionHelper
 {
     /**
      * Validate that each field has a correct type, possibly assigning the any
      * type.
      *
-     * @param QueryBuilder $queryBuilder
+     * @param Schema $schema
      * @param array<string, AbstractField|Association|mixed> $fields
      *
      * @return array<string, AbstractField>
      */
-    public static function validateFields(QueryBuilder $queryBuilder, array $fields): array
+    public static function validateFields(Schema $schema, array $fields): array
     {
         $castFields = [];
 
         foreach ($fields as $name => $field) {
-            $castFields[$name] = static::validateField($queryBuilder, $name, $field);
+            $castFields[$name] = static::validateField($schema, $name, $field);
         }
 
         return $castFields;
     }
 
     /**
-     * @param QueryBuilder $queryBuilder
+     * @param Schema $schema
      * @param string $name
      * @param AbstractField|mixed $field
      *
@@ -44,14 +44,14 @@ class DefinitionHelper
      *
      * @return AbstractField
      */
-    public static function validateField(QueryBuilder $queryBuilder, string $name, $field)
+    public static function validateField(Schema $schema, string $name, $field)
     {
         if (is_string($field)) {
-            $field = new Field($queryBuilder, $field, 'any');
+            $field = new Field($schema, $field, 'any');
         }
 
         if (!$field instanceof AbstractField) {
-            throw DefinitionException::fieldDefinitionExpected($queryBuilder, $name, $field);
+            throw DefinitionException::fieldDefinitionExpected($schema, $name, $field);
         }
 
         $field->setName($name);
@@ -60,35 +60,35 @@ class DefinitionHelper
     }
 
     /**
-     * @param QueryBuilder $queryBuilder
+     * @param Schema $schema
      * @param array<string, Association|mixed> $associations
      *
      * @return array<string, Association>
      */
-    public static function validateAssociations(QueryBuilder $queryBuilder, array $associations): array
+    public static function validateAssociations(Schema $schema, array $associations): array
     {
         $castFields = [];
 
         foreach ($associations as $name => $association) {
-            $castFields[$name] = static::validateAssociation($queryBuilder, $name, $association);
+            $castFields[$name] = static::validateAssociation($schema, $name, $association);
         }
 
         return $castFields;
     }
 
     /**
-     * @param QueryBuilder $queryBuilder
+     * @param Schema $schema
      * @param string $name
      * @param Association|mixed $association
      */
     public static function validateAssociation(
-        QueryBuilder $queryBuilder,
+        Schema $schema,
         string $name,
         $association
     ): Association {
         if (! $association instanceof Association) {
             throw DefinitionException::associationDefinitionExpected(
-                $queryBuilder,
+                $schema,
                 $name,
                 $association
             );
@@ -96,19 +96,19 @@ class DefinitionHelper
 
         $association->setName($name);
 
-        if (!static::isValidAssociation($queryBuilder, $association)) {
-            throw DefinitionException::associationDoesNotExist($queryBuilder, $association);
+        if (!static::isValidAssociation($schema, $association)) {
+            throw DefinitionException::associationDoesNotExist($schema, $association);
         }
 
         return $association;
     }
 
     private static function isValidAssociation(
-        QueryBuilder $queryBuilder,
+        Schema $schema,
         Association $association
     ): bool {
         $key = $association->getKey();
-        $model = $queryBuilder->model();
+        $model = $schema->model();
 
         return method_exists($model, $key) && $model->{$key}() instanceof EloquentRelation;
     }
@@ -116,33 +116,33 @@ class DefinitionHelper
     /**
      * Validate that each sort has the correct type.
      *
-     * @param QueryBuilder $queryBuilder
+     * @param Schema $schema
      * @param array<string, Sort|mixed> $sorts
      *
      * @return array<string, Sort>
      */
-    public static function validateSorts(QueryBuilder $queryBuilder, array $sorts): array
+    public static function validateSorts(Schema $schema, array $sorts): array
     {
         foreach ($sorts as $name => $sort) {
-            static::validateSort($queryBuilder, $name, $sort);
+            static::validateSort($schema, $name, $sort);
         }
 
         return $sorts;
     }
 
     /**
-     * @param QueryBuilder $queryBuilder
+     * @param Schema $schema
      * @param string $name
      * @param Sort|mixed $sort
      */
-    public static function validateSort(QueryBuilder $queryBuilder, string $name, $sort): void
+    public static function validateSort(Schema $schema, string $name, $sort): void
     {
         if (! $sort instanceof Sort) {
-            throw DefinitionException::sortDefinitionExpected($queryBuilder, $name, $sort);
+            throw DefinitionException::sortDefinitionExpected($schema, $name, $sort);
         }
 
         if (! $sort->getHandler()) {
-            throw DefinitionException::sortHandlerNotDefined($queryBuilder, $name);
+            throw DefinitionException::sortHandlerNotDefined($schema, $name);
         }
 
         $sort->setName($name);
@@ -151,37 +151,37 @@ class DefinitionHelper
     /**
      * Validate that each filter has the correct type.
      *
-     * @param QueryBuilder $queryBuilder
+     * @param Schema $schema
      * @param array<string, Filter|mixed> $filters
      *
      * @return array<string, Filter>
      */
-    public static function validateFilters(QueryBuilder $queryBuilder, array $filters): array
+    public static function validateFilters(Schema $schema, array $filters): array
     {
         foreach ($filters as $name => $filter) {
-            static::validateFilter($queryBuilder, $name, $filter);
+            static::validateFilter($schema, $name, $filter);
         }
 
         return $filters;
     }
 
     /**
-     * @param QueryBuilder $queryBuilder
+     * @param Schema $schema
      * @param string $name
      * @param Filter|mixed $filter
      *
      * @throws DefinitionException
      */
-    public static function validateFilter(QueryBuilder $queryBuilder, string $name, $filter): void
+    public static function validateFilter(Schema $schema, string $name, $filter): void
     {
         if (! $filter instanceof Filter) {
-            throw DefinitionException::filterDefinitionExpected($queryBuilder, $name, $filter);
+            throw DefinitionException::filterDefinitionExpected($schema, $name, $filter);
         }
 
         $filter->setName($name);
 
         if (! $filter->getHandler()) {
-            throw DefinitionException::filterHandlerNotDefined($queryBuilder, $filter);
+            throw DefinitionException::filterHandlerNotDefined($schema, $filter);
         }
     }
 }

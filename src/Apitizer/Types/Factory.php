@@ -2,7 +2,7 @@
 
 namespace Apitizer\Types;
 
-use Apitizer\QueryBuilder;
+use Apitizer\Schema;
 
 /**
  * Boiler plate that is common across sorting, filters, fields, etc
@@ -10,9 +10,9 @@ use Apitizer\QueryBuilder;
 abstract class Factory
 {
     /**
-     * @var QueryBuilder
+     * @var Schema
      */
-    protected $queryBuilder;
+    protected $schema;
 
     /**
      * The name that is available to the client
@@ -26,9 +26,9 @@ abstract class Factory
      */
     protected $description;
 
-    public function __construct(QueryBuilder $queryBuilder)
+    public function __construct(Schema $schema)
     {
-        $this->setQueryBuilder($queryBuilder);
+        $this->setSchema($schema);
     }
 
     /**
@@ -62,14 +62,14 @@ abstract class Factory
         return $this;
     }
 
-    public function getQueryBuilder(): QueryBuilder
+    public function getSchema(): Schema
     {
-        return $this->queryBuilder;
+        return $this->schema;
     }
 
-    public function setQueryBuilder(QueryBuilder $queryBuilder): self
+    public function setSchema(Schema $schema): self
     {
-        $this->queryBuilder = $queryBuilder;
+        $this->schema = $schema;
 
         return $this;
     }

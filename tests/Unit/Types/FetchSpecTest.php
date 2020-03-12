@@ -7,7 +7,7 @@ use Apitizer\Types\FetchSpec;
 use Apitizer\Types\Field;
 use Apitizer\Types\Filter;
 use Apitizer\Types\Sort;
-use Tests\Support\Builders\EmptyBuilder;
+use Tests\Support\Schemas\EmptySchema;
 use Tests\Unit\TestCase;
 
 class FetchSpecTest extends TestCase
@@ -53,21 +53,21 @@ class FetchSpecTest extends TestCase
 
     private function fieldWithName(string $name)
     {
-        return (new Field(new EmptyBuilder, $name, 'string'))->setName($name);
+        return (new Field(new EmptySchema, $name, 'string'))->setName($name);
     }
 
     private function filterWithName(string $name)
     {
-        return (new Filter(new EmptyBuilder))->setName($name);
+        return (new Filter(new EmptySchema))->setName($name);
     }
 
     private function sortWithName(string $name)
     {
-        return (new Sort(new EmptyBuilder))->setName($name);
+        return (new Sort(new EmptySchema))->setName($name);
     }
 
     private function associationWithName(string $name)
     {
-        return (new Association(new EmptyBuilder, new EmptyBuilder(), 'wow'))->setName($name);
+        return (new Association(new EmptySchema, new EmptySchema(), 'wow'))->setName($name);
     }
 }

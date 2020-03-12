@@ -2,27 +2,27 @@
 
 namespace Apitizer;
 
-use Apitizer\QueryBuilder;
+use Apitizer\Schema;
 use Apitizer\Support\ComposerNamespaceClassFinder;
 
 /**
- * The loader responsible for preparing a list of query builders based on the
- * configuration. Query builders can be references directly by name, or by
+ * The loader responsible for preparing a list of schemas based on the
+ * configuration. schemas can be references directly by name, or by
  * using the namespace (assuming PSR-4 and composer are used).
  */
-class QueryBuilderLoader
+class SchemaLoader
 {
     /**
      * @var string[]|null
      */
-    protected $queryBuilders;
+    protected $schemas;
 
     /**
-     * Load all query builders based on the config/apitizer.php configuration.
+     * Load all schemas based on the config/apitizer.php configuration.
      */
     public function loadFromConfig(): void
     {
-        $this->queryBuilders = array_unique(array_merge(
+        $this->schemas = array_unique(array_merge(
             $this->loadIndividualClasses(),
             $this->loadNamespaces()
         ));
@@ -35,11 +35,11 @@ class QueryBuilderLoader
      */
     protected function loadIndividualClasses(): array
     {
-        return config('apitizer.query_builders.classes');
+        return config('apitizer.schemas.classes');
     }
 
     /**
-     * Load all query builders from the registered namespaces.
+     * Load all schemas from the registered namespaces.
      *
      * @return string[]
      */
@@ -47,7 +47,7 @@ class QueryBuilderLoader
     {
         $classes = [];
 
-        foreach (config('apitizer.query_builders.namespaces', []) as $namespace) {
+        foreach (config('apitizer.schemas.namespaces', []) as $namespace) {
             $classes = array_merge($classes, $this->loadFromNamespace($namespace));
         }
 
@@ -55,27 +55,27 @@ class QueryBuilderLoader
     }
 
     /**
-     * Load the query builders non recursively from a namespace.
+     * Load the schemas non recursively from a namespace.
      *
      * @param string $namespace
      * @return string[]
      */
     protected function loadFromNamespace(string $namespace): array
     {
-        return ComposerNamespaceClassFinder::make($namespace, QueryBuilder::class)->all();
+        return ComposerNamespaceClassFinder::make($namespace, Schema::class)->all();
     }
 
     /**
-     * Get a list of fully-qualified namespaces to the registered query builders.
+     * Get a list of fully-qualified namespaces to the registered schemas.
      *
      * @return string[]
      */
-    public function getQueryBuilders(): array
+    public function getSchemas(): array
     {
-        if (is_null($this->queryBuilders)) {
+        if (is_null($this->schemas)) {
             $this->loadFromConfig();
         }
 
-        return $this->queryBuilders ?? [];
+        return $this->schemas ?? [];
     }
 }

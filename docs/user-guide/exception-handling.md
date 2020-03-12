@@ -5,8 +5,8 @@ default, exceptions are raised. This can be tweaked in several ways. Generally,
 there are 3 ways to change the exception handling:
 
 - Globally
-- For one or multiple query builders.
-- For one specific query builder instance.
+- For one or multiple schemas.
+- For one specific schema instance.
 
 All of these cases are accomplished in the same way: by changing the
 ExceptionStrategy. There are two strategies available out of the box:
@@ -16,7 +16,7 @@ ExceptionStrategy. There are two strategies available out of the box:
 
 ## Global exception handler
 
-To change the default exception strategy for all query builders, you can bind
+To change the default exception strategy for all schemas, you can bind
 your preferred strategy in Laravel's container. This can be done in [a
 provider](https://laravel.com/docs/6.x/providers).
 
@@ -36,19 +36,19 @@ class AppServiceProvider extends ServiceProvider
 }
 ```
 
-## One or multiple query builders
+## One or multiple schemas
 
-Every `Apitizer\QueryBuilder` has the `getExceptionStrategy` method that returns
+Every `Apitizer\Schema` has the `getExceptionStrategy` method that returns
 an instance of the Strategy class. You can override this method with your own
-implementation that returns the exception strategy for that specific query
-builder (or any of it's children, if you declare it on an abstract base class).
+implementation that returns the exception strategy for that specific schema
+(or any of it's children, if you declare it on an abstract base class).
 
 ```php
 <?php
 
 use Apitizer\ExceptionStrategy\Strategy;
 
-class PostBuilder extends QueryBuilder
+class PostSchema extends Schema
 {
     public function getExceptionStrategy(): Strategy
     {
@@ -75,13 +75,13 @@ messages to some service or file.
 <?php
 
 use Apitizer\ExceptionStrategy\Strategy;
-use Apitizer\QueryBuilder;
+use Apitizer\Schema;
 use Apitizer\Exceptions\ApitizerException;
 use Apitizer\Exceptions\InvalidOutputException;
 
 class MyStrategy implements Strategy
 {
-    public function handle(QueryBuilder $queryBuilder, ApitizerException $exception): void
+    public function handle(Schema $schema, ApitizerException $exception): void
     {
         if ($exception instanceof InvalidOutputException) {
             // log to sentry, bugsnag, or w/e

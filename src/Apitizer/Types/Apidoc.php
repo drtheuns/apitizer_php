@@ -2,24 +2,24 @@
 
 namespace Apitizer\Types;
 
-use Apitizer\QueryBuilder;
+use Apitizer\Schema;
 use Illuminate\Support\Str;
 use ReflectionClass;
 
 /**
- * This class holds information about a single query builder and is intended to
+ * This class holds information about a single schema and is intended to
  * be used to generate documentation.
  *
- * Each query builder has a callback `QueryBuilder::apidoc` where you can attach
+ * Each schema has a callback `Schema::apidoc` where you can attach
  * extra information, such as a description or custom metadata, to the
  * documentation.
  */
 class Apidoc
 {
     /**
-     * @var QueryBuilder
+     * @var Schema
      */
-    protected $queryBuilder;
+    protected $schema;
 
     /**
      * @var string
@@ -37,12 +37,12 @@ class Apidoc
      */
     protected $metadata;
 
-    public function __construct(QueryBuilder $queryBuilder)
+    public function __construct(Schema $schema)
     {
-        $this->queryBuilder = $queryBuilder;
-        $this->setName($this->guessQueryBuilderResourceName());
+        $this->schema = $schema;
+        $this->setName($this->guessSchemaResourceName());
 
-        $queryBuilder->apidoc($this);
+        $schema->apidoc($this);
     }
 
     public function getDescription(): ?string
@@ -74,7 +74,7 @@ class Apidoc
      */
     public function getFields(): array
     {
-        return $this->queryBuilder->getFields();
+        return $this->schema->getFields();
     }
 
     /**
@@ -82,7 +82,7 @@ class Apidoc
      */
     public function getAssociations(): array
     {
-        return $this->queryBuilder->getAssociations();
+        return $this->schema->getAssociations();
     }
 
     /**
@@ -90,7 +90,7 @@ class Apidoc
      */
     public function getSorts(): array
     {
-        return $this->queryBuilder->getSorts();
+        return $this->schema->getSorts();
     }
 
     /**
@@ -98,7 +98,7 @@ class Apidoc
      */
     public function getFilters(): array
     {
-        return $this->queryBuilder->getFilters();
+        return $this->schema->getFilters();
     }
 
     /**
@@ -106,22 +106,22 @@ class Apidoc
      */
     public function getValidationBuilders(): array
     {
-        return $this->queryBuilder->getRules()->getBuilders();
+        return $this->schema->getRules()->getBuilders();
     }
 
-    public function getQueryBuilder(): QueryBuilder
+    public function getSchema(): Schema
     {
-        return $this->queryBuilder;
+        return $this->schema;
     }
 
-    protected function guessQueryBuilderResourceName(): string
+    protected function guessSchemaResourceName(): string
     {
         // It might be better to guess based on the model's name.
-        $className = (new ReflectionClass($this->queryBuilder))->getShortName();
+        $className = (new ReflectionClass($this->schema))->getShortName();
 
-        // UserBuilder -> User
-        // UserQueryBuilder -> User
-        \preg_match('/(.+?)(?:Query)?Builder$/', $className, $re);
+        // UserSchema -> User
+        // UserSchema -> User
+        \preg_match('/(.+?)Schema$/', $className, $re);
 
         if (isset($re[1])) {
             return Str::title($re[1]);
@@ -142,7 +142,7 @@ class Apidoc
 
     public function hasRules(): bool
     {
-        return $this->getQueryBuilder()->getRules()->hasRules();
+        return $this->getSchema()->getRules()->hasRules();
     }
 
     public function hasAssociations(): bool

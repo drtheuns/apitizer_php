@@ -2,7 +2,7 @@
 
 namespace Apitizer\Types;
 
-use Apitizer\QueryBuilder;
+use Apitizer\Schema;
 
 /**
  * A field that receives it's values from a model.
@@ -15,11 +15,11 @@ class Field extends AbstractField
     protected $key;
 
     public function __construct(
-        QueryBuilder $queryBuilder,
+        Schema $schema,
         string $key,
         string $type
     ) {
-        parent::__construct($queryBuilder);
+        parent::__construct($schema);
         $this->key = $key;
         $this->type = $type;
     }
