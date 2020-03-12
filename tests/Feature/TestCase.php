@@ -18,6 +18,6 @@ class TestCase extends \Tests\TestCase
 
     protected function getPackageProviders($app)
     {
-        return ['Apitizer\ServiceProvider', 'Apitizer\RouteServiceProvider'];
+        return ['Apitizer\ServiceProvider'];
     }
 }

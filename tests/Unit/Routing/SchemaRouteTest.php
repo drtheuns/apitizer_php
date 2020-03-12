@@ -13,10 +13,17 @@ use Illuminate\Support\Facades\Route as LaravelRoute;
 
 class SchemaRouteTest extends TestCase
 {
+    protected function getEnvironmentSetUp($app)
+    {
+        parent::getEnvironmentSetUp($app);
+
+        // Disable the doc route, to not confuse the tests.
+        $app['config']->set('apitizer.generate_documentation', false);
+    }
+
     protected function getPackageProviders($app)
     {
-        // This is needed to register the router macro.
-        return ['Apitizer\RouteServiceProvider'];
+        return ['Apitizer\ServiceProvider'];
     }
 
     /** @test */

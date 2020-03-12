@@ -8,6 +8,8 @@ use Apitizer\Parser\InputParser;
 use Apitizer\Parser\Parser;
 use Apitizer\Rendering\BasicRenderer;
 use Apitizer\Rendering\Renderer;
+use Apitizer\Routing\SchemaRoute;
+use Illuminate\Routing\Router;
 
 class ServiceProvider extends \Illuminate\Support\ServiceProvider
 {
@@ -26,6 +28,11 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
         $this->app->bind(Renderer::class, BasicRenderer::class);
         $this->app->singleton(SchemaLoader::class, function () {
             return new SchemaLoader();
+        });
+
+        Router::macro('schema', function (string $schema) {
+            /** @var class-string<\Apitizer\Schema> $schema */
+            return (new SchemaRoute($schema))->generateRoutes();
         });
     }
 

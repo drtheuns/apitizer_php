@@ -14,7 +14,7 @@ use Illuminate\Routing\Route;
  *
  *     Route::schema(PostSchema::class);
  *
- * Take a look at the RouteServiceProvider for the macro definition.
+ * Take a look at the ServiceProvider for the macro definition.
  */
 class SchemaRoute
 {
